@@ -8,9 +8,9 @@
 @Contact :   tongtan@gmail.com
 '''
 
-def start():
-   return "func runner"
-
+import   ehr_engine
 
 if __name__ == "__main__":
-    print("running")
+   print(ehr_engine.EhrEngine().start())
+
+   

@@ -8,7 +8,3 @@
 @Contact :   tongtan@gmail.com
 '''
 
-
-import sys
-
-sys.path.append("../")
