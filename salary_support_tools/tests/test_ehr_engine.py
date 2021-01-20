@@ -54,3 +54,19 @@ class TestEhrEngine(object):
             ehr_engine.PersonInfo, columns, personInfo.get_exl_tpl_folder_path())
 
         assert len(cov.loadTemp()) > 0
+
+    def test_salaryGz_exl_to_clazz(self):
+        salaryGz = ehr_engine.SalaryGzInfo()
+        columns = salaryGz.getColumnDef()
+        cov = ehr_engine.ExlToClazz(
+            ehr_engine.SalaryGzInfo, columns, salaryGz.get_exl_tpl_folder_path())
+
+        assert len(cov.loadTemp()) > 0
+
+    def test_salaryJj_exl_to_clazz(self):
+        salaryJjInfo = ehr_engine.SalaryJjInfo()
+        columns = salaryJjInfo.getColumnDef()
+        cov = ehr_engine.ExlToClazz(
+            ehr_engine.SalaryJjInfo, columns, salaryJjInfo.get_exl_tpl_folder_path())
+
+        assert len(cov.loadTemp()) > 0

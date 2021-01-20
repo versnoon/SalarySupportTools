@@ -24,10 +24,21 @@ class EhrEngine(object):
         docstring
         """
         personInfo = PersonInfo()
-        columns = personInfo.getColumnDef()
         cov = ExlToClazz(
-            PersonInfo, columns, personInfo.get_exl_tpl_folder_path())
-        return cov.loadTemp()
+            PersonInfo, personInfo.getColumnDef(), personInfo.get_exl_tpl_folder_path())
+        persons = cov.loadTemp()
+
+        salaryGzInfo = SalaryGzInfo()
+        cov = ExlToClazz(
+            SalaryGzInfo, salaryGzInfo.getColumnDef(), salaryGzInfo.get_exl_tpl_folder_path())
+        salaryGzs = cov.loadTemp()
+
+        salaryJjInfo = SalaryJjInfo()
+        cov = ExlToClazz(
+            SalaryJjInfo, salaryJjInfo.getColumnDef(), salaryJjInfo.get_exl_tpl_folder_path())
+        salaryJjs = cov.loadTemp()
+
+        return persons, salaryGzs, salaryJjs
 
 
 class PersonInfo(object):
@@ -98,7 +109,7 @@ class PersonInfo(object):
         return m
 
     def __str__(self):
-        return '员工信息: 公司 {} - 部门 {} - 分厂 {} - 作业区 {} - 班组 {} - 工号 {} - 姓名 {} - 岗位 {}'.format(self._complayLevelOne, self._departLevelTow, self._branchLevelThree, self._assignmentSectionLevelFour, self._groupLevelFive, self._code, self._name, self._cJobTitle)
+        return '员工基本信息: 公司 {} - 部门 {} - 分厂 {} - 作业区 {} - 班组 {} - 工号 {} - 姓名 {} - 岗位 {}'.format(self._complayLevelOne, self._departLevelTow, self._branchLevelThree, self._assignmentSectionLevelFour, self._groupLevelFive, self._code, self._name, self._cJobTitle)
 
 
 class SalaryGzInfo(object):
@@ -106,17 +117,113 @@ class SalaryGzInfo(object):
     工资信息
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, code="", name="", departfullinfo="", depart="", branch="", salaryModel="", jobName="", postPrice="", distributionMark="", fzZxkc=0, fdZxkc=0, jxjyZxkc=0, totalPayable=0):
+        self._code = code
+        self._name = name
+        self._departfullinfo = departfullinfo
+        self._departLevelTow = depart
+        self._branchLevelThree = branch
+        self._salaryModel = salaryModel
+        self._jobName = jobName
+        self._postPrice = postPrice
+        self._distributionMark = distributionMark
+        self._fzZxkc = fzZxkc
+        self._fdZxkc = fdZxkc
+        self._jxjyZxkc = jxjyZxkc
+        self._totalPayable = totalPayable
 
     def __str__(self):
-        pass
+        return '员工工资信息: 机构 {} - 二级机构 {} - 三级机构 {} - 工号 {} - 姓名 {} - 岗位 {} - 应发 {}'.format(self._departfullinfo, self._departLevelTow, self._branchLevelThree, self._code, self._name, self._jobName, self._totalPayable)
 
     def getColumnDef(self) -> dict:
-        pass
+        columns = dict()
+        columns["_code"] = "员工通行证"
+        columns["_name"] = "员工姓名"
+        columns["_departfullinfo"] = "机构"
+        columns["_departLevelTow"] = "二级机构"
+        columns["_branchLevelThree"] = "三级机构"
+        columns["_salaryModel"] = "薪酬模式"
+        columns["_jobName"] = "岗位名称"
+        columns["_postPrice"] = "岗位价值"
+        columns["_distributionMark"] = "是否代发工资"
+        columns["_fzZxkc"] = "累计住房租金支出"
+        columns["_fdZxkc"] = "累计住房贷款利息支出"
+        columns["_jxjyZxkc"] = "累计继续教育支出"
+        columns["_totalPayable"] = "应发"
+        return columns
 
-    def to_map(self):
-        pass
+    def get_exl_tpl_folder_path(self):
+        return r'd:\薪酬审核文件夹\202101\工资信息-股份.xls'
+
+    def to_map(self, datas):
+        m = dict()
+        for i in len(datas):
+            info = datas[i]
+            m[info._code] = info
+        return m
+
+
+class SalaryJjInfo(object):
+    """
+    奖金信息
+    """
+
+    def __init__(self, code="", name="", departfullinfo="", distributionMark="", ysjse=0, bonusTow=0, gtsyj=0, pay=0, jjhj=0, totalPayable=0, jsjseptsl=0, jbjj=0, gts=0, bonusOne=0, bonusThree=0, yseyhsl=0, yse=0, gstz=0):
+        self._code = code
+        self._name = name
+        self._departfullinfo = departfullinfo
+        self._distributionMark = distributionMark
+        self._ysjse = ysjse
+        self._bonusTwo = bonusTow
+        self._gtsyj = gtsyj
+        self._pay = pay
+        self._jjhj = jjhj
+        self._jsjseptsl = jsjseptsl
+        self._jbjj = jbjj
+        self._gts = gts
+        self._bonusOne = bonusOne
+        self._bonusThree = bonusThree
+        self._yseyhsl = yseyhsl
+        self._yse = yse
+        self._totalPayable = totalPayable
+        self._gstz = gstz
+
+    def __str__(self):
+        return '员工奖金信息: 机构 {} - 工号 {} - 姓名 {} - 应发 {} - 实发 {}'.format(self._departfullinfo, self._code, self._name, self._totalPayable, self._pay)
+
+    def getColumnDef(self) -> dict:
+        columns = dict()
+        columns["_code"] = "员工通行证"
+        columns["_name"] = "员工姓名"
+        columns["_departfullinfo"] = "机构"
+        columns["_distributionMark"] = "是否代发工资"
+        columns["_ysjse"] = "应税计算额(优惠税率)"
+        columns["_bonusTwo"] = "单项奖2"
+        columns["_gtsyj"] = "个调税(应缴)"
+        columns["_pay"] = "实发"
+        columns["_jjhj"] = "奖金合计"
+        columns["_jsjseptsl"] = "应税计算额(普通税率)"
+        columns["_jbjj"] = "基本奖金"
+        columns["_gts"] = "个调税"
+        columns["_bonusOne"] = "单项奖1"
+        columns["_bonusThree"] = "单项奖3"
+        columns["_yseyhsl"] = "应税额(优惠税率)"
+        columns["_bonusThree"] = "单项奖3"
+        columns["_yseyhsl"] = "应税额"
+        columns["_totalPayable"] = "应发"
+        columns["gstz"] = "个税调整"
+
+        return columns
+
+    def get_exl_tpl_folder_path(self):
+        return r'd:\薪酬审核文件夹\202101\奖金信息-股份.xls'
+
+    def to_map(self, datas):
+        m = dict()
+        for i in len(datas):
+            info = datas[i]
+            m[info._code] = info
+        return m
 
 
 class ExlToClazz(object):
