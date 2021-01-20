@@ -7,22 +7,38 @@
 @Version :   1.0
 @Contact :   tongtan@gmail.com
 '''
+
+import pytest
 from salary_support_tools import ehr_engine
+
 
 class TestEhrEngine(object):
     """
     docstring
     """
+
     def test_engine_name(self, ):
         """
         docstring
         """
         engine = ehr_engine.EhrEngine()
-        assert 'ehr'==engine._name
+        assert 'ehr' == engine._name
 
-    def test_engine_start(self, ):
+    def test_getColumnDef(self, ):
         """
         docstring
         """
-        engine = ehr_engine.EhrEngine()
-        assert 'tt'==engine.start()
+        personInfo = ehr_engine.PersonInfo()
+        columns = personInfo.getColumnDef()
+        assert len(columns) > 0
+        assert columns['_code'] == "职工编码"
+        with pytest.raises(KeyError):
+            columns['code']
+
+    def test_getPropertyName(self,):
+        personInfo = ehr_engine.PersonInfo()
+        propertyName = personInfo.getPropertyName("职工编码")
+        assert '_code' == propertyName
+
+        errProperName = personInfo.getPropertyName("映射以外的说明")
+        assert '' == errProperName
