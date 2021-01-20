@@ -23,22 +23,30 @@ class EhrEngine(object):
         """
         docstring
         """
+        # 解析人员基本信息
         personInfo = PersonInfo()
         cov = ExlToClazz(
             PersonInfo, personInfo.getColumnDef(), personInfo.get_exl_tpl_folder_path())
         persons = cov.loadTemp()
 
+        # 解析人员工资信息
         salaryGzInfo = SalaryGzInfo()
         cov = ExlToClazz(
             SalaryGzInfo, salaryGzInfo.getColumnDef(), salaryGzInfo.get_exl_tpl_folder_path())
         salaryGzs = cov.loadTemp()
 
+        # 解析人员将建信息
         salaryJjInfo = SalaryJjInfo()
         cov = ExlToClazz(
             SalaryJjInfo, salaryJjInfo.getColumnDef(), salaryJjInfo.get_exl_tpl_folder_path())
         salaryJjs = cov.loadTemp()
 
-        return persons, salaryGzs, salaryJjs
+        salaryBankInfo = SalaryBankInfo()
+        cov = ExlToClazz(
+            SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path())
+        salaryBanks = cov.loadTemp()
+
+        return personInfo.to_map(persons), salaryGzInfo.to_map(salaryGzs), salaryJjInfo.to_map(salaryJjs), salaryBankInfo.to_map(salaryBanks)
 
 
 class PersonInfo(object):
@@ -103,7 +111,7 @@ class PersonInfo(object):
 
     def to_map(self, datas):
         m = dict()
-        for i in len(datas):
+        for i in range(len(datas)):
             personInfo = datas[i]
             m[personInfo._code] = personInfo
         return m
@@ -157,7 +165,7 @@ class SalaryGzInfo(object):
 
     def to_map(self, datas):
         m = dict()
-        for i in len(datas):
+        for i in range(len(datas)):
             info = datas[i]
             m[info._code] = info
         return m
@@ -220,10 +228,77 @@ class SalaryJjInfo(object):
 
     def to_map(self, datas):
         m = dict()
-        for i in len(datas):
+        for i in range(len(datas)):
             info = datas[i]
             m[info._code] = info
         return m
+
+
+class SalaryBankInfo(object):
+    """
+    奖金信息
+    """
+
+    def __init__(self, code="", name="", departfullinfo="", financialInstitution="", bankNo="", payment="", purpose="", associalBankNo="", cardType=""):
+        self._code = code
+        self._name = name
+        self._departfullinfo = departfullinfo
+        self._financialInstitution = financialInstitution
+        self._bankNo = bankNo
+        self._payment = payment
+        self._purpose = purpose
+        self._associalBankNo = associalBankNo
+        self._cardType = cardType
+
+    def __str__(self):
+        return '员工银行卡信息: 机构 {} - 工号 {} - 姓名 {} - 金融机构 {} - 卡号 {}'.format(self._departfullinfo, self._code, self._name, self._financialInstitution, self._bankNo)
+
+    def getColumnDef(self) -> dict:
+        columns = dict()
+        columns["_code"] = "员工通行证"
+        columns["_name"] = "员工姓名"
+        columns["_departfullinfo"] = "部门"
+        columns["_financialInstitution"] = "金融机构"
+        columns["_bankNo"] = "卡号"
+        columns["_payment"] = "支付方式"
+        columns["_purpose"] = "卡用途"
+        columns["_associalBankNo"] = "联行号/网点代码"
+        columns["_cardType"] = "卡折类型"
+
+        return columns
+
+    def get_exl_tpl_folder_path(self):
+        return r'd:\薪酬审核文件夹\202101\银行卡信息-股份.xls'
+
+    def to_map(self, datas):
+        m = dict()
+        for i in range(len(datas)):
+            info = datas[i]
+            v = dict()
+            if info._code in m:
+                v = m[info._code]
+            if self.is_gz_bankno(info._purpose):
+                v['gz'] = info
+            if self.is_jj_bankno(info._purpose):
+                v['jj'] = info
+            m[info._code] = v
+        return m
+
+    def is_gz_bankno(self, purpose=""):
+        return self.val_bank_purpost(purpose, "工资卡")
+
+    def is_jj_bankno(self, purpose=""):
+        return self.val_bank_purpost(purpose, "奖金卡")
+
+    def val_bank_purpost(self, purpose="", banktype=""):
+        if len(purpose) == 0:
+            return False
+        if len(banktype) == 0:
+            return False
+        if banktype in purpose:
+            return True
+        else:
+            return False
 
 
 class ExlToClazz(object):

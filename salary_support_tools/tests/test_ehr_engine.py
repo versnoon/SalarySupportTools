@@ -70,3 +70,22 @@ class TestEhrEngine(object):
             ehr_engine.SalaryJjInfo, columns, salaryJjInfo.get_exl_tpl_folder_path())
 
         assert len(cov.loadTemp()) > 0
+
+    def test_val_bank_purpost(self):
+        salaryBankInfo = ehr_engine.SalaryBankInfo()
+        assert salaryBankInfo.val_bank_purpost(" 工资卡  报支卡", "工资卡") == True
+        assert salaryBankInfo.val_bank_purpost("奖金卡  工资卡  报支卡", "工资卡") == True
+        assert salaryBankInfo.val_bank_purpost("奖金卡  工资卡  报支卡", "奖金卡") == True
+        assert salaryBankInfo.val_bank_purpost("奖金卡  工资卡  报支卡", "其他卡") == False
+        assert salaryBankInfo.is_jj_bankno("奖金卡  工资卡  报支卡") == True
+        assert salaryBankInfo.is_gz_bankno("奖金卡  工资卡  报支卡") == True
+        assert salaryBankInfo.is_jj_bankno("工资卡  报支卡") == False
+        assert salaryBankInfo.is_gz_bankno("报支卡") == False
+
+    def test_salaryBank_exl_to_clazz(self):
+        salaryBankInfo = ehr_engine.SalaryBankInfo()
+        columns = salaryBankInfo.getColumnDef()
+        cov = ehr_engine.ExlToClazz(
+            ehr_engine.SalaryBankInfo, columns, salaryBankInfo.get_exl_tpl_folder_path())
+
+        assert len(cov.loadTemp()) > 0
