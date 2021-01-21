@@ -46,17 +46,33 @@ class EhrEngine(object):
             SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path())
         salaryBanks = cov.loadTemp()
 
-        return personInfo.to_map(persons), salaryGzInfo.to_map(salaryGzs), salaryJjInfo.to_map(salaryJjs), salaryBankInfo.to_map(salaryBanks)
+        operator = AuditerOperator('202101', '01', personInfo.to_map(persons), salaryGzInfo.to_map(
+            salaryGzs), salaryJjInfo.to_map(salaryJjs), salaryBankInfo.to_map(salaryBanks))
+        return operator.export()
 
     def validate(self, persinfos, salaryGzs, salaryJjs, salaryBanks):
         """
         验证员工的相关信息
         """
-        # 工资奖金实发小于0
         # 验证工资数据
         for gz in salaryGzs:
-            pass
+            code = gz._code
+            # 工资奖金实发小于0
+            if gz._pay < 0:
+                print("{}，工资实发 < 0 {}".format(persinfos[code], gz._pay))
             # 缺少银行卡号
+            if salaryBanks[code]['gz'] is None:
+                print("{}，缺少工资银行信息".format(persinfos[code]))
+        for jj in salaryJjs:
+            code = jj._code
+            # 工资奖金实发小于0
+            if gz._pay < 0:
+                if code in persinfos:
+                    print("{}，奖金实发 < 0 {}".format(persinfos[code], gz._pay))
+            # 缺少银行卡号
+            if salaryBanks[code]['jj'] is None:
+                print("{}，缺少奖金银行信息".format(persinfos[code]))
+
             # 所得税核对
             # 社保核对 怎么完成核对逻辑
 
@@ -558,3 +574,92 @@ class ExlToClazz(object):
             if columns[key] == columnName:
                 return key
         return ""
+
+
+class AuditerOperator(object):
+    """
+    审核表相关业务
+    """
+
+    def __init__(self, period, salaryScope, personinfos, salaryGzs, salaryJjs, salaryBanks):
+        self.period = period
+        self.salaryScope = salaryScope
+        self._persons = personinfos
+        self._gzs = salaryGzs
+        self._jjs = salaryJjs
+        self._banks = salaryBanks
+
+    def export(self):
+        datas = []
+        # 工资奖金数据
+        for key in self._gzs.keys():
+            a = Auditor(self.period, self.salaryScope)
+            jj = None
+            if key in self._jjs:
+                jj = self._jjs[key]
+            bank = None
+            if key in self._banks:
+                bank = self._banks[key]
+            a.to_auditor(self._persons[key],
+                         self._gzs[key], jj, bank)
+            datas.append(a)
+        # 其他不在系统内人员
+        for key in self._jjs.keys():
+            if key not in self._gzs:
+                a = Auditor(self.period, self.salaryScope)
+                bank = None
+                if key in self._banks:
+                    bank = self._banks[key]
+                a.to_auditor(None, None, self._jjs[key], bank)
+        return datas
+
+
+class Auditor(object):
+    """
+    审核表业务模型
+    """
+
+    def __init__(self, period, salaryScope, code="", name="", gwgz=0, blgz=0, nggz=0, fzgz=0, shbz=0, jbjj=0, bankno1="", bankinfo1=""):
+        self.period = period  # 期间
+        self.salaryScope = salaryScope  # 工资范围
+        self._code = code  # 职工编码
+        self._name = name  # 姓名
+        # 工资信息
+        self._gwgz = gwgz  # 岗位工资
+        self._blgz = blgz  # 保留工资
+        self._nggz = nggz  # 年功工资
+        self._fzgz = fzgz  # 辅助工资
+        self._shbz = shbz  # 生活补助
+
+        # 奖金信息
+        self._jbjj = jbjj  # 基本奖金
+        # 账号信息
+        self._bankno1 = bankno1  # 银行账号1
+        self._bankinfo1 = bankinfo1  # 银行1
+
+    def to_auditor(self, personinfo: PersonInfo, gzinfo: SalaryGzInfo, jjinfo: SalaryJjInfo, bankinfo: SalaryBankInfo):
+        if personinfo is not None:
+            self._code = personinfo._code
+            self._name = personinfo._name
+        else:
+            if jjinfo is not None:
+                self._code = jjinfo._code
+                self._name = jjinfo._name
+            else:
+                raise ValueError("数据异常，存在不合法的发放人员数据")
+        if gzinfo is not None:
+            self._gwgz = gzinfo._gwgz
+            self._blgz = gzinfo._blgz
+            self._nggz = gzinfo._glgz
+            self._fzgz = gzinfo._qtblgz
+            self._shbz = gzinfo._shbt_jt
+        if jjinfo is not None:
+            self._jbjj = jjinfo._jbjj
+
+        if bankinfo is not None:
+            self._bankno1 = bankinfo['gz']._bankNo
+            self._bankinfo1 = bankinfo['gz']._financialInstitution
+
+    def __str__(self):
+        return '审批表信息: 发薪日期 {} - 工资范围 {} - 职工编码 {} - 姓名 {} - 岗位工资 {} - 基本奖金 {} - 工资卡号 {} - 工资卡金融机构 {}'.format(
+            self.period, self.salaryScope, self._code, self._name, self._gwgz, self._jbjj, self._bankno1, self._bankinfo1)

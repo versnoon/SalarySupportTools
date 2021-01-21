@@ -89,3 +89,25 @@ class TestEhrEngine(object):
             ehr_engine.SalaryBankInfo, columns, salaryBankInfo.get_exl_tpl_folder_path())
 
         assert len(cov.loadTemp()) > 0
+
+    def test_to_auditor(self):
+        personinfo = ehr_engine.PersonInfo()
+        personinfo._code = 'M73677'
+        personinfo._name = '童坦'
+        salarygz = ehr_engine.SalaryGzInfo()
+        salarygz._gwgz = 4000
+        salaryjj = ehr_engine.SalaryJjInfo()
+        salaryjj._code = 'M73678'
+        salaryjj._name = '其他人'
+        auditor = ehr_engine.Auditor('202101', '01')
+        auditor.to_auditor(personinfo, salarygz, salaryjj, None)
+        assert auditor._code == 'M73677'
+        assert auditor._name == '童坦'
+        assert auditor._gwgz == 4000
+
+        auditor.to_auditor(None, None, salaryjj, None)
+        assert auditor._code == 'M73678'
+        assert auditor._name == '其他人'
+
+        with pytest.raises(ValueError):
+            auditor.to_auditor(None, None, None, None)

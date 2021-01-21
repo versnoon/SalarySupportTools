@@ -11,9 +11,11 @@
 from salary_support_tools import ehr_engine
 
 if __name__ == "__main__":
-    persons, salaryGzs, salaryJjs, salaryBanks = ehr_engine.EhrEngine().start()
-    print(persons['MA8837'])
-    print(salaryGzs['MA8837'])
-    print(salaryJjs['MA8837'])
-    print(salaryBanks['MA8837']['gz'])
-    print(salaryBanks['MA8837']['jj'])
+    # persons, salaryGzs, salaryJjs, salaryBanks = ehr_engine.EhrEngine().start()
+    # print(persons['MA8837'])
+    # print(salaryGzs['MA8837'])
+    # print(salaryJjs['MA8837'])
+    # print(salaryBanks['MA8837']['gz'])
+    # print(salaryBanks['MA8837']['jj'])
+    datas = ehr_engine.EhrEngine().start()
+    print(datas[0])
