@@ -48,6 +48,21 @@ class EhrEngine(object):
 
         return personInfo.to_map(persons), salaryGzInfo.to_map(salaryGzs), salaryJjInfo.to_map(salaryJjs), salaryBankInfo.to_map(salaryBanks)
 
+    def validate(self,):
+        """
+        验证员工的相关信息
+        """
+        # 实发小于0
+        # 缺少银行卡号
+        # 所得税核对
+        # 社保核对 怎么完成核对逻辑
+        pass
+
+    def export(self,):
+        """
+        生成各类所需的拨款单，银行报盘 等
+        """
+
 
 class PersonInfo(object):
     """
@@ -306,10 +321,11 @@ class ExlToClazz(object):
     模板
     """
 
-    def __init__(self, clazz, columnsDef, filePath):
+    def __init__(self, clazz, columnsDef, filePath, titleindex=0):
         self.clazz = clazz
         self.columnsDef = columnsDef
         self.filePath = filePath
+        self.titleindex = titleindex
 
     def loadTemp(self) -> []:
         if not isfile(self.filePath):
@@ -319,11 +335,11 @@ class ExlToClazz(object):
         # 读取第一个sheet 工作簿
         sheet = book.sheet_by_index(0)
         # 获取列头
-        titles = sheet.row_slice(0)
+        titles = sheet.row_slice(self.titleindex)
         # 反射生成
         res = []
         for r in range(sheet.nrows):
-            if r > 0:
+            if r > self.titleindex:
                 row = sheet.row_slice(r)
                 ins = self.clazz()
                 for i in range(len(titles)):
