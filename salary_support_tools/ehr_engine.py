@@ -46,9 +46,9 @@ class EhrEngine(object):
             SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path())
         salaryBanks = cov.loadTemp()
 
-        operator = AuditerOperator('202101', '01', personInfo.to_map(persons), salaryGzInfo.to_map(
+        auditOper = AuditerOperator('202101', '01', personInfo.to_map(persons), salaryGzInfo.to_map(
             salaryGzs), salaryJjInfo.to_map(salaryJjs), salaryBankInfo.to_map(salaryBanks))
-        return operator.export()
+        return auditOper.export()
 
     def validate(self, persinfos, salaryGzs, salaryJjs, salaryBanks):
         """
@@ -653,6 +653,7 @@ class Auditor(object):
             self._nggz = gzinfo._glgz
             self._fzgz = gzinfo._qtblgz
             self._shbz = gzinfo._shbt_jt
+
         if jjinfo is not None:
             self._jbjj = jjinfo._jbjj
 

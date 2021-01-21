@@ -19,3 +19,4 @@ if __name__ == "__main__":
     # print(salaryBanks['MA8837']['jj'])
     datas = ehr_engine.EhrEngine().start()
     print(datas[0])
+    print(len(datas))
