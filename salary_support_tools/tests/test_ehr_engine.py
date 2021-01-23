@@ -99,21 +99,21 @@ class TestEhrEngine(object):
         salaryjj = ehr_engine.SalaryJjInfo()
         salaryjj._code = 'M73678'
         salaryjj._name = '其他人'
-        auditor = ehr_engine.Auditor('202101', '01')
-        auditor.to_auditor(personinfo, salarygz, salaryjj, None)
+        auditor = ehr_engine.SapSalaryInfo('202101', '01')
+        auditor.to_sap(personinfo, salarygz, salaryjj, None)
         assert auditor._code == 'M73677'
         assert auditor._name == '童坦'
         assert auditor._gwgz == 4000
 
-        auditor.to_auditor(None, None, salaryjj, None)
+        auditor.to_sap(None, None, salaryjj, None)
         assert auditor._code == 'M73678'
         assert auditor._name == '其他人'
 
         with pytest.raises(ValueError):
-            auditor.to_auditor(None, None, None, None)
+            auditor.to_sap(None, None, None, None)
 
     def test_getattr_auditor(self):
-        auditor = ehr_engine.Auditor('202101', '01')
+        auditor = ehr_engine.SapSalaryInfo('202101', '01')
         t = hasattr(auditor, 'period')
         v = getattr(auditor, "period", '')
         assert t == True

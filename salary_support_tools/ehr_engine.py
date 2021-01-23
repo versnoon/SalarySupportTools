@@ -45,15 +45,18 @@ class EhrEngine(object):
         cov = ExlToClazz(
             SalaryJjInfo, salaryJjInfo.getColumnDef(), salaryJjInfo.get_exl_tpl_folder_path())
         salaryJjs = cov.loadTemp()
-
         salaryBankInfo = SalaryBankInfo()
         cov = ExlToClazz(
             SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path())
         salaryBanks = cov.loadTemp()
 
-        auditOper = AuditerOperator('202101', '01', personInfo.to_map(persons), salaryGzInfo.to_map(
+        so = SapsOperator('202101', '01', personInfo.to_map(persons), salaryGzInfo.to_map(
             salaryGzs), salaryJjInfo.to_map(salaryJjs), salaryBankInfo.to_map(salaryBanks))
-        return auditOper.export()
+        datas = so.to_saps()
+        ao = AuditerOperator(datas)
+        ao.export()
+        to = TexOperator(datas)
+        to.export()
 
     def validate(self, persinfos, salaryGzs, salaryJjs, salaryBanks):
         """
@@ -591,9 +594,9 @@ class ExlToClazz(object):
         return ""
 
 
-class AuditerOperator(object):
+class SapsOperator(object):
     """
-    审核表相关业务
+    转换成sap格式
     """
 
     def __init__(self, period, salaryScope, personinfos, salaryGzs, salaryJjs, salaryBanks):
@@ -604,33 +607,42 @@ class AuditerOperator(object):
         self._jjs = salaryJjs
         self._banks = salaryBanks
 
-    def to_auditors(self):
+    def to_saps(self):
         datas = []
         # 工资奖金数据
         for key in self._gzs.keys():
-            a = Auditor(self.period, self.salaryScope)
+            a = SapSalaryInfo(self.period, self.salaryScope)
             jj = None
             if key in self._jjs:
                 jj = self._jjs[key]
             bank = None
             if key in self._banks:
                 bank = self._banks[key]
-            a.to_auditor(self._persons[key],
-                         self._gzs[key], jj, bank)
+            a.to_sap(self._persons[key],
+                     self._gzs[key], jj, bank)
             datas.append(a)
         # 其他不在系统内人员
         for key in self._jjs.keys():
             if key not in self._gzs:
-                a = Auditor(self.period, self.salaryScope)
+                a = SapSalaryInfo(self.period, self.salaryScope)
                 bank = None
                 if key in self._banks:
                     bank = self._banks[key]
-                a.to_auditor(None, None, self._jjs[key], bank)
+                a.to_sap(None, None, self._jjs[key], bank)
         return datas
+
+
+class AuditerOperator(object):
+    """
+    审核表相关业务
+    """
+
+    def __init__(self, datas):
+        self.datas = datas
 
     def export(self):
         # 导出excel
-        self.createExcel(self.to_auditors(), self.columnsDef())
+        self.createExcel(self.datas, self.columnsDef())
 
     def columnsDef(self):
         columns = OrderedDict()
@@ -694,7 +706,7 @@ class AuditerOperator(object):
         columns["_jsgg"] = "技术攻关津贴"
         columns["_fgzjtbf"] = "非工资性津贴补发"
 
-        columns["_totalpayalbe"] = "应发合计"
+        columns["_totalpayable"] = "应发合计"
         columns["_totalpay"] = "实发合计"
         columns["_jyjf"] = "教育经费"
         columns["_gcjj"] = "工程津贴"
@@ -744,19 +756,27 @@ class AuditerOperator(object):
         if not exists(path):
             makedirs(path)
         b.save(r'd:\薪酬审核文件夹\202101\导出文件\系统数据.xls')
-        pass
 
 
-class Auditor(object):
+class SapSalaryInfo(object):
     """
-    审核表业务模型
+    SAP模型
     """
 
-    def __init__(self, period, salaryScope, code="", name="", gwgz=0, blgz=0, nggz=0, fzgz=0, shbz=0, khgz=0, gzbt=0, qtgz=0, ntjbgz=0, ntzz=0, ntglgz=0, djsj=0, ybjt=0, jsjt=0, yzdnjt=0, ksjt=0, xjjt=0, zwjt=0, wyjt=0, bzzjt=0, kjjt=0, nsjt=0, totaljbf=0, totalqq=0, gjj=0, yl=0, sy=0, yil=0, nj=0, totalsdj=0, sljj=0, cwkk=0, cwbt=0, wybt=0, bjf=0, db=0, txf=0, gwf=0, hm=0, wcf=0, scjt=0, zwbt=0, kyxm=0, jsgg=0, fgzjtbf=0, yznx=0, totalpayalbe=0, totalpay=0, jyjf=0, gcjt=0, jssc=0, qt=0, jbjj=0, gsxyj=0, nddxj=0, nddxjpay=0, nddxjtex=0, jsjj=0, totaljj=0, gzpay=0, jjpay=0, bankno1="", bankinfo1="", bankno2="", bankinfo2="", ygz=""):
+    def __init__(self, period, salaryScope, code="", name="", gwgz=0, blgz=0, nggz=0, fzgz=0, shbz=0, khgz=0, gzbt=0, qtgz=0, ntjbgz=0, ntzz=0, ntglgz=0, djsj=0, ybjt=0, jsjt=0, yzdnjt=0, ksjt=0, xjjt=0, zwjt=0, wyjt=0, bzzjt=0, kjjt=0, nsjt=0, totaljbf=0, totalqq=0, gjj=0, yl=0, sy=0, yil=0, nj=0, totalsdj=0, sljj=0, cwkk=0, cwbt=0, wybt=0, bjf=0, db=0, txf=0, gwf=0, hm=0, wcf=0, scjt=0, zwbt=0, kyxm=0, jsgg=0, fgzjtbf=0, yznx=0, totalpayable=0, totalpay=0, jyjf=0, gcjt=0, jssc=0, qt=0, jbjj=0, gsxyj=0, nddxj=0, nddxjpay=0, nddxjtex=0, jsjj=0, totaljj=0, gzpay=0, jjpay=0, bankno1="", bankinfo1="", bankno2="", bankinfo2="", ygz=""):
         self.period = period  # 期间
         self.salaryScope = salaryScope  # 工资范围
+        self.one = ""  # 一级组织
+        self.two = ""  # 二级组织
+        self.three = ""  # 三级组织
+        self.four = ""  # 四级组织
+        self.five = ""  # 五级组织
+        self.rsfw = self.one  # 人事范围
+        self.zw = ""  # 职位
+        self.zz = ""  # 职族
         self._code = code  # 职工编码
         self._name = name  # 姓名
+        self._idno = ""  # 身份证号
         # 工资信息
         self._gwgz = gwgz  # 岗位工资
         self._blgz = blgz  # 保留工资
@@ -782,6 +802,9 @@ class Auditor(object):
         self._kjjt = kjjt  # 科技津贴
         self._nsjt = nsjt  # 能手津贴
         self._totaljj = totaljj  # 奖金合计
+        self._fd_jbf = 0  # 法定加班
+        self._gxr_jbf = 0  # 公休日加班
+        self._ps_jbf = 0  # 平时加班
         self._totaljbf = totaljbf  # 加班费合计
         self._totalqq = totalqq  # 缺勤扣款合计
         self._yznx = yznx  # 预支年薪
@@ -824,6 +847,9 @@ class Auditor(object):
 
         # 奖金信息
         self._jbjj = jbjj  # 基本奖金
+        self._onejj = 0  # 单项奖1
+        self._twojj = 0  # 单项奖2
+        self._threejj = 0  # 单项奖3
         self._gsxyj = gsxyj  # 公司效益奖
         self._gsxyjpay = 0  # 公司效益奖上卡
         self._gsxyjtex = 0  # 公司效益奖所得税
@@ -843,7 +869,7 @@ class Auditor(object):
         # 汇总
 
         self._totalsdj = totalsdj  # 所得税
-        self._totalpayalbe = totalpayalbe  # 应发
+        self._totalpayable = totalpayable  # 应发
         self._totalpay = totalpay  # 实发
         self._gzpay = gzpay  # 工资上卡
         self._jjpay = jjpay  # 奖金上卡
@@ -857,15 +883,44 @@ class Auditor(object):
         self._jssc = jssc  # 技术输出
         self._qt = qt  # 其他
 
-        self._ygz = ygz
-        self._ygzz = ""
+        self._ygz = ygz  # 员工组
+        self._ygzz = ""  # 员工自足
 
-    def to_auditor(self, personinfo: PersonInfo, gzinfo: SalaryGzInfo, jjinfo: SalaryJjInfo, bankinfo: SalaryBankInfo):
+        self._znjy = 0  # 子女教育
+        self._jxjy = 0  # 继续教育
+        self._zfdk = 0  # 住房贷款
+        self._zffz = 0  # 住房租金
+        self._sylr = 0  # 赡养老人
+        self._mggl = 0  # 马钢工龄
+        self._gl = 0  # 参加工作时间工龄
+        self._cwdf = 0  # 财务代发计税项
+        self._cwdff = 0  # 财务代发非计税项
+        self._ljyf = 0  # 累计应发
+        self._ljwx = 0  # 累计五险
+        self._ljqt = 0  # 累计其他
+        self._ljjm = 0  # 累计减免
+        self._ljtex = 0  # 累计个税
+
+    def to_sap(self, personinfo: PersonInfo, gzinfo: SalaryGzInfo, jjinfo: SalaryJjInfo, bankinfo: SalaryBankInfo):
         if personinfo is not None:
+            self.one = personinfo._complayLevelOne
+            self.two = personinfo._departLevelTow
+            self.three = personinfo._branchLevelThree
+            self.four = personinfo._assignmentSectionLevelFour
+            self.five = personinfo._groupLevelFive
+
             self._code = personinfo._code
             self._name = personinfo._name
             self._ygz = personinfo._personType
             self._ygzz = personinfo._jobStatus
+
+            self.zw = personinfo._cJobTitle
+            self.zz = personinfo._postType
+
+            self._mggl = personinfo._timeOfJoinBaowu  # 进宝武时间
+            self._gl = personinfo._timeOfWork  # 参加工作时间
+            self._idno = personinfo._idNo
+
         else:
             if jjinfo is not None:
                 self._code = jjinfo._code
@@ -883,7 +938,7 @@ class Auditor(object):
             self._qtgz = gzinfo._shf
             self._ntjbgz = gzinfo._gdgz
             self._ntzz = gzinfo._dtxgz
-            self._ntglgz = gzinfo._glgz
+            self._ntglgz = 0
             self._djsj = gzinfo._shfbc_jt
             self._wjbt = 0
             self._ybjt = gzinfo._zyb_jt
@@ -896,6 +951,10 @@ class Auditor(object):
             self._bzzjt = 0
             self._kjjt = gzinfo._kjyx_jt
             self._nsjt = gzinfo._czns_jt
+            self._fd_jbf = gzinfo._fd_jbgz
+            self._gxr_jbf = gzinfo._xxr_jbgz
+            self._ps_jbf = gzinfo._ps_jbgz
+
             self._totaljbf = gzinfo._total_jbgz
             self._totalqq = gzinfo._total_kk
 
@@ -926,8 +985,15 @@ class Auditor(object):
             self._jsgg = gzinfo._js_jt
             self._fgzjtbf = gzinfo._gxbt_jt
             self._yznx = gzinfo._ygdxz + gzinfo._jxgz
+            self._znjy = gzinfo._znjyZxkc
+            self._jxjy = gzinfo._jxjyZxkc
+            self._zfdk = gzinfo._fdZxkc
+            self._zffz = gzinfo._fzZxkc
+            self._sylr = gzinfo._sylrZxkc
 
-            self._totalpayalbe = gzinfo._totalPayable   # 工资应发
+            self._cwdf = gzinfo._qtnssr  # 其他纳税收入
+
+            self._totalpayable = gzinfo._totalPayable   # 工资应发
             self._totalpay = gzinfo._pay  # 工资实发
             self._gzpay = gzinfo._pay  # 工资实发
 
@@ -935,6 +1001,9 @@ class Auditor(object):
 
         if jjinfo is not None:
             self._jbjj = jjinfo._jbjj
+            self._onejj = jjinfo._bonusOne
+            self._twojj = jjinfo._bonusTwo
+            self._threejj = jjinfo._bonusThree
 
             self._gcjt = jjinfo._gcjj
             self._jssc = jjinfo._jssc
@@ -947,7 +1016,7 @@ class Auditor(object):
 
             self._totalsdj = self._totalsdj + 0 - jjinfo._gts  # 合并入奖金所得税
 
-            self._totalpayalbe = self._totalpayalbe + jjinfo._totalPayable  # 合并奖金应发
+            self._totalpayable = self._totalpayable + jjinfo._totalPayable  # 合并奖金应发
             self._totalpay = self._totalpay + jjinfo._totalPayable  # 合并奖金实发
             self._jjpay = jjinfo._pay  # 奖金实发
 
@@ -960,7 +1029,7 @@ class Auditor(object):
 
     def __str__(self):
         return '审批表信息: 发薪日期 {} - 工资范围 {} - 职工编码 {} - 姓名 {} - 人员类型 {} - 在职状态 {} - 应发合计 {} - 奖金合计 {} - 公积金 {} - 养老保险 {} - 失业保险 {} - 医疗保险 {} - 年金 {} - 所得税 {} - 实发合计 {} - 工资卡号 {} - 工资卡金融机构 {} - 奖金卡号 {} - 奖金卡金融机构 {}'.format(
-            self.period, self.salaryScope, self._code, self._name, self._ygz, self._ygzz, self._totalpayalbe, self._totaljj, self._gjj, self._yl, self._sy, self._yil, self._nj, self._totalsdj, self._totalpay, self._bankno1, self._bankinfo1, self._bankno2, self._bankinfo2)
+            self.period, self.salaryScope, self._code, self._name, self._ygz, self._ygzz, self._totalpayable, self._totaljj, self._gjj, self._yl, self._sy, self._yil, self._nj, self._totalsdj, self._totalpay, self._bankno1, self._bankinfo1, self._bankno2, self._bankinfo2)
 
 
 class TexOperator(object):
@@ -968,8 +1037,66 @@ class TexOperator(object):
     税单相关表
     """
 
-    def __init__(self, datas,):
-        self._datas = datas
+    def __init__(self, datas):
+        self.datas = datas
+
+    def export(self):
+        # 导出excel
+        self.createExcel(self.datas, self.columnsDef())
+
+    def columnsDef(self):
+        columns = dict()
+        columns["_code"] = "工号"
+        columns["_name"] = "姓名"
+        columns["_certificateType"] = "证件类型"
+        columns["_idno"] = "证件号码"
+        columns["_totalpayable"] = "本期收入"
+        columns["_notexpay"] = "本期免税收入"
+        columns["_yl"] = "基本养老保险费"
+        columns["_yil"] = "基本医疗保险费"
+        columns["_sy"] = "基本失业保险费"
+        columns["_gjj"] = "住房公积金"
+        columns["_znjj"] = "累计子女教育"
+        columns["_jxjj"] = "累计继续教育"
+        columns["_zfdkll"] = "累计住房贷款利息"
+        columns["_zfzj"] = "累计住房租金"
+        columns["_ljsylr"] = "累计赡养老人"
+        columns["_nj"] = "企业（职业）年金"
+        columns["_syjkx"] = "商业健康保险"
+        columns["_syylbx"] = "税延养老保险"
+        columns["_qt"] = "其他"
+        columns["_zykc"] = "准予扣除的捐赠额"
+        columns["_jmse"] = "减免税额"
+        columns["_bz"] = "备注"
+        return columns
+
+    def createExcel(self, datas, columndefs):
+        """
+        创建excel
+        """
+        b = xlwt.Workbook(encoding='uft-8')
+        s = b.add_sheet('正常工资薪金收入')
+
+        source = []
+        for v in datas:
+            ti = TexInfo()
+            ti.to_tex(v)
+            source.append(ti)
+        # 写入标题
+        for i, v in enumerate(columndefs.values()):
+            s.write(0, i, v)
+        for i, v in enumerate(source):
+            for j, propertyName in enumerate(columndefs.keys()):
+                try:
+                    s.write(
+                        i+1, j, getattr(source[i], propertyName, ''))
+                except TypeError:
+                    print(propertyName)
+
+        path = r'd:\薪酬审核文件夹\202101\导出文件'
+        if not exists(path):
+            makedirs(path)
+        b.save(r'd:\薪酬审核文件夹\202101\导出文件\正常工资薪金所得.xls')
 
 
 class TexInfo(object):
@@ -977,9 +1104,50 @@ class TexInfo(object):
     所得税相关信息定义
     """
 
-    def __init__(self, code, name, certificateType, idno, totalpayable):
-        self._code = code
-        self._name = name
-        self._certificateType = certificateType
-        self._idno = idno
-        self._totalpayable = totalpayable
+    def __init__(self):
+        self._code = ""  # 工号
+        self._name = ""  # *姓名
+        self._certificateType = "居民身份证"  # *证件类型
+        self._idno = ""  # 证件号码
+        self._totalpayable = 0  # 本期收入
+        self._notexpay = None  # 本期免税收入
+        self._yl = 0  # 基本养老保险费
+        self._yil = 0  # 基本医疗保险费
+        self._sy = 0  # 基本失业保险费
+        self._gjj = 0  # 住房公积金
+        self._znjj = None  # 累计子女教育
+        self._jxjj = None  # 累计继续教育
+        self._zfdkll = None  # 累计住房贷款利息
+        self._zfzj = None  # 累计住房租金
+        self._ljsylr = None  # 累计赡养老人
+        self._nj = 0  # 企业（职业）年金
+        self._syjkx = None  # 商业健康保险
+        self._syylbx = None  # 税延养老保险
+        self._qt = None  # 其他
+        self._zykc = None  # 准予扣除的捐赠额
+        self._jmse = None  # 减免税额
+        self._bz = ""  # 备注
+
+    def to_tex(self, sapinfo: SapSalaryInfo):
+        self._code = sapinfo._code  # 工号
+        self._name = sapinfo._name  # *姓名
+        self._idno = sapinfo._idno  # 证件号码
+        self._totalpayable = sapinfo._totalpayable  # 本期收入
+        self._yl = sapinfo._yl  # 基本养老保险费
+        if sapinfo.yl < 0:
+            self._yl = 0
+        self._yil = sapinfo.yil  # 基本医疗保险费
+        if sapinfo.yil < 0:
+            self._yil = 0
+        self._sy = sapinfo._sy  # 基本失业保险费
+        if sapinfo._sy < 0:
+            self._sy = 0
+        self._gjj = sapinfo._gjj  # 住房公积金
+        if sapinfo._gjj > 2410:
+            self._gjj = 2410  # 住房公积金
+        self._nj = sapinfo._nj  # 企业（职业）年金
+        if sapinfo._nj > 804:
+            self._nj = 804
+        if sapinfo._nj < 0:
+            self._nj = 0
+        self._bz = '{}-{}'.format(sapinfo.one, sapinfo.two)  # 备注
