@@ -111,3 +111,10 @@ class TestEhrEngine(object):
 
         with pytest.raises(ValueError):
             auditor.to_auditor(None, None, None, None)
+
+    def test_getattr_auditor(self):
+        auditor = ehr_engine.Auditor('202101', '01')
+        t = hasattr(auditor, 'period')
+        v = getattr(auditor, "period", '')
+        assert t == True
+        assert v == '202101'

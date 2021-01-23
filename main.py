@@ -17,6 +17,4 @@ if __name__ == "__main__":
     # print(salaryJjs['MA8837'])
     # print(salaryBanks['MA8837']['gz'])
     # print(salaryBanks['MA8837']['jj'])
-    datas = ehr_engine.EhrEngine().start()
-    print(datas[0])
-    print(len(datas))
+    ehr_engine.EhrEngine().start()
