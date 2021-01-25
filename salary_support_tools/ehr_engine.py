@@ -140,7 +140,7 @@ class PersonInfo(object):
         columns["_idNo"] = "证件号码"
         columns["_personType"] = "人员类型"
         columns["_sourceOfPerson"] = "人员来源"
-        columns["_timeOfWork"] = "参加工作时间"
+        columns["_timeOfWork"] = "参加工作日期"
         columns["_timeOfJoinBaowu"] = "来宝钢系统日期"
         columns["_timeOfJoinComplay"] = "来公司日期"
         columns["_vJobTile"] = "核定岗位"
