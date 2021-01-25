@@ -736,7 +736,7 @@ class AuditerOperator(object):
         columns["_bankno2"] = "银行卡2"
         columns["_bankinfo2"] = "银行2"
         columns["_gzpay"] = "上卡工资"
-        columns["_nddxjpay"] = "上卡年终奖"
+        columns["_nddxjpay1"] = "上卡年终奖"
         columns["_jjpay"] = "上卡基本奖"
         columns["_sfhd"] = "实发核对"
         columns["_ygz"] = "员工组"
