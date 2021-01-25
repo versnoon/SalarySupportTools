@@ -29,12 +29,13 @@ class TestEhrEngine(object):
         docstring
         """
         personInfo = ehr_engine.PersonInfo()
+        personInfo.period = "202001"
         columns = personInfo.getColumnDef()
         assert len(columns) > 0
         assert columns['_code'] == "工号"
         with pytest.raises(KeyError):
             columns['code']
-        assert r'd:\薪酬审核文件夹\202101\人员信息.xls' == personInfo.get_exl_tpl_folder_path()
+        assert r'd:\薪酬审核文件夹\202001\人员信息.xls' == personInfo.get_exl_tpl_folder_path()
 
     def test_getPropertyName(self,):
         personInfo = ehr_engine.PersonInfo()
@@ -49,6 +50,7 @@ class TestEhrEngine(object):
 
     def test_personinfo_exl_to_clazz(self):
         personInfo = ehr_engine.PersonInfo()
+        personInfo.period = "202101"
         columns = personInfo.getColumnDef()
         cov = ehr_engine.ExlToClazz(
             ehr_engine.PersonInfo, columns, personInfo.get_exl_tpl_folder_path())
@@ -118,3 +120,18 @@ class TestEhrEngine(object):
         v = getattr(auditor, "period", '')
         assert t == True
         assert v == '202101'
+
+    def test_salaryPeriod_exl_to_clazz(self):
+        sp = ehr_engine.SalaryPeriod()
+        columns = sp.getColumnDef()
+        cov = ehr_engine.ExlToClazz(
+            ehr_engine.SalaryPeriod, columns, sp.get_exl_tpl_folder_path())
+        sps = cov.loadTemp()
+        assert len(sps) > 0
+
+    def test_salaryPeriod_str(self):
+        sp = ehr_engine.SalaryPeriod()
+        s = sp.get_period_str(2020, 1)
+        assert '2020年01月' == s
+        s = sp.get_period_str(2020, 10)
+        assert '2020年10月' == s
