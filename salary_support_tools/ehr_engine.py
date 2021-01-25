@@ -29,7 +29,6 @@ class EhrEngine(object):
         """
         docstring
         """
-        # 初始化模板路劲
 
         # 解析审核日期
         salaryPeriod = SalaryPeriod()
@@ -694,7 +693,7 @@ class AuditerOperator(object):
         columns["_blgz"] = "保留工资"
         columns["_nggz"] = "年功工资"
         columns["_fzgz"] = "辅助工资"
-        columns["_shbt"] = "生活补贴"
+        columns["_shbt"] = "生活补助"
         columns["_khgz"] = "考核工资"
         columns["_gzbt"] = "工资补退"
         columns["_qtgz"] = "其他工资"
@@ -705,7 +704,7 @@ class AuditerOperator(object):
         columns["_wjbt"] = "物价补贴"
         columns["_ybjt"] = "夜班津贴"
         columns["_jsjt"] = "技师津贴"
-        columns["_yzdnjt"] = "一专工多能津贴"  # 包含 计生 纪检 津贴
+        columns["_yzdnjt"] = "一专多能工津贴"  # 包含 计生 纪检 津贴
         columns["_ksjt"] = "矿山津贴"
         columns["_xjjt"] = "下井津贴"
         columns["_zwjt"] = "教、护龄津贴"
@@ -730,9 +729,9 @@ class AuditerOperator(object):
         columns["_cwkk"] = "财务扣款"
         columns["_df"] = "电费"
         columns["_fz"] = "房租"
-        columns["_dsf"] = "电视费"
+        columns["_dsf"] = "收视费"
         columns["_qjf"] = "清洁费"
-        columns["_ccf"] = "乘车费"
+        columns["_ccf"] = "乘车费用"
         columns["_cwbt"] = "财务补退"
         columns["_wybt"] = "物业补贴"
         columns["_bjf"] = "保健费"
@@ -752,7 +751,7 @@ class AuditerOperator(object):
         columns["_fgzjtbf"] = "非工资性津贴补发"
 
         columns["_totalpayable"] = "工资应发"
-        columns["_totalpay"] = "工资实发"
+        columns["_totalpay"] = "实发工资"
         columns["_jyjf"] = "教育经费"
         columns["_gcjj"] = "工程津贴"
         columns["_jssc"] = "技术输出"
@@ -802,7 +801,7 @@ class AuditerOperator(object):
         path = r'd:\薪酬审核文件夹\{}\导出文件'.format(self.period)
         if not exists(path):
             makedirs(path)
-        b.save(r'{}\{}'.format(path, "系统数据.xls"))
+        b.save(r'{}\{}'.format(path, "审核表数据.xls"))
 
 
 class SapSalaryInfo(object):
