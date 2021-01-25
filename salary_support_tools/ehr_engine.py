@@ -218,7 +218,8 @@ class SalaryGzInfo(object):
         self._gshl_jt = gshljt
         self._js_jt = jsjt
         self._tsgx_jt = tsgxjt
-        self._zw_jt = zwjt   # 驻外津贴
+        self._zw_jt = zwjt  # 驻外津贴
+        self._hsz_jt = 0  # 护士长津贴
         self._gongw_jt = gongwjt  # 公务津贴
         self._gxbt_jt = gxbtjt  # 各项补贴
         self._sdqnwy_jt = sdqnwyjt  # 水电气暖物业补贴
@@ -273,8 +274,11 @@ class SalaryGzInfo(object):
 
         # 企业部分
         self._yl_qybx = ylqybx  # 养老
+        self._yl_bj_qybx = 0  # 养老补缴
         self._yil_qybx = yilqybx  # 医疗
+        self._yil_bj_qybx = 0  # 医疗补缴
         self._sy_qybx = syqybx  # 失业
+        self._sy_bj_qybx = 0  # 失业补缴
         self._shy_qybx = shyqybx  # 生育
         self._gs_qybx = gsqybx  # 工伤
         self._gjj_qybx = gjjqybx  # 公积金
@@ -284,7 +288,7 @@ class SalaryGzInfo(object):
         return '员工工资信息: 机构 {} - 二级机构 {} - 三级机构 {} - 工号 {} - 姓名 {} - 岗位 {} - 应发 {}'.format(self._departfullinfo, self._departLevelTow, self._branchLevelThree, self._code, self._name, self._jobName, self._totalPayable)
 
     def getColumnDef(self) -> dict:
-        columns = dict()
+        columns = OrderedDict()
         columns["_code"] = "员工通行证"
         columns["_name"] = "员工姓名"
         columns["_departfullinfo"] = "机构"
@@ -337,7 +341,8 @@ class SalaryGzInfo(object):
         columns["_gshl_jt"] = "工伤护理费"
         columns["_js_jt"] = "技术津贴"
         columns["_tsgx_jt"] = "特殊贡献津贴"
-        columns["_zw_jt"] = "驻外津贴"
+        columns["_zw_jt"] = "驻外津贴"  # 驻外津贴
+        # columns["_hsz_jt"] = "护士长津贴"
 
         columns["_gongw_jt"] = "公务车贴"
         columns["_gxbt_jt"] = "各项补贴"
@@ -668,7 +673,8 @@ class AuditerOperator(object):
         columns["_yzdnjt"] = "一专多能、计生、纪检、信访津贴"
         columns["_ksjt"] = "矿山津贴"
         columns["_xjjt"] = "下井津贴"
-        columns["_zwjt"] = "驻外津贴"
+        columns["_zwjt"] = "教、护龄津贴"
+        columns["_hszjt"] = "护士长津贴"
         columns["_wyjt"] = "外语津贴"
         columns["_bzzjt"] = "班组长津贴"
         columns["_kjjt"] = "科技津贴"
@@ -678,11 +684,15 @@ class AuditerOperator(object):
         columns["_totalqq"] = "缺勤扣款合计"
         columns["_gjj"] = "公积金"
         columns["_yl"] = "养老保险"
+        columns["_yil"] = "医疗保险缴"
         columns["_sy"] = "失业保险"
-        columns["_yil"] = "医疗保险"
+        columns["_yl_bj"] = "养老保险补缴"
+        columns["_yil_bj"] = "医疗保险补缴"
+        columns["_sy_bj"] = "失业保险补缴"
         columns["_nj"] = "年金"
         columns["_totalsdj"] = "工资税收"
         columns["_sljj"] = "水利基金"
+        columns["_cwkk"] = "财务扣款"
         columns["_df"] = "电费"
         columns["_fz"] = "房租"
         columns["_dsf"] = "电视费"
@@ -797,6 +807,7 @@ class SapSalaryInfo(object):
         self._ksjt = ksjt  # 矿山津贴
         self._xjjt = xjjt  # 下井津贴
         self._zwjt = zwjt  # 驻外津贴 （原教护龄津贴）
+        self._hszjt = 0  # 护士长津贴
         self._wyjt = wyjt  # 外语津贴
         self._bzzjt = bzzjt  # 班组长津贴
         self._kjjt = kjjt  # 科技津贴
@@ -812,8 +823,11 @@ class SapSalaryInfo(object):
 
         self._gjj = gjj  # 公积金个人
         self._yl = yl  # 养老保险个人
+        self._yl_bj = 0  # 养老保险个人补缴 00
         self._sy = sy  # 失业保险个人
-        self.yil = yil  # 医疗保险个人
+        self._sy_bj = 0  # 失业保险个人补缴 =0
+        self._yil = yil  # 医疗保险个人
+        self._yil_bj = 0  # 医疗保险个人补缴=0
         self._nj = nj  # 年金保险个人
 
         # 其他扣缴
@@ -972,7 +986,7 @@ class SapSalaryInfo(object):
             if gzinfo._qtkk != "":
                 self._cwkk = 0 - gzinfo._qtkk  # 其他扣款
 
-            self._wyjt = gzinfo._sdqnwy_jt  # 物业补贴
+            self._wybt = gzinfo._sdqnwy_jt  # 物业补贴
             self._bjf = gzinfo._cq_jt
             self._db = gzinfo._dsznf
             self._txf = gzinfo._tx_jt
@@ -1030,6 +1044,145 @@ class SapSalaryInfo(object):
     def __str__(self):
         return '审批表信息: 发薪日期 {} - 工资范围 {} - 职工编码 {} - 姓名 {} - 人员类型 {} - 在职状态 {} - 应发合计 {} - 奖金合计 {} - 公积金 {} - 养老保险 {} - 失业保险 {} - 医疗保险 {} - 年金 {} - 所得税 {} - 实发合计 {} - 工资卡号 {} - 工资卡金融机构 {} - 奖金卡号 {} - 奖金卡金融机构 {}'.format(
             self.period, self.salaryScope, self._code, self._name, self._ygz, self._ygzz, self._totalpayable, self._totaljj, self._gjj, self._yl, self._sy, self._yil, self._nj, self._totalsdj, self._totalpay, self._bankno1, self._bankinfo1, self._bankno2, self._bankinfo2)
+
+
+class ReportOperator(object):
+    '''
+    报表格式数据导出
+    '''
+
+    def __init__(self, datas):
+        self.datas = datas
+
+    def export(self):
+        # 导出excel
+        self.createExcel(self.datas, self.columnsDef())
+
+    def columnsDef(self):
+        columns = dict()
+        columns["_code"] = "实发核对"
+        columns["_code"] = "一级组织"
+        columns["_code"] = "二级组织"
+        columns["_code"] = "三级组织"
+        columns["_code"] = "四级组织"
+        columns["_code"] = "五级组织"
+        columns["_code"] = "员工编号"
+        columns["_code"] = "员工姓名"
+        columns["_code"] = "身份证"
+        columns["_code"] = "工资范围"
+        columns["_code"] = "人事范围"
+        columns["_code"] = "员工组"
+        columns["_code"] = "员工子组"
+        columns["_code"] = "职位"
+        columns["_code"] = "职族"
+        columns["_code"] = "岗位工资"
+        columns["_code"] = "保留工资"
+        columns["_code"] = "年功工资"
+        columns["_code"] = "辅助工资"
+        columns["_code"] = "生活补助"
+        columns["_code"] = "考核工资"
+        columns["_code"] = "工资补退"
+        columns["_code"] = "其他工资"
+        columns["_code"] = "内退基本工资"
+        columns["_code"] = "内退增资"
+        columns["_code"] = "内退工龄工资"
+        columns["_code"] = "代缴三金"
+        columns["_code"] = "物价补贴"
+        columns["_code"] = "夜班津贴"
+        columns["_code"] = "技师津贴"
+        columns["_code"] = "一专多能工津贴"
+        columns["_code"] = "矿山津贴"
+        columns["_code"] = "下井津贴"
+        columns["_code"] = "教、护龄津贴"
+        columns["_code"] = "护士长津贴"
+        columns["_code"] = "外语津贴"
+        columns["_code"] = "班组长津贴"
+        columns["_code"] = "科技津贴"
+        columns["_code"] = "能手津贴"
+        columns["_code"] = "基本奖金"
+        columns["_code"] = "单项奖1"
+        columns["_code"] = "单项奖2"
+        columns["_code"] = "单项奖3"
+        columns["_code"] = "法定节日加班工资"
+        columns["_code"] = "公休日加班工资"
+        columns["_code"] = "平时加班工资"
+        columns["_code"] = "缺勤扣款合计"
+        columns["_code"] = "公积金"
+        columns["_code"] = "养老保险"
+        columns["_code"] = "医疗保险缴"
+        columns["_code"] = "失业保险"
+        columns["_code"] = "养老保险补缴"
+        columns["_code"] = "医疗保险补缴"
+        columns["_code"] = "失业保险补缴"
+        columns["_code"] = "年金"
+        columns["_code"] = "个税合计"
+        columns["_code"] = "水利基金"
+        columns["_code"] = "财务扣款"
+        columns["_code"] = "电费"
+        columns["_code"] = "房租"
+        columns["_code"] = "收视费"
+        columns["_code"] = "清洁费"
+        columns["_code"] = "乘车费用"
+        columns["_code"] = "财务补退"
+        columns["_code"] = "物业补贴"
+        columns["_code"] = "保健费"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+        columns["_code"] = "工号"
+
+        return columns
+
+    def createExcel(self, datas, columndefs):
+        """
+        创建excel
+        """
+        # b = xlwt.Workbook(encoding='uft-8')
+        # s = b.add_sheet('正常工资薪金收入')
+
+        # source = []
+        # for v in datas:
+        #     ti = TexInfo()
+        #     ti.to_tex(v)
+        #     source.append(ti)
+        # # 写入标题
+        # for i, v in enumerate(columndefs.values()):
+        #     s.write(0, i, v)
+        # for i, v in enumerate(source):
+        #     for j, propertyName in enumerate(columndefs.keys()):
+        #         try:
+        #             s.write(
+        #                 i+1, j, getattr(source[i], propertyName, ''))
+        #         except TypeError:
+        #             print(propertyName)
+
+        # path = r'd:\薪酬审核文件夹\202101\导出文件'
+        # if not exists(path):
+        #     makedirs(path)
+        # b.save(r'd:\薪酬审核文件夹\202101\导出文件\正常工资薪金所得.xls')
 
 
 class TexOperator(object):
@@ -1134,10 +1287,10 @@ class TexInfo(object):
         self._idno = sapinfo._idno  # 证件号码
         self._totalpayable = sapinfo._totalpayable  # 本期收入
         self._yl = sapinfo._yl  # 基本养老保险费
-        if sapinfo.yl < 0:
+        if sapinfo._yl < 0:
             self._yl = 0
-        self._yil = sapinfo.yil  # 基本医疗保险费
-        if sapinfo.yil < 0:
+        self._yil = sapinfo._yil  # 基本医疗保险费
+        if sapinfo._yil < 0:
             self._yil = 0
         self._sy = sapinfo._sy  # 基本失业保险费
         if sapinfo._sy < 0:
