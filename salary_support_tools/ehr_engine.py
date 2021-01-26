@@ -375,7 +375,7 @@ class SalaryGzInfo(object):
         columns["_gongw_jt"] = "公务车贴"
         columns["_gxbt_jt"] = "各项补贴"
         columns["_sdqnwy_jt"] = "水电气暖物业补贴"
-        columns["_shbt_jt"] = "生活补贴"
+        columns["_shbt_jt"] = "生活补助"
         columns["_shfbc_jt"] = "生活费补差"
         columns["_gxbt_jt"] = "岗薪补贴"
         columns["_total_jt"] = "津贴合计"
