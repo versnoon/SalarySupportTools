@@ -12,4 +12,5 @@ from salary_support_tools import ehr_engine
 
 if __name__ == "__main__":
     persons, period, departs = ehr_engine.EhrEngine().initven()
-    ehr_engine.EhrEngine().start(persons, period, departs)
+    if len(persons) > 0:
+        ehr_engine.EhrEngine().start(persons, period, departs)

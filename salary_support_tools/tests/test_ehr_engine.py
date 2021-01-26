@@ -160,3 +160,35 @@ class TestEhrEngine(object):
         assert m['01'].name == "集团机关"
         with pytest.raises(KeyError):
             m['99']
+
+    def test_salaryJjInfo_to_sum(self):
+        jj = ehr_engine.SalaryJjInfo()
+        jj._bonusOne = 1000
+        jj2 = ehr_engine.SalaryJjInfo()
+        jj2._bonusOne = 2000
+        jj2._bonusTwo = 4000
+        jj.to_sum(jj2)
+        assert jj._bonusOne == 3000
+        assert jj._bonusTwo == 4000
+
+    def test_salaryJjInfo_to_map(self):
+        jj = ehr_engine.SalaryJjInfo()
+        jj.period = "2021年01月"
+        jj.depart = "01_集团机关"
+        columns = jj.getColumnDef()
+        cov = ehr_engine.ExlsToClazz(
+            ehr_engine.SalaryJjInfo, columns, jj.get_exl_tpl_folder_path_prefix(), jj.get_exl_tpl_file_name_prefix(), 0, True)
+        jjs = cov.loadTemp()
+        m = jj.to_map(jjs)
+        assert m['M58709']._jbjj == 3252 * 1
+
+    def test_salaryBankInfo_to_map(self):
+        bank = ehr_engine.SalaryBankInfo()
+        bank.period = "2021年01月"
+        columns = bank.getColumnDef()
+        cov = ehr_engine.ExlsToClazz(
+            ehr_engine.SalaryBankInfo, columns, bank.get_exl_tpl_folder_path_prefix(), bank.get_exl_tpl_file_name_prefix(), 0, True)
+        banks = cov.loadTemp()
+        m = bank.to_map(banks)
+        assert 'M73677' in m
+        assert 'M58100' in m

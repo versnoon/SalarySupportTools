@@ -7,8 +7,8 @@
 @Version :   1.0
 @Contact :   tongtan@gmail.com
 '''
-from os.path import isfile, exists
-from os import makedirs
+from os.path import isfile, exists, join
+from os import makedirs, walk, listdir
 
 
 from collections import OrderedDict
@@ -66,11 +66,18 @@ class EhrEngine(object):
         docstring
         """
 
+        salaryBankInfo = SalaryBankInfo()
+        salaryBankInfo.period = period
+        cov = ExlsToClazz(
+            SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path_prefix(), salaryBankInfo.get_exl_tpl_file_name_prefix(), 0, True)
+        salaryBanks = cov.loadTemp()
+        banks = salaryBankInfo.to_map(salaryBanks)
+
         # 循环处理单位信息
         for v in departs.values():
-            self.parserInfos(persons, period, v)
+            self.parserInfos(persons, period, v, banks)
 
-    def parserInfos(self, persons, period, salaryDepart):
+    def parserInfos(self, persons, period, salaryDepart, banks):
         """
         将ehr数据转换为Sap相关格式数据并导出
 
@@ -90,18 +97,12 @@ class EhrEngine(object):
         salaryJjInfo = SalaryJjInfo()
         salaryJjInfo.period = period
         salaryJjInfo.depart = depart
-        cov = ExlToClazz(
-            SalaryJjInfo, salaryJjInfo.getColumnDef(), salaryJjInfo.get_exl_tpl_folder_path(), 0, True)
+        cov = ExlsToClazz(
+            SalaryJjInfo, salaryJjInfo.getColumnDef(), salaryJjInfo.get_exl_tpl_folder_path_prefix(), salaryJjInfo.get_exl_tpl_file_name_prefix(), 0, True)
         salaryJjs = cov.loadTemp()
-        salaryBankInfo = SalaryBankInfo()
-        salaryBankInfo.period = period
-        salaryBankInfo.depart = depart
-        cov = ExlToClazz(
-            SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path(), 0, True)
-        salaryBanks = cov.loadTemp()
 
         so = SapsOperator(period, salaryDepart.salaryScope, persons, salaryGzInfo.to_map(
-            salaryGzs), salaryJjInfo.to_map(salaryJjs), salaryBankInfo.to_map(salaryBanks))
+            salaryGzs), salaryJjInfo.to_map(salaryJjs), banks)
         datas = so.to_saps()
         if len(datas) > 0:
             ao = AuditerOperator(datas, period, depart)
@@ -546,8 +547,36 @@ class SalaryJjInfo(object):
         if datas is not None and len(datas) > 0:
             for i in range(len(datas)):
                 info = datas[i]
+                if info._code in m:
+                    info.to_sum(m[info._code])
                 m[info._code] = info
         return m
+
+    def to_sum(self, jj):
+        self._ysjse += jj._ysjse
+        self._bonusTwo += jj._bonusTwo
+        self._gtsyj += jj._gtsyj
+        self._pay += jj._pay
+        self._jjhj += jj._jjhj
+        self._jsjseptsl += jj._jsjseptsl
+        self._jbjj += jj._jbjj
+        self._gts += jj._gts
+        self._bonusOne += jj._bonusOne
+        self._bonusThree += jj._bonusThree
+        self._yseyhsl += jj._yseyhsl
+        self._totalPayable += jj._totalPayable
+        self._gstz += jj._gstz
+        self._gcjj += jj._gcjj
+        self._jssc += jj._jssc
+        self._qt += jj._qt
+        self._nddxj += jj._nddxj
+        self._jsjj += jj._jsjj
+
+    def get_exl_tpl_folder_path_prefix(self):
+        return r'd:\薪酬审核文件夹\{}\{}'.format(self.period, self.depart)
+
+    def get_exl_tpl_file_name_prefix(self):
+        return '奖金信息'
 
 
 class SalaryBankInfo(object):
@@ -557,7 +586,6 @@ class SalaryBankInfo(object):
 
     def __init__(self, code="", name="", departfullinfo="", financialInstitution="", bankNo="", payment="", purpose="", associalBankNo="", cardType=""):
         self.period = ""
-        self.depart = ""
         self._code = code
         self._name = name
         self._departfullinfo = departfullinfo
@@ -586,7 +614,7 @@ class SalaryBankInfo(object):
         return columns
 
     def get_exl_tpl_folder_path(self):
-        return r'd:\薪酬审核文件夹\{}\银行卡信息_{}.xls'.format(self.period, self.depart)
+        return r'd:\薪酬审核文件夹\{}\银行卡信息.xls'.format(self.period)
 
     def to_map(self, datas):
         m = dict()
@@ -602,6 +630,12 @@ class SalaryBankInfo(object):
                     v['jj'] = info
                 m[info._code] = v
         return m
+
+    def get_exl_tpl_folder_path_prefix(self):
+        return r'd:\薪酬审核文件夹\{}'.format(self.period)
+
+    def get_exl_tpl_file_name_prefix(self):
+        return '银行卡信息'
 
     def is_gz_bankno(self, purpose=""):
         return self.val_bank_purpost(purpose, "工资卡")
@@ -669,6 +703,43 @@ class ExlToClazz(object):
             if columns[key] == columnName:
                 return key
         return ""
+
+
+class ExlsToClazz(object):
+    """
+    多个excel转class
+    """
+
+    def __init__(self, clazz, columnsDef, filepath_prefix, filename_prefix, titleindex=0, noneable=False):
+        self.clazz = clazz
+        self.columnsDef = columnsDef
+        self.filepath_prefix = filepath_prefix
+        self.filename_prefix = filename_prefix
+        self.titleindex = titleindex
+        self.noneable = noneable
+
+    def loadTemp(self) -> []:
+        file_list = listdir(self.filepath_prefix)
+        # for base_path, folder_list, file_list in walk(self.filepath_prefix):
+        datas = []
+        for file_name in file_list:
+            file_path = join(self.filepath_prefix, file_name)
+            file_ext = file_name.rsplit('.', maxsplit=1)
+            if len(file_ext) != 2:
+                # 没有后缀名
+                continue
+            if file_ext[1].lower() != 'xls':
+                # 不是excel2003文件
+                continue
+            name = file_ext[0]
+            # 判断已特定名称开头的文件
+            if name.startswith(self.filename_prefix):
+                clazz = ExlToClazz(
+                    self.clazz, self.columnsDef, file_path, 0, True)
+                t = clazz.loadTemp()
+                if len(t) > 0:
+                    datas.extend(t)
+        return datas
 
 
 class SapsOperator(object):
