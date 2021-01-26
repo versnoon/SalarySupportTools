@@ -83,7 +83,7 @@ class EhrEngine(object):
         salaryGzInfo.period = period
         salaryGzInfo.depart = depart
         cov = ExlToClazz(
-            SalaryGzInfo, salaryGzInfo.getColumnDef(), salaryGzInfo.get_exl_tpl_folder_path())
+            SalaryGzInfo, salaryGzInfo.getColumnDef(), salaryGzInfo.get_exl_tpl_folder_path(), 0, True)
         salaryGzs = cov.loadTemp()
 
         # 解析人员奖金信息
@@ -91,24 +91,25 @@ class EhrEngine(object):
         salaryJjInfo.period = period
         salaryJjInfo.depart = depart
         cov = ExlToClazz(
-            SalaryJjInfo, salaryJjInfo.getColumnDef(), salaryJjInfo.get_exl_tpl_folder_path())
+            SalaryJjInfo, salaryJjInfo.getColumnDef(), salaryJjInfo.get_exl_tpl_folder_path(), 0, True)
         salaryJjs = cov.loadTemp()
         salaryBankInfo = SalaryBankInfo()
         salaryBankInfo.period = period
         salaryBankInfo.depart = depart
         cov = ExlToClazz(
-            SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path())
+            SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path(), 0, True)
         salaryBanks = cov.loadTemp()
 
         so = SapsOperator(period, salaryDepart.salaryScope, persons, salaryGzInfo.to_map(
             salaryGzs), salaryJjInfo.to_map(salaryJjs), salaryBankInfo.to_map(salaryBanks))
         datas = so.to_saps()
-        ao = AuditerOperator(datas, period, depart)
-        ao.export()
-        to = TexOperator(datas, period, depart)
-        to.export()
-        sh = ReportOperator(datas, period, depart)
-        sh.export()
+        if len(datas) > 0:
+            ao = AuditerOperator(datas, period, depart)
+            ao.export()
+            to = TexOperator(datas, period, depart)
+            to.export()
+            sh = ReportOperator(datas, period, depart)
+            sh.export()
 
     def validate(self, persinfos, salaryGzs, salaryJjs, salaryBanks):
         """
@@ -205,9 +206,10 @@ class PersonInfo(object):
 
     def to_map(self, datas):
         m = dict()
-        for i in range(len(datas)):
-            personInfo = datas[i]
-            m[personInfo._code] = personInfo
+        if datas is not None and len(datas) > 0:
+            for i in range(len(datas)):
+                personInfo = datas[i]
+                m[personInfo._code] = personInfo
         return m
 
     def __str__(self):
@@ -463,9 +465,10 @@ class SalaryGzInfo(object):
 
     def to_map(self, datas):
         m = dict()
-        for i in range(len(datas)):
-            info = datas[i]
-            m[info._code] = info
+        if datas is not None and len(datas) > 0:
+            for i in range(len(datas)):
+                info = datas[i]
+                m[info._code] = info
         return m
 
 
@@ -538,9 +541,10 @@ class SalaryJjInfo(object):
 
     def to_map(self, datas):
         m = dict()
-        for i in range(len(datas)):
-            info = datas[i]
-            m[info._code] = info
+        if datas is not None and len(datas) > 0:
+            for i in range(len(datas)):
+                info = datas[i]
+                m[info._code] = info
         return m
 
 
@@ -584,16 +588,17 @@ class SalaryBankInfo(object):
 
     def to_map(self, datas):
         m = dict()
-        for i in range(len(datas)):
-            info = datas[i]
-            v = dict()
-            if info._code in m:
-                v = m[info._code]
-            if self.is_gz_bankno(info._purpose):
-                v['gz'] = info
-            if self.is_jj_bankno(info._purpose):
-                v['jj'] = info
-            m[info._code] = v
+        if datas is not None and len(datas) > 0:
+            for i in range(len(datas)):
+                info = datas[i]
+                v = dict()
+                if info._code in m:
+                    v = m[info._code]
+                if self.is_gz_bankno(info._purpose):
+                    v['gz'] = info
+                if self.is_jj_bankno(info._purpose):
+                    v['jj'] = info
+                m[info._code] = v
         return m
 
     def is_gz_bankno(self, purpose=""):
@@ -618,14 +623,18 @@ class ExlToClazz(object):
     模板
     """
 
-    def __init__(self, clazz, columnsDef, filePath, titleindex=0):
+    def __init__(self, clazz, columnsDef, filePath, titleindex=0, noneable=False):
         self.clazz = clazz
         self.columnsDef = columnsDef
         self.filePath = filePath
         self.titleindex = titleindex
+        self.noneable = noneable
 
     def loadTemp(self) -> []:
         if not isfile(self.filePath):
+            # 跳过异常
+            if self.noneable:
+                return
             raise FileNotFoundError("文件路径 {0} 不存在".format(self.filePath))
         # 读取模板文件
         book = xlrd.open_workbook(self.filePath)
@@ -1441,10 +1450,11 @@ class SalaryDepart(object):
 
     def to_map(self, datas):
         m = OrderedDict()
-        for i in datas:
-            k = i.salaryScope
-            v = i
-            m[k] = v
+        if datas is not None and len(datas) > 0:
+            for i in datas:
+                k = i.salaryScope
+                v = i
+                m[k] = v
         return m
 
     def __str__(self):
