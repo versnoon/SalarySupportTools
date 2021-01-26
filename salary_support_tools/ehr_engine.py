@@ -25,11 +25,7 @@ class EhrEngine(object):
         self._name = name
         self._folder_prefix = r'd:\薪酬审核文件夹'
 
-    def start(self):
-        """
-        docstring
-        """
-
+    def initven(self):
         # 解析审核日期
         salaryPeriod = SalaryPeriod()
         sp = ExlToClazz(SalaryPeriod, salaryPeriod.getColumnDef(),
@@ -38,50 +34,80 @@ class EhrEngine(object):
         if len(sps) != 1:
             raise ValueError("审核日期解析错误,请检查'当前审核日期.xls'模板")
         period = salaryPeriod.get_period_str(sps[0].year, sps[0].month)
-        print(sps[0].year)
-        print(sps[0].month)
-        print(period)
         # 初始化日期文件夹 工作目录
         current_folder_path = r"{}\{}".format(self._folder_prefix, period)
         if not exists(current_folder_path):
             makedirs(current_folder_path)
-            return
         # 解析单位信息模板
 
-        # 解析人员基本信息
+        salaryDepart = SalaryDepart()
+        sd = ExlToClazz(SalaryDepart, salaryDepart.getColumnDef(),
+                        salaryDepart.get_exl_tpl_folder_path())
+        sds = sd.loadTemp()
+        if len(sds) < 1:
+            raise ValueError("审核机构解析错误,请检查'审核机构信息.xls'模板")
+        # 初始化机构文件夹 工作目录
+        dm = salaryDepart.to_map(sds)
+        for k, v in dm.items():
+            current_folder_path = r"{}\{}\{}_{}".format(
+                self._folder_prefix, period, k, v.name)
+            if not exists(current_folder_path):
+                makedirs(current_folder_path)
+         # 解析人员基本信息
         personInfo = PersonInfo()
         personInfo.period = period
         cov = ExlToClazz(
             PersonInfo, personInfo.getColumnDef(), personInfo.get_exl_tpl_folder_path())
-        persons = cov.loadTemp()
+        persons = personInfo.to_map(cov.loadTemp())
+        return persons, period, dm
+
+    def start(self, persons, period, departs):
+        """
+        docstring
+        """
+
+        # 循环处理单位信息
+        for v in departs.values():
+            self.parserInfos(persons, period, v)
+
+    def parserInfos(self, persons, period, salaryDepart):
+        """
+        将ehr数据转换为Sap相关格式数据并导出
+
+        """
+        # 单位文件夹名称
+        depart = '{}_{}'.format(salaryDepart.salaryScope, salaryDepart.name)
 
         # 解析人员工资信息
         salaryGzInfo = SalaryGzInfo()
         salaryGzInfo.period = period
+        salaryGzInfo.depart = depart
         cov = ExlToClazz(
             SalaryGzInfo, salaryGzInfo.getColumnDef(), salaryGzInfo.get_exl_tpl_folder_path())
         salaryGzs = cov.loadTemp()
 
-        # 解析人员将建信息
+        # 解析人员奖金信息
         salaryJjInfo = SalaryJjInfo()
         salaryJjInfo.period = period
+        salaryJjInfo.depart = depart
         cov = ExlToClazz(
             SalaryJjInfo, salaryJjInfo.getColumnDef(), salaryJjInfo.get_exl_tpl_folder_path())
         salaryJjs = cov.loadTemp()
         salaryBankInfo = SalaryBankInfo()
         salaryBankInfo.period = period
+        salaryBankInfo.depart = depart
         cov = ExlToClazz(
             SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path())
         salaryBanks = cov.loadTemp()
 
-        so = SapsOperator(period, '01', personInfo.to_map(persons), salaryGzInfo.to_map(
+        so = SapsOperator(period, salaryDepart.salaryScope, persons, salaryGzInfo.to_map(
             salaryGzs), salaryJjInfo.to_map(salaryJjs), salaryBankInfo.to_map(salaryBanks))
         datas = so.to_saps()
-        ao = AuditerOperator(datas, period)
+        ao = AuditerOperator(datas, period, depart)
         ao.export()
-        to = TexOperator(datas, period)
+        to = TexOperator(datas, period, depart)
         to.export()
-        sh = ReportOperator(datas, period)
+        sh = ReportOperator(datas, period, depart)
         sh.export()
 
     def validate(self, persinfos, salaryGzs, salaryJjs, salaryBanks):
@@ -195,6 +221,7 @@ class SalaryGzInfo(object):
 
     def __init__(self, code="", name="", departfullinfo="", depart="", branch="", salaryModel="", jobName="", postPrice="", distributionMark="", fzZxkc=0, fdZxkc=0, jxjyZxkc=0, znjyZxkc=0, sylrZxkc=0, zxnf=0, gsgl=0, lxgl=0, bjbl=0, gwxs=0, gwxbz=0, gwgz=0, blgz=0, glgz=0, jbx=0, qtblgz=0, gdgz=0, dtxgz=0, gwx=0, zlx=0, yfjxnx=0, shf=0, jbgzdy=0, rpjgzkk=0, rpjgzjk=0, zybjt=0, jnjt=0, jggzjt=0, gzzjt=0, kjyxjt=0, cznsjt=0, xljt=0, txjt=0, cqjt=0, gwjt=0, mzjt=0, wcjt=0, gsjt=0, gshljt=0, jsjt=0, tsgxjt=0, zwjt=0, gongwjt=0, gxbtjt=0, sdqnwyjt=0, shbtjt=0, shfbcjt=0, totaljt=0, rpjgz=0, qtnssr=0, ygdxz=0, jxgz=0, jdfdyyz=0, khfd=0, shfbt=0, dsznf=0, jkdjf=0, qtdf=0, kdjf=0, gztz=0, qtbf=0, qtkk=0, qtdkk=0, fdjbgz=0, xxrjbgz=0, psjbgz=0, totaljbgz=0, bjkk=0, sjkk=0, kgkk=0, totalkk=0, yl=0, yil=0, sy=0, gjj=0, nj=0, gjjbz=0, yse=0, gts=0, dfxm=0, bfone=0, bftwo=0, totaldk=0, pay=0, ylqybx=0, yilqybx=0, syqybx=0, shyqybx=0, gsqybx=0, gjjqybx=0, njqybx=0, totalPayable=0):
         self.period = ""
+        self.depart = ""  # 单位文件夹名称
         self._code = ""  # 员工通行证
         self._name = name  # 员工姓名
         self._departfullinfo = departfullinfo  # 机构
@@ -432,7 +459,7 @@ class SalaryGzInfo(object):
         return columns
 
     def get_exl_tpl_folder_path(self):
-        return r'd:\薪酬审核文件夹\{}\工资信息.xls'.format(self.period)
+        return r'd:\薪酬审核文件夹\{}\{}\工资信息.xls'.format(self.period, self.depart)
 
     def to_map(self, datas):
         m = dict()
@@ -449,6 +476,7 @@ class SalaryJjInfo(object):
 
     def __init__(self, code="", name="", departfullinfo="", distributionMark="", ysjse=0, bonusTow=0, gtsyj=0, pay=0, jjhj=0, totalPayable=0, jsjseptsl=0, jbjj=0, gts=0, bonusOne=0, bonusThree=0, yseyhsl=0, yse=0, gstz=0, gcjj=0, jssc=0, nddxj=0, jsjj=0, qt=0, gsxyj=0):
         self.period = ""
+        self.depart = ""  # 审批单位文件夹名称
         self._code = code
         self._name = name
         self._departfullinfo = departfullinfo
@@ -506,7 +534,7 @@ class SalaryJjInfo(object):
         return columns
 
     def get_exl_tpl_folder_path(self):
-        return r'd:\薪酬审核文件夹\{}\奖金信息.xls'.format(self.period)
+        return r'd:\薪酬审核文件夹\{}\{}\奖金信息.xls'.format(self.period, self.depart)
 
     def to_map(self, datas):
         m = dict()
@@ -523,6 +551,7 @@ class SalaryBankInfo(object):
 
     def __init__(self, code="", name="", departfullinfo="", financialInstitution="", bankNo="", payment="", purpose="", associalBankNo="", cardType=""):
         self.period = ""
+        self.depart = ""
         self._code = code
         self._name = name
         self._departfullinfo = departfullinfo
@@ -551,7 +580,7 @@ class SalaryBankInfo(object):
         return columns
 
     def get_exl_tpl_folder_path(self):
-        return r'd:\薪酬审核文件夹\{}\银行卡信息.xls'.format(self.period)
+        return r'd:\薪酬审核文件夹\{}\银行卡信息_{}.xls'.format(self.period, self.depart)
 
     def to_map(self, datas):
         m = dict()
@@ -675,8 +704,9 @@ class AuditerOperator(object):
     审核表相关业务
     """
 
-    def __init__(self, datas, period):
+    def __init__(self, datas, period, depart):
         self.period = period
+        self.depart = depart
         self.datas = datas
 
     def export(self):
@@ -798,10 +828,10 @@ class AuditerOperator(object):
                 except TypeError:
                     print(propertyName)
 
-        path = r'd:\薪酬审核文件夹\{}\导出文件'.format(self.period)
+        path = r'd:\薪酬审核文件夹\{}\{}\导出文件'.format(self.period, self.depart)
         if not exists(path):
             makedirs(path)
-        b.save(r'{}\{}'.format(path, "审核表数据.xls"))
+        b.save(r'{}\{}_{}_{}'.format(path, self.depart, self.period, "审核表数据.xls"))
 
 
 class SapSalaryInfo(object):
@@ -1087,9 +1117,10 @@ class ReportOperator(object):
     报表格式数据导出
     '''
 
-    def __init__(self, datas, period):
+    def __init__(self, datas, period, depart):
         self.datas = datas
         self.period = period
+        self.depart = depart
 
     def export(self):
         # 导出excel
@@ -1238,10 +1269,11 @@ class ReportOperator(object):
                 except TypeError:
                     print(propertyName)
 
-        path = r'd:\薪酬审核文件夹\{}\导出文件'.format(self.period)
+        path = r'd:\薪酬审核文件夹\{}\{}\导出文件'.format(self.period, self.depart)
         if not exists(path):
             makedirs(path)
-        b.save(r'{}\{}'.format(path, "SAPSH002.xls"))
+        b.save(r'{}\{}_{}_{}'.format(
+            path, self.depart, self.period, "SAPSH002.xls"))
 
 
 class TexOperator(object):
@@ -1249,8 +1281,9 @@ class TexOperator(object):
     税单相关表
     """
 
-    def __init__(self, datas, period):
+    def __init__(self, datas, period, depart):
         self.datas = datas
+        self.depart = depart
         self.period = period
 
     def export(self):
@@ -1306,10 +1339,11 @@ class TexOperator(object):
                 except TypeError:
                     print(propertyName)
 
-        path = r'd:\薪酬审核文件夹\{}\导出文件'.format(self.period)
+        path = r'd:\薪酬审核文件夹\{}\{}\导出文件'.format(self.period, self.depart)
         if not exists(path):
             makedirs(path)
-        b.save(r'{}\{}'.format(path, "正常工资薪金所得.xls"))
+        b.save(r'{}\{}_{}_{}'.format(
+            path, self.depart, self.period, "正常工资薪金所得.xls"))
 
 
 class TexInfo(object):
@@ -1387,3 +1421,31 @@ class SalaryPeriod(object):
 
     def get_period_str(self, year, month):
         return "{:0>4d}年{:0>2d}月".format(int(year), int(month))
+
+
+class SalaryDepart(object):
+    def __init__(self):
+        self.salaryScope = ""  # 工资范围
+        self.name = ""  # 单位名称
+        self.sortno = 0  # 显示顺序
+
+    def getColumnDef(self) -> dict:
+        columns = dict()
+        columns["sortno"] = "序号"
+        columns["salaryScope"] = "工资范围"
+        columns["name"] = "EHR单位名称"
+        return columns
+
+    def get_exl_tpl_folder_path(self):
+        return r'd:\薪酬审核文件夹\审核机构信息.xls'
+
+    def to_map(self, datas):
+        m = OrderedDict()
+        for i in datas:
+            k = i.salaryScope
+            v = i
+            m[k] = v
+        return m
+
+    def __str__(self):
+        return '审核机构信息: 序号{} - 工资范围 {} - 单位名称 {}'.format(self.sortno, self.salaryScope, self.name)

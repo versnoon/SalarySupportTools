@@ -50,7 +50,7 @@ class TestEhrEngine(object):
 
     def test_personinfo_exl_to_clazz(self):
         personInfo = ehr_engine.PersonInfo()
-        personInfo.period = "202101"
+        personInfo.period = "2021年01月"
         columns = personInfo.getColumnDef()
         cov = ehr_engine.ExlToClazz(
             ehr_engine.PersonInfo, columns, personInfo.get_exl_tpl_folder_path())
@@ -59,6 +59,8 @@ class TestEhrEngine(object):
 
     def test_salaryGz_exl_to_clazz(self):
         salaryGz = ehr_engine.SalaryGzInfo()
+        salaryGz.period = "2021年01月"
+        salaryGz.depart = "01_集团机关"
         columns = salaryGz.getColumnDef()
         cov = ehr_engine.ExlToClazz(
             ehr_engine.SalaryGzInfo, columns, salaryGz.get_exl_tpl_folder_path())
@@ -67,6 +69,8 @@ class TestEhrEngine(object):
 
     def test_salaryJj_exl_to_clazz(self):
         salaryJjInfo = ehr_engine.SalaryJjInfo()
+        salaryJjInfo.period = "2021年01月"
+        salaryJjInfo.depart = "01_集团机关"
         columns = salaryJjInfo.getColumnDef()
         cov = ehr_engine.ExlToClazz(
             ehr_engine.SalaryJjInfo, columns, salaryJjInfo.get_exl_tpl_folder_path())
@@ -86,6 +90,8 @@ class TestEhrEngine(object):
 
     def test_salaryBank_exl_to_clazz(self):
         salaryBankInfo = ehr_engine.SalaryBankInfo()
+        salaryBankInfo.period = "2021年01月"
+        salaryBankInfo.depart = "01_集团机关"
         columns = salaryBankInfo.getColumnDef()
         cov = ehr_engine.ExlToClazz(
             ehr_engine.SalaryBankInfo, columns, salaryBankInfo.get_exl_tpl_folder_path())
@@ -135,3 +141,22 @@ class TestEhrEngine(object):
         assert '2020年01月' == s
         s = sp.get_period_str(2020, 10)
         assert '2020年10月' == s
+
+    def test_salaryDepart_exl_to_clazz(self):
+        sd = ehr_engine.SalaryDepart()
+        columns = sd.getColumnDef()
+        cov = ehr_engine.ExlToClazz(
+            ehr_engine.SalaryDepart, columns, sd.get_exl_tpl_folder_path())
+        sps = cov.loadTemp()
+        assert len(sps) > 0
+
+    def test_salaryDepart_to_map(self):
+        sd = ehr_engine.SalaryDepart()
+        columns = sd.getColumnDef()
+        cov = ehr_engine.ExlToClazz(
+            ehr_engine.SalaryDepart, columns, sd.get_exl_tpl_folder_path())
+        sps = cov.loadTemp()
+        m = sd.to_map(sps)
+        assert m['01'].name == "集团机关"
+        with pytest.raises(KeyError):
+            m['99']
