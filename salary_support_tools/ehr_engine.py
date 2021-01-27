@@ -67,7 +67,8 @@ class EhrEngine(object):
         """
         # 循环处理单位信息
         for v in departs.values():
-            self.parserInfos(persons, period, v, banks)
+            datas, depart = self.parserInfos(persons, period, v, banks)
+            self.export_sap_info(datas, period, depart)
 
     def parserInfos(self, persons, period, salaryDepart, banks):
         """
@@ -96,15 +97,7 @@ class EhrEngine(object):
         so = SapsOperator(period, salaryDepart.salaryScope, persons, salaryGzInfo.to_map(
             salaryGzs), salaryJjInfo.to_map(salaryJjs), banks)
         datas = so.to_saps()
-        if len(datas) > 0:
-            ao = AuditerOperator(datas, period, depart)
-            ao.export()
-            to = TexOperator(datas, period, depart)
-            to.export()
-            sh = ReportOperator(datas, period, depart)
-            sh.export()
-            sh003 = ReportSh003Operator(datas, period, depart)
-            sh003.export()
+        return datas, depart
 
     def validate(self, persinfos, salaryGzs, salaryJjs, salaryBanks):
         """
@@ -132,10 +125,19 @@ class EhrEngine(object):
             # 所得税核对
             # 社保核对 怎么完成核对逻辑
 
-    def export(self,):
+    def export_sap_info(self, datas, period, depart):
         """
         生成各类所需的拨款单，银行报盘 等
         """
+        if len(datas) > 0:
+            ao = AuditerOperator(datas, period, depart)
+            ao.export()
+            to = TexOperator(datas, period, depart)
+            to.export()
+            sh = ReportOperator(datas, period, depart)
+            sh.export()
+            sh003 = ReportSh003Operator(datas, period, depart)
+            sh003.export()
 
 
 class PersonInfo(object):
@@ -1732,8 +1734,7 @@ class SalaryDepart(object):
         if datas is not None and len(datas) > 0:
             for i in datas:
                 k = i.salaryScope
-                v = i
-                m[k] = v
+                m[k] = i
         return m
 
     def get_departs(self):
