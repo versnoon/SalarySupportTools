@@ -74,7 +74,7 @@ class EhrEngineTwo(object):
 
         return period, dm
 
-    def loadBaseDatas(self, period):
+    def loadBaseDatas(self, period, depart):
         # 解析人员基本信息
         personInfo = PersonInfo()
         personInfo.period = period
@@ -87,7 +87,7 @@ class EhrEngineTwo(object):
         cov = ExlsToClazz(
             SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path_prefix(), salaryBankInfo.get_exl_tpl_file_name_prefix(), 0, True)
         salaryBanks = cov.loadTemp()
-        banks = salaryBankInfo.to_map(salaryBanks)
+        banks = salaryBankInfo.to_map(salaryBanks, depart)
         return persons, banks
 
     def loadAuditedDatas(self, period, departs):
@@ -180,12 +180,17 @@ class EhrEngineTwo(object):
             if k not in errs_mgs:
                 self.createExcel(period, k, "奖金信息", v, jj_columndef)
 
-    def clear_excel(self, period, departs):
+    def clear_file(self, period, departs):
+        """
+        清楚上次得审核结果信息
+        """
         for depart in departs.values():
             self._clearExcel(
                 period, depart.get_depart_salaryScope_and_name(), "工资信息.xls")
             self._clearExcel(
                 period, depart.get_depart_salaryScope_and_name(), "奖金信息.xls")
+            self._clearExcel(
+                period, depart.get_depart_salaryScope_and_name(), "错误信息.txt")
             path = r'{}\{}\{}\{}'.format(
                 self._folder_prefix, period, depart.get_depart_salaryScope_and_name(), "导出文件")
             if exists(path):
@@ -220,7 +225,7 @@ class EhrEngineTwo(object):
             makedirs(path)
         b.save(r'{}\{}{}'.format(path, file_name, ".xls"))
 
-    def validate(self, period, persons, banks, depart, gzm, jjm):
+    def validate(self, period, persons, banks, departs, gzm, jjm):
         """
         验证工资数据，验证奖金数据
         """
@@ -237,17 +242,17 @@ class EhrEngineTwo(object):
                     err_message = err_mgs[depart]
                 if v._pay < 0:
                     err_message.append(self.err_mss(
-                        persons[v._code], "工资实发异常：工资实发小于0，实发金额{}".format(v._pay)))
-                bankno = banks[v._code]["gz"]
+                        persons, v._code, "工资实发异常：工资实发小于0，实发金额{}".format(v._pay)))
+                bankno = banks[depart][v._code]["gz"]
                 if v._pay > 0 and (bankno._bankNo is None or bankno._bankNo == "" or bankno._departfullinfo != v._departfullinfo):
                     err_message.append(self.err_mss(
-                        persons[v._code], "银行卡信息异常：缺少工资卡信息"))
+                        persons, v._code, "银行卡信息异常：缺少工资卡信息"))
                 if v._salaryModel.startswith("岗位绩效工资制") and v._gwgz == 0:
                     err_message.append(self.err_mss(
-                        persons[v._code], "岗位工资异常：缺少岗位工资信息"))
-                if v._salaryModel.startswith("生活费") and v._shf == v._totalPayable:
-                    err_message.append(self.err_mss(
-                        persons[v._code], "生活费人员工资异常：其他工资{}不等于应发合计{}".format(v._shf, v._totalPayable)))
+                        persons, v._code, "岗位工资异常：缺少岗位工资信息"))
+                # if v._salaryModel.startswith("生活费") and v._shf != v._totalPayable:
+                #     err_message.append(self.err_mss(
+                #         persons, v._code, "生活费人员工资异常：其他工资{}不等于应发合计{}".format(v._shf, v._totalPayable)))
             if len(err_message) > 0:
                 err_mgs[depart] = err_message
         # 验证奖金
@@ -260,17 +265,20 @@ class EhrEngineTwo(object):
                     err_message = err_mgs[depart]
                 if v._pay < 0:
                     err_message.append(self.err_mss(
-                        persons[v._code], "奖金实发异常：奖金实发小于0，实发金额{}".format(v._pay)))
-                bankno = banks[v._code]["jj"]
-                if v._pay > 0 and (bankno._bankNo is None or bankno._bankNo == "" or bankno._departfullinfo != v._departfullinfo):
+                        persons, v._code, "奖金实发异常：奖金实发小于0，实发金额{}".format(v._pay)))
+                bankno = banks[depart][v._code]["jj"]
+                if v._pay > 0 and (bankno is None or bankno._bankNo is None or bankno._bankNo == "" or bankno._departfullinfo != v._departfullinfo):
                     err_message.append(self.err_mss(
-                        persons[v._code], "银行卡信息异常：缺少奖金卡信息"))
+                        persons, v._code, "银行卡信息异常：缺少奖金卡信息"))
             if len(err_message) > 0:
                 err_mgs[depart] = err_message
         return err_mgs
 
-    def err_mss(self, person, message) -> str:
-        return '错误信息提示:  ->  {}--{}'.format(person, message)
+    def err_mss(self, persons, code, message) -> str:
+        if code in persons:
+            return '错误信息提示:  ->  {}--{}'.format(persons[code], message)
+        else:
+            return '错误信息提示:  ->  {}--{}'.format(code, message)
 
     def err_info_write_to_depart_folder(self, period, errs_mgs):
         """

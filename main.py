@@ -17,9 +17,9 @@ if __name__ == "__main__":
     #     ehr_engine.EhrEngine().start(persons, period, departs)
     engine = ehr_engine_two.EhrEngineTwo()
     period, depart = engine.initven()
-    persons, banks = engine.loadBaseDatas(period)
+    persons, banks = engine.loadBaseDatas(period, depart)
     if len(persons) > 0:
-        engine.clear_excel(period, depart)
+        engine.clear_file(period, depart)
         gz_datas, jj_datas = engine.loadAuditedDatas(period, depart)
         gzm, jjm = engine.split_salary_data_by_depart(
             depart, gz_datas, jj_datas)

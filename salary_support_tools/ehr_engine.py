@@ -12,6 +12,9 @@ from os import makedirs, walk, listdir
 
 
 from collections import OrderedDict
+
+from collections import defaultdict
+
 import xlrd
 import xlwt
 
@@ -94,7 +97,7 @@ class EhrEngine(object):
             SalaryJjInfo, salaryJjInfo.getColumnDef(), salaryJjInfo.get_exl_tpl_folder_path_prefix(), salaryJjInfo.get_exl_tpl_file_name_prefix(), 0, True)
         salaryJjs = cov.loadTemp()
 
-        so = SapsOperator(period, salaryDepart.salaryScope, persons, salaryGzInfo.to_map(
+        so = SapsOperator(period, salaryDepart, persons, salaryGzInfo.to_map(
             salaryGzs), salaryJjInfo.to_map(salaryJjs), banks)
         datas = so.to_saps()
         return datas, depart
@@ -646,20 +649,64 @@ class SalaryBankInfo(object):
     def get_exl_tpl_folder_path(self):
         return r'd:\薪酬审核文件夹\{}\银行卡信息.xls'.format(self.period)
 
-    def to_map(self, datas):
-        m = dict()
-        if datas is not None and len(datas) > 0:
-            for i in range(len(datas)):
-                info = datas[i]
-                v = dict()
-                if info._code in m:
-                    v = m[info._code]
-                if self.is_gz_bankno(info._purpose):
-                    v['gz'] = info
-                if self.is_jj_bankno(info._purpose):
-                    v['jj'] = info
-                m[info._code] = v
-        return m
+    def to_map(self, datas, departs):
+
+        # 按单位分组
+        ds = dict()
+        for k, depart in departs.items():
+            depart_str = depart.get_depart_salaryScope_and_name()
+            if datas is not None and len(datas) > 0:
+                m = dict()
+                for i in range(len(datas)):
+                    info = datas[i]
+                    bank_depart = info._get_depart_from_departfullinfo(departs)
+                    # 分组
+                    if bank_depart is not None and depart.salaryScope == bank_depart.salaryScope:
+                        if depart_str in ds:
+                            m = ds[depart_str]
+                        v = defaultdict(lambda: None)
+                        if info._code in m:
+                            v = m[info._code]
+                        if self.is_gz_bankno(info._purpose):
+                            v['gz'] = info
+                        if self.is_jj_bankno(info._purpose):
+                            v['jj'] = info
+                        m[info._code] = v
+                        if len(m) > 0:
+                            ds[depart_str] = m
+        return ds
+
+        # m = dict()
+        # if datas is not None and len(datas) > 0:
+        #     for i in range(len(datas)):
+        #         info = datas[i]
+        #         v = dict()
+        #         if info._code in m:
+        #             v = m[info._code]
+        #         if self.is_gz_bankno(info._purpose):
+        #             v['gz'] = info
+        #         if self.is_jj_bankno(info._purpose):
+        #             v['jj'] = info
+        #         m[info._code] = v
+        # return m
+
+    def _get_departLevelTow(self, i=1):
+        departs = self._departfullinfo.split("\\")
+        if len(departs) < 2:
+            raise ValueError(
+                "机构信息错误：{}-{}".format(self._code, self._departfullinfo))
+        return departs[i]
+
+    def _get_depart_from_departfullinfo(self, departs):
+        for k, v in departs.items():
+            relativeUnits = v.get_departs()
+            for ru in relativeUnits:
+                i = 1
+                if k == '49':  # 投资工资 取 1
+                    i = 0
+                if self._get_departLevelTow(i) == ru:
+                    return v
+        return None
 
     def get_exl_tpl_folder_path_prefix(self):
         return r'd:\薪酬审核文件夹\{}'.format(self.period)
@@ -777,9 +824,9 @@ class SapsOperator(object):
     转换成sap格式
     """
 
-    def __init__(self, period, salaryScope, personinfos, salaryGzs, salaryJjs, salaryBanks):
+    def __init__(self, period, salaryDepart, personinfos, salaryGzs, salaryJjs, salaryBanks):
         self.period = period
-        self.salaryScope = salaryScope
+        self.salaryDepart = salaryDepart
         self._persons = personinfos
         self._gzs = salaryGzs
         self._jjs = salaryJjs
@@ -789,23 +836,25 @@ class SapsOperator(object):
         datas = []
         # 工资奖金数据
         for key in self._gzs.keys():
-            a = SapSalaryInfo(self.period, self.salaryScope)
+            a = SapSalaryInfo(self.period, self.salaryDepart.salaryScope)
             jj = None
             if key in self._jjs:
                 jj = self._jjs[key]
             bank = None
-            if key in self._banks:
-                bank = self._banks[key]
+            if key in self._banks[self.salaryDepart.get_depart_salaryScope_and_name()]:
+                bank = self._banks[self.salaryDepart.get_depart_salaryScope_and_name(
+                )][key]
             a.to_sap(self._persons[key],
                      self._gzs[key], jj, bank)
             datas.append(a)
         # 其他不在系统内人员
         for key in self._jjs.keys():
             if key not in self._gzs:
-                a = SapSalaryInfo(self.period, self.salaryScope)
+                a = SapSalaryInfo(self.period, self.salaryDepart.salaryScope)
                 bank = None
-                if key in self._banks:
-                    bank = self._banks[key]
+                if key in self._banks[self.salaryDepart.get_depart_salaryScope_and_name()]:
+                    bank = self._banks[self.salaryDepart.get_depart_salaryScope_and_name(
+                    )][key]
                 a.to_sap(None, None, self._jjs[key], bank)
                 datas.append(a)
         return datas
