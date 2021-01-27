@@ -339,11 +339,21 @@ class SalaryGzInfo(object):
     def __str__(self):
         return '员工工资信息: 机构 {} - 二级机构 {} - 三级机构 {} - 工号 {} - 姓名 {} - 岗位 {} - 应发 {}'.format(self._departfullinfo, self._departLevelTow, self._branchLevelThree, self._code, self._name, self._jobName, self._totalPayable)
 
+    def _get_departLevelTow(self, i=1):
+        departs = self._departfullinfo.split("\\")
+        if len(departs) < 2:
+            raise ValueError(
+                "机构信息错误：{}-{}".format(self._code, self._departfullinfo))
+        return departs[i]
+
     def _get_depart_from_departLevelTow(self, departs):
         for k, v in departs.items():
             relativeUnits = v.get_departs()
             for ru in relativeUnits:
-                if self._departLevelTow == ru:
+                i = 1
+                if k == '49':  # 投资工资 取 1
+                    i = 0
+                if self._get_departLevelTow(i) == ru:
                     return v
         return None
 
@@ -508,18 +518,21 @@ class SalaryJjInfo(object):
         self._qt = qt
         self._gsxyj = gsxyj
 
-    def _get_departLevelTow(self):
+    def _get_departLevelTow(self, i=1):
         departs = self._departfullinfo.split("\\")
         if len(departs) < 2:
             raise ValueError(
                 "机构信息错误：{}-{}".format(self._code, self._departfullinfo))
-        return departs[1]
+        return departs[i]
 
     def _get_depart_from_departfullinfo(self, departs):
         for k, v in departs.items():
             relativeUnits = v.get_departs()
             for ru in relativeUnits:
-                if self._get_departLevelTow() == ru:
+                i = 1
+                if k == '49':  # 投资工资 取 1
+                    i = 0
+                if self._get_departLevelTow(i) == ru:
                     return v
         return None
 
@@ -1153,7 +1166,9 @@ class SapSalaryInfo(object):
             if gzinfo._qtdkk != "":
                 self._sljj = 0 - gzinfo._qtdkk  # 水利基金
             if gzinfo._qtkk != "":
-                self._cwkk = 0 - gzinfo._qtkk  # 其他扣款
+                self._cwkk = gzinfo._qtkk  # 其他扣款
+
+            self._cwbt = gzinfo._qtbf + gzinfo._bfone  # 财务补退
 
             self._wybt = gzinfo._sdqnwy_jt  # 物业补贴
             self._bjf = gzinfo._cq_jt
@@ -1176,7 +1191,7 @@ class SapSalaryInfo(object):
 
             self._cwdf = gzinfo._qtnssr  # 其他纳税收入
 
-            self._totalpayable = gzinfo._totalPayable   # 工资应发
+            self._totalpayable = gzinfo._totalPayable + gzinfo._dsznf    # 工资应发 独补合计
             self._totalpay = gzinfo._pay  # 工资实发
             self._gzpay = gzinfo._pay  # 工资实发
 
@@ -1197,10 +1212,11 @@ class SapSalaryInfo(object):
 
             self._totaljj = jjinfo._totalPayable
 
-            self._totalsdj = self._totalsdj + 0 - jjinfo._gts  # 合并入奖金所得税
+            self._totalsdj = self._totalsdj + 0 - jjinfo._gts + \
+                0 - jjinfo._gstz  # 合并入奖金所得税(包括奖金个税调整)
 
             self._totalpayable = self._totalpayable + jjinfo._totalPayable  # 合并奖金应发
-            self._totalpay = self._totalpay + jjinfo._totalPayable  # 合并奖金实发
+            self._totalpay = self._totalpay + jjinfo._pay  # 合并奖金实发
             self._jjpay = jjinfo._pay  # 奖金实发
 
         if bankinfo is not None:

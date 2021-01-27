@@ -93,8 +93,8 @@ class TestEhrEngine(object):
         salaryBankInfo.period = "2021年01月"
         salaryBankInfo.depart = "01_集团机关"
         columns = salaryBankInfo.getColumnDef()
-        cov = ehr_engine.ExlToClazz(
-            ehr_engine.SalaryBankInfo, columns, salaryBankInfo.get_exl_tpl_folder_path())
+        cov = ehr_engine.ExlsToClazz(
+            ehr_engine.SalaryBankInfo, columns, salaryBankInfo.get_exl_tpl_folder_path_prefix(), salaryBankInfo.get_exl_tpl_file_name_prefix())
 
         assert len(cov.loadTemp()) > 0
 

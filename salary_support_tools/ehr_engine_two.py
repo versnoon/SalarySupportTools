@@ -198,3 +198,22 @@ class EhrEngineTwo(object):
         if not exists(path):
             makedirs(path)
         b.save(r'{}\{}{}'.format(path, file_name, ".xls"))
+
+    def validate(self, period, persons, banks, depart, gzm, jjm):
+        """
+        验证工资数据，验证奖金数据
+        """
+        # 验证工资
+        #  实发 < 0
+        #  缺少工资账号
+        #  岗位绩效  缺少岗位工资
+        #  生活费   岗位工资不为0
+        err_message = []
+        for k, v in gzm.items():
+            if v._pay < 0:
+                pass
+
+        # 验证奖金
+        # 实发  < 0
+        # 缺少哦奖金账号
+        pass
