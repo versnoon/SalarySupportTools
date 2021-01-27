@@ -49,8 +49,8 @@ class EhrEngine(object):
         # 初始化机构文件夹 工作目录
         dm = salaryDepart.to_map(sds)
         for k, v in dm.items():
-            current_folder_path = r"{}\{}\{}_{}".format(
-                self._folder_prefix, period, k, v.name)
+            current_folder_path = r"{}\{}\{}".format(
+                self._folder_prefix, period, v.get_depart_salaryScope_and_name())
             if not exists(current_folder_path):
                 makedirs(current_folder_path)
          # 解析人员基本信息
@@ -61,18 +61,10 @@ class EhrEngine(object):
         persons = personInfo.to_map(cov.loadTemp())
         return persons, period, dm
 
-    def start(self, persons, period, departs):
+    def start(self, persons, period, departs, banks):
         """
         docstring
         """
-
-        salaryBankInfo = SalaryBankInfo()
-        salaryBankInfo.period = period
-        cov = ExlsToClazz(
-            SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path_prefix(), salaryBankInfo.get_exl_tpl_file_name_prefix(), 0, True)
-        salaryBanks = cov.loadTemp()
-        banks = salaryBankInfo.to_map(salaryBanks)
-
         # 循环处理单位信息
         for v in departs.values():
             self.parserInfos(persons, period, v, banks)
@@ -347,6 +339,14 @@ class SalaryGzInfo(object):
     def __str__(self):
         return '员工工资信息: 机构 {} - 二级机构 {} - 三级机构 {} - 工号 {} - 姓名 {} - 岗位 {} - 应发 {}'.format(self._departfullinfo, self._departLevelTow, self._branchLevelThree, self._code, self._name, self._jobName, self._totalPayable)
 
+    def _get_depart_from_departLevelTow(self, departs):
+        for k, v in departs.items():
+            relativeUnits = v.get_departs()
+            for ru in relativeUnits:
+                if self._departLevelTow == ru:
+                    return v
+        return None
+
     def getColumnDef(self) -> dict:
         columns = OrderedDict()
         columns["_code"] = "员工通行证"
@@ -407,7 +407,7 @@ class SalaryGzInfo(object):
         columns["_gongw_jt"] = "公务车贴"
         columns["_gxbt_jt"] = "各项补贴"
         columns["_sdqnwy_jt"] = "水电气暖物业补贴"
-        columns["_shbt_jt"] = "生活补助"
+        columns["_shbt_jt"] = "生活补贴"
         columns["_shfbc_jt"] = "生活费补差"
         columns["_gxbt_jt"] = "岗薪补贴"
         columns["_total_jt"] = "津贴合计"
@@ -507,6 +507,21 @@ class SalaryJjInfo(object):
         self._jsjj = jsjj
         self._qt = qt
         self._gsxyj = gsxyj
+
+    def _get_departLevelTow(self):
+        departs = self._departfullinfo.split("\\")
+        if len(departs) < 2:
+            raise ValueError(
+                "机构信息错误：{}-{}".format(self._code, self._departfullinfo))
+        return departs[1]
+
+    def _get_depart_from_departfullinfo(self, departs):
+        for k, v in departs.items():
+            relativeUnits = v.get_departs()
+            for ru in relativeUnits:
+                if self._get_departLevelTow() == ru:
+                    return v
+        return None
 
     def __str__(self):
         return '员工奖金信息: 机构 {} - 工号 {} - 姓名 {} - 应发 {} - 实发 {}'.format(self._departfullinfo, self._code, self._name, self._totalPayable, self._pay)
@@ -805,7 +820,7 @@ class AuditerOperator(object):
         columns["_blgz"] = "保留工资"
         columns["_nggz"] = "年功工资"
         columns["_fzgz"] = "辅助工资"
-        columns["_shbt"] = "生活补助"
+        columns["_shbz"] = "生活补助"
         columns["_khgz"] = "考核工资"
         columns["_gzbt"] = "工资补退"
         columns["_qtgz"] = "其他工资"
@@ -1230,7 +1245,7 @@ class ReportOperator(object):
         columns["_blgz"] = "保留工资"
         columns["_nggz"] = "年功工资"
         columns["_fzgz"] = "辅助工资"
-        columns["_shbt"] = "生活补助"
+        columns["_shbz"] = "生活补助"
         columns["_khgz"] = "考核工资"
         columns["_gzbt"] = "工资补退"
         columns["_qtgz"] = "其他工资"
@@ -1394,7 +1409,7 @@ class ReportSh003Operator(object):
         columns["_blgz"] = "保留工资"
         columns["_nggz"] = "年功工资"
         columns["_fzgz"] = "辅助工资"
-        columns["_shbt"] = "生活补助"
+        columns["_shbz"] = "生活补助"
         columns["_khgz"] = "考核工资"
         columns["_gzbt"] = "工资补退"
         columns["_qtgz"] = "其他工资"
@@ -1675,12 +1690,14 @@ class SalaryDepart(object):
         self.salaryScope = ""  # 工资范围
         self.name = ""  # 单位名称
         self.sortno = 0  # 显示顺序
+        self.relativeUnits = ""  # 相关单位
 
     def getColumnDef(self) -> dict:
         columns = dict()
         columns["sortno"] = "序号"
         columns["salaryScope"] = "工资范围"
         columns["name"] = "EHR单位名称"
+        columns["relativeUnits"] = "相关单位"
         return columns
 
     def get_exl_tpl_folder_path(self):
@@ -1695,5 +1712,16 @@ class SalaryDepart(object):
                 m[k] = v
         return m
 
+    def get_departs(self):
+        res = []
+        if self.relativeUnits is None or self.relativeUnits == "":
+            res.append(self.name)
+        else:
+            res.extend(self.relativeUnits.split("|"))
+        return res
+
+    def get_depart_salaryScope_and_name(self):
+        return '{}_{}'.format(self.salaryScope, self.name)
+
     def __str__(self):
-        return '审核机构信息: 序号{} - 工资范围 {} - 单位名称 {}'.format(self.sortno, self.salaryScope, self.name)
+        return '审核机构信息: 序号{} - 工资范围 {} - 审核单位名称 {} - 相关单位 {}'.format(self.sortno, self.salaryScope, self.name, self.get_departs())

@@ -9,8 +9,18 @@
 '''
 
 from salary_support_tools import ehr_engine
+from salary_support_tools import ehr_engine_two
 
 if __name__ == "__main__":
-    persons, period, departs = ehr_engine.EhrEngine().initven()
+    # persons, period, departs = ehr_engine.EhrEngine().initven()
+    # if len(persons) > 0:
+    #     ehr_engine.EhrEngine().start(persons, period, departs)
+    engine = ehr_engine_two.EhrEngineTwo()
+    period, depart = engine.initven()
+    persons, banks = engine.loadBaseDatas(period)
     if len(persons) > 0:
-        ehr_engine.EhrEngine().start(persons, period, departs)
+        gz_datas, jj_datas = engine.loadAuditedDatas(period, depart)
+        gzm, jjm = engine.split_salary_data_by_depart(gz_datas, jj_datas,)
+        engine.copy_to_depart_folder(period, gzm, jjm)
+        engine_audit = ehr_engine.EhrEngine()
+        engine_audit.start(persons, period, depart, banks)

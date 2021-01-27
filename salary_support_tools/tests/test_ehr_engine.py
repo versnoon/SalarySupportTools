@@ -158,6 +158,7 @@ class TestEhrEngine(object):
         sps = cov.loadTemp()
         m = sd.to_map(sps)
         assert m['01'].name == "集团机关"
+        assert m["01"].get_departs()[0] == "办公室（党委办公室）"
         with pytest.raises(KeyError):
             m['99']
 
@@ -192,3 +193,28 @@ class TestEhrEngine(object):
         m = bank.to_map(banks)
         assert 'M73677' in m
         assert 'M58100' in m
+
+    def test_salaryDepart_get_departs(self):
+        salaryDepart = ehr_engine.SalaryDepart()
+        salaryDepart.name = "集团机关"
+        salaryDepart.salaryScope = "01"
+        salaryDepart.sortno = 1
+        salaryDepart.relativeUnits = "办公室（党委办公室）|党委工作部（党委组织部、人力资源部）|纪委（审计稽查部）|工会|投资管理部（法律事务部）|财务部|管理创新部、科技管理部|人力资源服务中心|宝武运营共享服务中心马鞍山区域分中心|行政事务中心"
+        departs = salaryDepart.get_departs()
+        assert departs[0] == "办公室（党委办公室）"
+        assert departs[1] == "党委工作部（党委组织部、人力资源部）"
+        salaryDepart.relativeUnits = ""
+        departs = salaryDepart.get_departs()
+        assert departs[0] == "集团机关"
+
+    def test_get_departLevelTow(self):
+        jj = ehr_engine.SalaryJjInfo()
+        jj._departfullinfo = "马钢（集团）控股有限公司(总部)\宝武运营共享服务中心马鞍山区域分中心\采购核算组"
+        d = jj._get_departLevelTow()
+        assert d == "宝武运营共享服务中心马鞍山区域分中心"
+        jj._departfullinfo = "马钢（集团）控股有限公司(总部)"
+        with pytest.raises(ValueError):
+            jj._get_departLevelTow()
+        jj._departfullinfo = "马钢（集团）控股有限公司(总部)\财务部"
+        d = jj._get_departLevelTow()
+        assert d == "财务部"
