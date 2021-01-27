@@ -20,7 +20,8 @@ if __name__ == "__main__":
     persons, banks = engine.loadBaseDatas(period)
     if len(persons) > 0:
         gz_datas, jj_datas = engine.loadAuditedDatas(period, depart)
-        gzm, jjm = engine.split_salary_data_by_depart(gz_datas, jj_datas,)
+        gzm, jjm = engine.split_salary_data_by_depart(
+            depart, gz_datas, jj_datas)
         engine.copy_to_depart_folder(period, gzm, jjm)
         engine_audit = ehr_engine.EhrEngine()
         engine_audit.start(persons, period, depart, banks)

@@ -127,7 +127,7 @@ class EhrEngineTwo(object):
                 jj.depart = di.get_depart_salaryScope_and_name()
         return gzs, jjs
 
-    def split_salary_data_by_depart(self, gz_datas, jj_datas):
+    def split_salary_data_by_depart(self, departs, gz_datas, jj_datas):
         """
         将载入的工资数据和奖金数据根据单位信息分类
         """
@@ -140,7 +140,8 @@ class EhrEngineTwo(object):
             if k in gz_map:
                 gz_values = gz_map[k]
             gz_values.append(gz)
-            gz_map[k] = gz_values
+            if self._need_audit_by_depart(departs, k):
+                gz_map[k] = gz_values
         jj_map = OrderedDict()
 
         for jj in jj_datas:
@@ -149,8 +150,18 @@ class EhrEngineTwo(object):
             if k in jj_map:
                 jj_values = jj_map[k]
             jj_values.append(jj)
-            jj_map[k] = jj_values
+            if self._need_audit_by_depart(departs, k):
+                jj_map[k] = jj_values
         return gz_map, jj_map
+
+    def _need_audit_by_depart(self, departs, departname):
+        """
+        当为空的时候不进行操作
+        """
+        for k, v in departs.items():
+            if departname == v.get_depart_salaryScope_and_name():
+                return v.status is not None and v.status != ''
+        return False
 
     def copy_to_depart_folder(self, period, gz_datas, jj_datas):
         """

@@ -1106,7 +1106,13 @@ class SapSalaryInfo(object):
                 raise ValueError("数据异常，存在不合法的发放人员数据")
         if gzinfo is not None:
             self._gwgz = gzinfo._gwgz
+            # 直管领导 岗位薪 统计在岗位工资上
+            if gzinfo._gwx > 0 and gzinfo._gwgz == 0:
+                self._gwgz = gzinfo._gwx
+            # 直管领导 资历薪 统计在保留工资上
             self._blgz = gzinfo._blgz
+            if gzinfo._zlx > 0 and gzinfo._blgz == 0:
+                self._blgz = gzinfo._zlx
             self._nggz = gzinfo._glgz
             self._fzgz = gzinfo._qtblgz
             self._shbz = gzinfo._shbt_jt
@@ -1161,7 +1167,7 @@ class SapSalaryInfo(object):
             self._kyxm = gzinfo._tsgx_jt
             self._jsgg = gzinfo._js_jt
             self._fgzjtbf = gzinfo._gxbt_jt
-            self._yznx = gzinfo._ygdxz + gzinfo._jxgz
+            self._yznx = gzinfo._ygdxz + gzinfo._jxgz + gzinfo._yfjxnx
             self._znjy = gzinfo._znjyZxkc
             self._jxjy = gzinfo._jxjyZxkc
             self._zfdk = gzinfo._fdZxkc
@@ -1691,6 +1697,7 @@ class SalaryDepart(object):
         self.name = ""  # 单位名称
         self.sortno = 0  # 显示顺序
         self.relativeUnits = ""  # 相关单位
+        self.status = ""  # 审核状态 不为空 及做数据的输出和导出 空不做动作
 
     def getColumnDef(self) -> dict:
         columns = dict()
@@ -1698,6 +1705,7 @@ class SalaryDepart(object):
         columns["salaryScope"] = "工资范围"
         columns["name"] = "EHR单位名称"
         columns["relativeUnits"] = "相关单位"
+        columns["status"] = "审核状态"
         return columns
 
     def get_exl_tpl_folder_path(self):
