@@ -22,7 +22,9 @@ if __name__ == "__main__":
         gz_datas, jj_datas = engine.loadAuditedDatas(period, depart)
         gzm, jjm = engine.split_salary_data_by_depart(
             depart, gz_datas, jj_datas)
-        # gzvm, jjvm = engine.validator(period, gzm, jjm)
-        engine.copy_to_depart_folder(period, gzm, jjm)
+        err_msgs = engine.validate(period, persons, banks, depart, gzm, jjm)
+        # 将审核结果写入相应得文件目录
+        errs_mgs = engine.write_to_depart_folder(period, err_msgs)
+        engine.copy_to_depart_folder(period, gzm, jjm, errs_mgs)
         engine_audit = ehr_engine.EhrEngine()
         engine_audit.start(persons, period, depart, banks)

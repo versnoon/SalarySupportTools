@@ -1144,7 +1144,7 @@ class SapSalaryInfo(object):
             self._xjjt = 0
             self._zwjt = gzinfo._zw_jt
             self._wyjt = gzinfo._xl_jt
-            self._bzzjt = 0
+            self._bzzjt = gzinfo._gzz_jt
             self._kjjt = gzinfo._kjyx_jt
             self._nsjt = gzinfo._czns_jt
             self._fd_jbf = gzinfo._fd_jbgz

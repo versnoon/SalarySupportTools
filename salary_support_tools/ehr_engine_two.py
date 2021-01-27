@@ -8,8 +8,9 @@
 @Contact :   tongtan@gmail.com
 '''
 
-from os.path import isfile, exists, join
-from os import makedirs, listdir
+from os.path import isfile, exists
+from os import makedirs, listdir, remove
+from shutil import rmtree
 
 from collections import OrderedDict
 
@@ -163,18 +164,37 @@ class EhrEngineTwo(object):
                 return v.status is not None and v.status != ''
         return False
 
-    def copy_to_depart_folder(self, period, gz_datas, jj_datas):
+    def copy_to_depart_folder(self, period, gz_datas, jj_datas, errs_mgs):
         """
         写入相应的单位文件夹
         """
+
         gz = SalaryGzInfo()
         gz_columndef = gz.getColumnDef()
         for k, v in gz_datas.items():
-            self.createExcel(period, k, "工资信息", v, gz_columndef)
+            self.clearExcel(period, k)
+            if k not in errs_mgs:
+                self.createExcel(period, k, "工资信息", v, gz_columndef)
         jj = SalaryJjInfo()
         jj_columndef = jj.getColumnDef()
         for k, v in jj_datas.items():
-            self.createExcel(period, k, "奖金信息", v, jj_columndef)
+            self.clearExcel(period, k)
+            if k not in errs_mgs:
+                self.createExcel(period, k, "奖金信息", v, jj_columndef)
+
+    def clearExcel(self, period, depart_folder_name):
+        self._clearExcel(period, depart_folder_name, "工资信息.xls")
+        self._clearExcel(period, depart_folder_name, "奖金信息.xls")
+        path = r'{}\{}\{}\{}'.format(
+            self._folder_prefix, period, depart_folder_name, "导出文件")
+        if exists(path):
+            rmtree(path)
+
+    def _clearExcel(self, period, depart_folder_name, filename):
+        path = r'{}\{}\{}\{}'.format(
+            self._folder_prefix, period, depart_folder_name, filename)
+        if exists(path):
+            remove(path)
 
     def createExcel(self, period, depart_folder_name, file_name, datas, columndefs):
         """
@@ -208,12 +228,58 @@ class EhrEngineTwo(object):
         #  缺少工资账号
         #  岗位绩效  缺少岗位工资
         #  生活费   岗位工资不为0
-        err_message = []
-        for k, v in gzm.items():
-            if v._pay < 0:
-                pass
-
+        err_mgs = dict()
+        for depart, vs in gzm.items():
+            err_message = []
+            for v in vs:
+                if depart in err_mgs:
+                    err_message = err_mgs[depart]
+                if v._pay < 0:
+                    err_message.append(self.err_mss(
+                        persons[v._code], "工资实发异常：工资实发小于0，实发金额{}".format(v._pay)))
+                bankno = banks[v._code]["gz"]
+                if v._pay > 0 and (bankno._bankNo is None or bankno._bankNo == ""):
+                    err_message.append(self.err_mss(
+                        persons[v._code], "银行卡信息异常：缺少工资卡信息"))
+                if v._salaryModel.startswith("岗位绩效工资制") and v._gwgz == 0:
+                    err_message.append(self.err_mss(
+                        persons[v._code], "岗位工资异常：缺少岗位工资信息"))
+                if v._salaryModel.startswith("生活费") and v._shf == v._totalPayable:
+                    err_message.append(self.err_mss(
+                        persons[v._code], "生活费人员工资异常：其他工资{}不等于应发合计{}".format(v._shf, v._totalPayable)))
+            err_mgs[depart] = err_message
         # 验证奖金
         # 实发  < 0
         # 缺少哦奖金账号
-        pass
+        for depart, vs in jjm.items():
+            err_message = []
+            for v in vs:
+                if depart in err_mgs:
+                    err_message = err_mgs[depart]
+                if v._pay < 0:
+                    err_message.append(self.err_mss(
+                        persons[v._code], "奖金实发异常：奖金实发小于0，实发金额{}".format(v._pay)))
+                bankno = banks[v._code]["jj"]
+                if v._pay > 0 and (bankno._bankNo is None or bankno._bankNo == ""):
+                    err_message.append(self.err_mss(
+                        persons[v._code], "银行卡信息异常：缺少奖金卡信息"))
+            err_mgs[depart] = err_message
+        return err_mgs
+
+    def err_mss(self, person, message) -> str:
+        return '错误信息提示:  ->  {}--{}'.format(person, message)
+
+    def write_to_depart_folder(self, period, errs_mgs):
+        """
+        写入相应得文件夹
+        """
+        for i, v in errs_mgs.items():
+            path = r'{}\{}\{}\{}'.format(
+                self._folder_prefix, period, i, "错误信息.txt")
+            if exists(path):
+                remove(path)
+            if len(v) > 0:
+                with open(path, 'a', encoding='utf-8') as f:
+                    for msg in v:
+                        f.write(msg + '\n')
+        return errs_mgs
