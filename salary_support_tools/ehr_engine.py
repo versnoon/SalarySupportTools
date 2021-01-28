@@ -859,6 +859,22 @@ class SapsOperator(object):
                     bank = self._banks[self.salaryDepart.get_depart_salaryScope_and_name(
                     )][key]
                     a.to_sap(None, None, self._jjs[key], bank)
+                #
+                if a.one is None or a.one == "" or len(a.one) == 0:
+                    # 减员人员机构信息从奖金机构信息中获取
+                    jj = self._jjs[key]
+                    departs = jj._departfullinfo.split("\\")
+                    if len(departs) > 0:
+                        a.one = departs[0]
+                    if len(departs) > 1:
+                        a.two = departs[1]
+                    if len(departs) > 2:
+                        a.three = departs[2]
+                    if len(departs) > 3:
+                        a.four = departs[3]
+                    if len(departs) > 4:
+                        a.five = departs[4]
+
                 datas.append(a)
         return datas
 
@@ -979,7 +995,7 @@ class AuditerOperator(object):
         创建excel
         """
         b = xlwt.Workbook(encoding='uft-8')
-        s = b.add_sheet('系统数据')
+        s = b.add_sheet('Sheet1')
 
         # 写入标题
         for i, v in enumerate(columndefs.values()):
@@ -1429,7 +1445,7 @@ class ReportOperator(object):
         创建excel
         """
         b = xlwt.Workbook(encoding='uft-8')
-        s = b.add_sheet('SAPSH002')
+        s = b.add_sheet('Sheet1')
 
         # 写入标题
         for i, v in enumerate(columndefs.values()):
@@ -1437,8 +1453,24 @@ class ReportOperator(object):
         for i, v in enumerate(datas):
             for j, propertyName in enumerate(columndefs.keys()):
                 try:
-                    s.write(
-                        i+1, j, getattr(datas[i], propertyName, 0))
+                    if propertyName == "one":
+                        s.write(
+                            i + 1, j, "马钢集团")
+                    elif propertyName == "two" and getattr(datas[i], "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(datas[i], "one", 0))
+                    elif propertyName == "three" and getattr(datas[i], "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(datas[i], "two", 0))
+                    elif propertyName == "four" and getattr(datas[i], "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(datas[i], "three", 0))
+                    elif propertyName == "five" and getattr(datas[i], "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(datas[i], "four", 0))
+                    else:
+                        s.write(
+                            i+1, j, getattr(datas[i], propertyName, 0))
                 except TypeError:
                     print(propertyName)
 
@@ -1594,7 +1626,7 @@ class ReportSh003Operator(object):
         创建excel
         """
         b = xlwt.Workbook(encoding='uft-8')
-        s = b.add_sheet('SAPSH002')
+        s = b.add_sheet('Sheet1')
 
         # 写入标题
         for i, v in enumerate(columndefs.values()):
@@ -1602,8 +1634,24 @@ class ReportSh003Operator(object):
         for i, v in enumerate(datas):
             for j, propertyName in enumerate(columndefs.keys()):
                 try:
-                    s.write(
-                        i+1, j, getattr(datas[i], propertyName, 0))
+                    if propertyName == "one":
+                        s.write(
+                            i + 1, j, "马钢集团")
+                    elif propertyName == "two" and getattr(datas[i], "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(datas[i], "one", 0))
+                    elif propertyName == "three" and getattr(datas[i], "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(datas[i], "two", 0))
+                    elif propertyName == "four" and getattr(datas[i], "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(datas[i], "three", 0))
+                    elif propertyName == "five" and getattr(datas[i], "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(datas[i], "four", 0))
+                    else:
+                        s.write(
+                            i+1, j, getattr(datas[i], propertyName, 0))
                 except TypeError:
                     print(propertyName)
 
@@ -1758,7 +1806,7 @@ class SalaryPeriod(object):
         return r'd:\薪酬审核文件夹\当前审核日期.xls'
 
     def get_period_str(self, year, month):
-        return "{:0>4d}年{:0>2d}月".format(int(year), int(month))
+        return "{:0>4d}{:0>2d}".format(int(year), int(month))
 
 
 class SalaryDepart(object):
