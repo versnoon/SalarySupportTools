@@ -10,6 +10,7 @@
 
 from os.path import isfile, exists
 from os import makedirs, listdir, remove
+import time
 from shutil import rmtree
 
 from collections import OrderedDict
@@ -180,10 +181,20 @@ class EhrEngineTwo(object):
             if k not in errs_mgs:
                 self.createExcel(period, k, "奖金信息", v, jj_columndef)
 
-    def write_audited_info(self,):
+    def write_audited_info(self, period, gz_datas, jj_datas, errs_mgs):
         """
         将审核结果写入txt文件
         """
+        auditorinfo = AuditorInfo()
+        aus = auditorinfo.create_auditorinfos(period, gz_datas, jj_datas)
+        for k, vs in aus.items():
+            if k not in errs_mgs:
+                otherStyleStr = time.strftime(
+                    "%Y%m%d%H%M%S", time.localtime(int(time.time())))
+                path = r'{}\{}\{}\{}{}{}'.format(
+                    self._folder_prefix, period, k, "审核结果", otherStyleStr, ".txt")
+                with open(path, 'a', encoding='utf-8') as f:
+                    f.write('{}'.format(vs))
 
     def clear_file(self, period, departs):
         """
@@ -334,4 +345,67 @@ class AuditorInfo(object):
         self.shy_qy = 0  # 生育企业
 
     def __str__(self):
-        return '审核结果:  基本信息--> 发薪期间 {} - 发薪单位 {} - 发薪人数 {} | 薪酬信息 - -> 应发合计 {} - 实发合计 {} - 代缴信息 -->  所得税 {} - 公积金个人 {} - 公积金企业 {} - 养老个人 {} - 养老企业 {} - 失业个人 {} - 失业企业 {} - 医疗个人 {} - 医疗企业 {} - 年金个人 {} - 年金企业 {} - 生育企业 {} - 工伤企业 {}'.format(self.period, self.depart, self.totalpayable, self.pay, self.tex, self.gjj_gr, self.gjj_qy, self.yl_gr, self.yl_qy, self.sy_gr, self.sy_qy, self.yil_gr, self.yil_qy, self.nj_gr, self.nj_qy, self.shy_qy, self.gs_qy)
+        return '审核结果:  基本信息--> 发薪期间 {} - 发薪单位 {} - 发薪人数 {} | 薪酬信息 - -> 应发合计 {:.2f} - 实发合计 {:.2f} - 代缴信息 -->  所得税 {:.2f} - 公积金个人 {:.2f} - 公积金企业 {:.2f} - 养老个人 {:.2f} - 养老企业 {:.2f} - 失业个人 {:.2f} - 失业企业 {:.2f} - 医疗个人 {:.2f} - 医疗企业 {:.2f} - 年金个人 {:.2f} - 年金企业 {:.2f} - 生育企业 {:.2f} - 工伤企业 {:.2f}'.format(self.period, self.depart, self.numofpers, self.totalpayable, self.pay, self.tex, self.gjj_gr, self.gjj_qy, self.yl_gr, self.yl_qy, self.sy_gr, self.sy_qy, self.yil_gr, self.yil_qy, self.nj_gr, self.nj_qy, self.shy_qy, self.gs_qy)
+
+    def create_auditorinfos(self, period, gzm, jjm):
+        auditorinfos = dict()
+        numofpers = dict()
+        for k, vs in gzm.items():
+            mop = dict()
+            for v in vs:
+                mop[v._code] = PersonSalaryInfo(period, v._code, v, None)
+            numofpers[k] = mop
+        for k, vs in jjm.items():
+            mop = dict()
+            if k in numofpers:
+                mop = numofpers[k]
+            for v in vs:
+                if v._code in mop:
+                    person = mop[v._code]
+                    person.jj = v
+                    mop[v._code] = person
+                else:
+                    mop[v._code] = PersonSalaryInfo(period, v._code, None, v)
+            numofpers[k] = mop
+
+        for k, vs in numofpers.items():
+            auditorinfo = AuditorInfo()
+            auditorinfo.period = v.period
+            auditorinfo.depart = k
+            auditorinfo.numofpers = len(vs)
+            for c, v in vs.items():
+                if v.gz is not None:
+                    auditorinfo.totalpayable += v.gz._totalPayable
+                    auditorinfo.pay += v.gz._pay
+                    auditorinfo.tex += 0 - v.gz._gts
+                    auditorinfo.gjj_gr += 0 - v.gz._gjj_bx
+                    auditorinfo.gjj_qy += 0 - v.gz._gjj_qybx
+                    auditorinfo.yl_gr += 0 - v.gz._yl_bx
+                    auditorinfo.yl_qy += 0 - v.gz._yl_qybx
+                    auditorinfo.sy_gr += 0 - v.gz._sy_bx
+                    auditorinfo.sy_qy += 0 - v.gz._sy_qybx
+                    auditorinfo.yil_gr += 0 - v.gz._yil_bx
+                    auditorinfo.yil_qy += 0 - v.gz._yil_qybx
+                    auditorinfo.nj_gr += 0 - v.gz._nj_bx
+                    auditorinfo.nj_qy += 0 - v.gz._nj_qybx
+                    auditorinfo.shy_qy += 0 - v.gz._shy_qybx
+                    auditorinfo.gs_qy += 0 - v.gz._gs_qybx
+                    auditorinfos[k] = auditorinfo
+                if v.jj is not None:
+                    auditorinfo.totalpayable += v.jj._totalPayable
+                    auditorinfo.pay += v.jj._pay
+                    auditorinfo.tex += 0 - v.jj._gts + 0 - v.jj._gstz
+            auditorinfos[k] = auditorinfo
+        return auditorinfos
+
+
+class PersonSalaryInfo(object):
+    """
+    个人薪酬信息
+    """
+
+    def __init__(self, period, code, gz, jj):
+        self.period = period
+        self.code = code
+        self.gz = gz
+        self.jj = jj

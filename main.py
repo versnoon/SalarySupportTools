@@ -27,5 +27,6 @@ if __name__ == "__main__":
         # 将审核结果写入相应得文件目录
         errs_mgs = engine.err_info_write_to_depart_folder(period, err_msgs)
         engine.copy_to_depart_folder(period, gzm, jjm, errs_mgs)
+        engine.write_audited_info(period, gzm, jjm, errs_mgs)
         engine_audit = ehr_engine.EhrEngine()
         engine_audit.start(persons, period, depart, banks)
