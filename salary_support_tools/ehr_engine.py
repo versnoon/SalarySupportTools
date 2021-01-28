@@ -18,6 +18,10 @@ from collections import defaultdict
 import xlrd
 import xlwt
 
+from salary_support_tools.person_engine import PersonEngine, PersonInfo
+
+from salary_support_tools.exl_to_clazz import ExlToClazz, ExlsToClazz
+
 
 class EhrEngine(object):
     """
@@ -57,11 +61,9 @@ class EhrEngine(object):
             if not exists(current_folder_path):
                 makedirs(current_folder_path)
          # 解析人员基本信息
-        personInfo = PersonInfo()
-        personInfo.period = period
-        cov = ExlToClazz(
-            PersonInfo, personInfo.getColumnDef(), personInfo.get_exl_tpl_folder_path())
-        persons = personInfo.to_map(cov.loadTemp())
+
+        p_engine = PersonEngine(period)
+        persons, old_persons, old_old_persons = p_engine.load_persons_datas_by_code()
         return persons, period, dm
 
     def start(self, persons, period, departs, banks):
@@ -141,79 +143,6 @@ class EhrEngine(object):
             sh.export()
             sh003 = ReportSh003Operator(datas, period, depart)
             sh003.export()
-
-
-class PersonInfo(object):
-    """
-    ehr系统中人员信息
-    """
-
-    def __init__(self, complay="", depart="", branch="", assignment="", group="", code="", name="", professional="", gender="", nation="", birthday="", age=0, idNo="", personType="", sourceOfPerson="", timeOfWork="", timeOfJoinBaowu="", timeOfJoinComplay="", vJobTitle="", cJobTitle="", postType="", jobStatus=""):
-        self.period = ""
-        self._complayLevelOne = complay  # 一级机构(公司)
-        self._departLevelTow = depart  # 二级机构（部门）
-        self._branchLevelThree = branch  # 三级机构（分厂）
-        self._assignmentSectionLevelFour = assignment  # 四级机构（作业区）
-        self._groupLevelFive = group  # 五级机构（班组）
-        self._code = code  # 职工编码
-        self._name = name  # 姓名
-        self._professional = professional  # 资格名称
-        self._gender = gender  # 性别
-        self._nation = nation  # 民族
-        self._birthday = birthday  # 出生日期
-        self._age = age  # 年龄
-        self._certificateType = '居民身份证'  # 证件类型
-        self._idNo = idNo  # 身份证号
-        self._personType = personType  # 人员类型
-        self._sourceOfPerson = sourceOfPerson  # 人员来源
-        self._timeOfWork = timeOfWork  # 参加工作时间
-        self._timeOfJoinBaowu = timeOfJoinBaowu  # 进入宝武时间
-        self._timeOfJoinComplay = timeOfJoinComplay  # 进去公司时间
-        self._vJobTile = vJobTitle  # 核定岗位名称
-        self._cJobTitle = cJobTitle  # 执行岗位名称
-        self._postType = postType  # 岗位类型
-        self._jobStatus = jobStatus  # 人员类型
-
-    def getColumnDef(self) -> dict:
-        columns = dict()
-        columns["_complayLevelOne"] = "一级机构(公司)"
-        columns["_departLevelTow"] = "二级机构(部门)"
-        columns["_branchLevelThree"] = "三级机构(分厂)"
-        columns["_assignmentSectionLevelFour"] = "四级机构(作业区)"
-        columns["_groupLevelFive"] = "五级机构(班组)"
-        columns["_code"] = "工号"
-        columns["_name"] = "姓名全称"
-        columns["_professional"] = "资格名称"
-        columns["_gender"] = "性别"
-        columns["_nation"] = "民族"
-        columns["_birthday"] = "出生日期"
-        columns["_age"] = "年龄"
-        columns["_certificateType"] = "证件类型"
-        columns["_idNo"] = "证件号码"
-        columns["_personType"] = "人员类型"
-        columns["_sourceOfPerson"] = "人员来源"
-        columns["_timeOfWork"] = "参加工作日期"
-        columns["_timeOfJoinBaowu"] = "来宝钢系统日期"
-        columns["_timeOfJoinComplay"] = "来公司日期"
-        columns["_vJobTile"] = "核定岗位"
-        columns["_cJobTitle"] = "执行岗位"
-        columns["_postType"] = "岗位类型"
-        columns["_jobStatus"] = "在职状态"
-        return columns
-
-    def get_exl_tpl_folder_path(self):
-        return r'd:\薪酬审核文件夹\{}\人员信息.xls'.format(self.period)
-
-    def to_map(self, datas):
-        m = dict()
-        if datas is not None and len(datas) > 0:
-            for i in range(len(datas)):
-                personInfo = datas[i]
-                m[personInfo._code] = personInfo
-        return m
-
-    def __str__(self):
-        return '员工基本信息: 公司 {} - 部门 {} - 分厂 {} - 作业区 {} - 班组 {} - 工号 {} - 姓名 {} - 岗位 {}'.format(self._complayLevelOne, self._departLevelTow, self._branchLevelThree, self._assignmentSectionLevelFour, self._groupLevelFive, self._code, self._name, self._cJobTitle)
 
 
 class SalaryGzInfo(object):
@@ -734,94 +663,6 @@ class SalaryBankInfo(object):
             return False
 
 
-class ExlToClazz(object):
-    """
-    模板
-    """
-
-    def __init__(self, clazz, columnsDef, filePath, titleindex=0, noneable=False):
-        self.clazz = clazz
-        self.columnsDef = columnsDef
-        self.filePath = filePath
-        self.titleindex = titleindex
-        self.noneable = noneable
-
-    def loadTemp(self) -> []:
-        if not isfile(self.filePath):
-            # 跳过异常
-            if self.noneable:
-                return
-            raise FileNotFoundError("文件路径 {0} 不存在".format(self.filePath))
-        # 读取模板文件
-        book = xlrd.open_workbook(self.filePath)
-        # 读取第一个sheet 工作簿
-        sheet = book.sheet_by_index(0)
-        # 获取列头
-        titles = sheet.row_slice(self.titleindex)
-        # 反射生成
-        res = []
-        for r in range(sheet.nrows):
-            if r > self.titleindex:
-                row = sheet.row_slice(r)
-                ins = self.clazz()
-                for i in range(len(titles)):
-                    propertyName = self.getPropertyName(titles[i].value)
-                    if "" != propertyName:
-                        if row[i] != None:
-                            if row[i].value != None and row[i].value != '':
-                                setattr(ins, propertyName, row[i].value)
-                res.append(ins)
-
-        return res
-
-    def getPropertyName(self, columnName) -> str:
-        """
-        docstring
-        """
-        columns = self.columnsDef
-        for key in columns.keys():
-            if columns[key] == columnName:
-                return key
-        return ""
-
-
-class ExlsToClazz(object):
-    """
-    多个excel转class
-    """
-
-    def __init__(self, clazz, columnsDef, filepath_prefix, filename_prefix, titleindex=0, noneable=False):
-        self.clazz = clazz
-        self.columnsDef = columnsDef
-        self.filepath_prefix = filepath_prefix
-        self.filename_prefix = filename_prefix
-        self.titleindex = titleindex
-        self.noneable = noneable
-
-    def loadTemp(self) -> []:
-        file_list = listdir(self.filepath_prefix)
-        # for base_path, folder_list, file_list in walk(self.filepath_prefix):
-        datas = []
-        for file_name in file_list:
-            file_path = join(self.filepath_prefix, file_name)
-            file_ext = file_name.rsplit('.', maxsplit=1)
-            if len(file_ext) != 2:
-                # 没有后缀名
-                continue
-            if file_ext[1].lower() != 'xls':
-                # 不是excel2003文件
-                continue
-            name = file_ext[0]
-            # 判断已特定名称开头的文件
-            if name.startswith(self.filename_prefix):
-                clazz = ExlToClazz(
-                    self.clazz, self.columnsDef, file_path, 0, True)
-                t = clazz.loadTemp()
-                if len(t) > 0:
-                    datas.extend(t)
-        return datas
-
-
 class SapsOperator(object):
     """
     转换成sap格式
@@ -852,6 +693,7 @@ class SapsOperator(object):
             datas.append(a)
         # 其他不在系统内人员
         for key in self._jjs.keys():
+            # 向往期找信息
             if key not in self._gzs:
                 a = SapSalaryInfo(self.period, self.salaryDepart.salaryScope)
                 bank = None
@@ -1262,8 +1104,8 @@ class SapSalaryInfo(object):
             self._cwdf = gzinfo._qtnssr  # 其他纳税收入
 
             self._totalpayable = gzinfo._totalPayable + gzinfo._dsznf    # 工资应发 独补合计
-            self._totalpay = gzinfo._pay  # 工资实发
-            self._gzpay = gzinfo._pay  # 工资实发
+            self._totalpay = gzinfo._pay - gzinfo._jkdjf  # 工资实发
+            self._gzpay = gzinfo._pay - gzinfo._jkdjf  # 工资实发 - 教育经费
 
             self._jyjf = gzinfo._jkdjf
 
