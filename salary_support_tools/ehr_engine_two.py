@@ -243,8 +243,11 @@ class EhrEngineTwo(object):
                 if v._pay < 0:
                     err_message.append(self.err_mss(
                         persons, v._code, "工资实发异常：工资实发小于0，实发金额{}".format(v._pay)))
-                bankno = banks[depart][v._code]["gz"]
-                if v._pay > 0 and (bankno._bankNo is None or bankno._bankNo == "" or bankno._departfullinfo != v._departfullinfo):
+                bank = banks[depart][v._code]
+                bankno = None
+                if bank is not None:
+                    bankno = banks[depart][v._code]["gz"]
+                if v._pay > 0 and (bankno is None or bankno._bankNo is None or bankno._bankNo == ""):
                     err_message.append(self.err_mss(
                         persons, v._code, "银行卡信息异常：缺少工资卡信息"))
                 if v._salaryModel.startswith("岗位绩效工资制") and v._gwgz == 0:
@@ -266,8 +269,11 @@ class EhrEngineTwo(object):
                 if v._pay < 0:
                     err_message.append(self.err_mss(
                         persons, v._code, "奖金实发异常：奖金实发小于0，实发金额{}".format(v._pay)))
-                bankno = banks[depart][v._code]["jj"]
-                if v._pay > 0 and (bankno is None or bankno._bankNo is None or bankno._bankNo == "" or bankno._departfullinfo != v._departfullinfo):
+                bank = banks[depart][v._code]
+                bankno = None
+                if bank is not None:
+                    bankno = banks[depart][v._code]["jj"]
+                if v._pay > 0 and (bankno is None or bankno._bankNo is None or bankno._bankNo == ""):
                     err_message.append(self.err_mss(
                         persons, v._code, "银行卡信息异常：缺少奖金卡信息"))
             if len(err_message) > 0:

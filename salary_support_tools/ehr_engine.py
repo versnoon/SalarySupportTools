@@ -652,14 +652,16 @@ class SalaryBankInfo(object):
     def to_map(self, datas, departs):
 
         # 按单位分组
-        ds = dict()
-        for k, depart in departs.items():
-            depart_str = depart.get_depart_salaryScope_and_name()
-            if datas is not None and len(datas) > 0:
-                m = dict()
-                for i in range(len(datas)):
-                    info = datas[i]
-                    bank_depart = info._get_depart_from_departfullinfo(departs)
+        ds = defaultdict(lambda: None)
+       # for k, depart in departs.items():
+       # depart_str = depart.get_depart_salaryScope_and_name()
+        if datas is not None and len(datas) > 0:
+            m = defaultdict(lambda: None)
+            for i in range(len(datas)):
+                info = datas[i]
+                bank_depart = info._get_depart_from_departfullinfo(departs)
+                for k, depart in departs.items():
+                    depart_str = depart.get_depart_salaryScope_and_name()
                     # 分组
                     if bank_depart is not None and depart.salaryScope == bank_depart.salaryScope:
                         if depart_str in ds:
@@ -671,7 +673,8 @@ class SalaryBankInfo(object):
                             v['gz'] = info
                         if self.is_jj_bankno(info._purpose):
                             v['jj'] = info
-                        m[info._code] = v
+                        if len(v) > 0:
+                            m[info._code] = v
                         if len(m) > 0:
                             ds[depart_str] = m
         return ds
@@ -844,8 +847,8 @@ class SapsOperator(object):
             if key in self._banks[self.salaryDepart.get_depart_salaryScope_and_name()]:
                 bank = self._banks[self.salaryDepart.get_depart_salaryScope_and_name(
                 )][key]
-            a.to_sap(self._persons[key],
-                     self._gzs[key], jj, bank)
+                a.to_sap(self._persons[key],
+                         self._gzs[key], jj, bank)
             datas.append(a)
         # 其他不在系统内人员
         for key in self._jjs.keys():
@@ -855,7 +858,7 @@ class SapsOperator(object):
                 if key in self._banks[self.salaryDepart.get_depart_salaryScope_and_name()]:
                     bank = self._banks[self.salaryDepart.get_depart_salaryScope_and_name(
                     )][key]
-                a.to_sap(None, None, self._jjs[key], bank)
+                    a.to_sap(None, None, self._jjs[key], bank)
                 datas.append(a)
         return datas
 
@@ -1273,7 +1276,7 @@ class SapSalaryInfo(object):
         if bankinfo is not None:
             self._bankno1 = bankinfo['gz']._bankNo
             self._bankinfo1 = bankinfo['gz']._financialInstitution
-            if 'jj' in bankinfo:
+            if 'jj' in bankinfo and bankinfo['jj'] is not None:
                 self._bankno2 = bankinfo['jj']._bankNo
                 self._bankinfo2 = bankinfo['jj']._financialInstitution
 
