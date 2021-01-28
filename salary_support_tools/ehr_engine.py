@@ -278,7 +278,7 @@ class SalaryGzInfo(object):
         self._zw_jt = 0  # 驻外津贴
         self._hsz_jt = 0  # 护士长津贴
         self._gongw_jt = 0  # 公务津贴
-        self._gxbt_jt = 0  # 各项补贴
+        self._gexbt_jt = 0  # 各项补贴
         self._sdqnwy_jt = 0  # 水电气暖物业补贴
         self._shbt_jt = 0   # 生活补贴
         self._shfbc_jt = 0  # 生活费补差
@@ -420,7 +420,7 @@ class SalaryGzInfo(object):
         # columns["_hsz_jt"] = "护士长津贴"
 
         columns["_gongw_jt"] = "公务车贴"
-        columns["_gxbt_jt"] = "各项补贴"
+        columns["_gexbt_jt"] = "各项补贴"
         columns["_sdqnwy_jt"] = "水电气暖物业补贴"
         columns["_shbt_jt"] = "生活补贴"
         columns["_shfbc_jt"] = "生活费补差"
@@ -1235,7 +1235,7 @@ class SapSalaryInfo(object):
             self._zwbt = gzinfo._gongw_jt
             self._kyxm = gzinfo._tsgx_jt
             self._jsgg = gzinfo._js_jt
-            self._fgzjtbf = gzinfo._gxbt_jt
+            self._fgzjtbf = gzinfo._gexbt_jt
             self._yznx = gzinfo._ygdxz + gzinfo._jxgz + gzinfo._yfjxnx
             self._znjy = gzinfo._znjyZxkc
             self._jxjy = gzinfo._jxjyZxkc
