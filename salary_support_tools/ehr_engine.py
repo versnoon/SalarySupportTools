@@ -22,6 +22,8 @@ from salary_support_tools.person_engine import PersonEngine, PersonInfo
 
 from salary_support_tools.exl_to_clazz import ExlToClazz, ExlsToClazz
 
+from salary_support_tools.salary_period_engine import SalaryPeriodEngine
+
 
 class EhrEngine(object):
     """
@@ -31,40 +33,6 @@ class EhrEngine(object):
     def __init__(self, name='ehr'):
         self._name = name
         self._folder_prefix = r'd:\薪酬审核文件夹'
-
-    def initven(self):
-        # 解析审核日期
-        salaryPeriod = SalaryPeriod()
-        sp = ExlToClazz(SalaryPeriod, salaryPeriod.getColumnDef(),
-                        salaryPeriod.get_exl_tpl_folder_path())
-        sps = sp.loadTemp()
-        if len(sps) != 1:
-            raise ValueError("审核日期解析错误,请检查'当前审核日期.xls'模板")
-        period = salaryPeriod.get_period_str(sps[0].year, sps[0].month)
-        # 初始化日期文件夹 工作目录
-        current_folder_path = r"{}\{}".format(self._folder_prefix, period)
-        if not exists(current_folder_path):
-            makedirs(current_folder_path)
-        # 解析单位信息模板
-
-        salaryDepart = SalaryDepart()
-        sd = ExlToClazz(SalaryDepart, salaryDepart.getColumnDef(),
-                        salaryDepart.get_exl_tpl_folder_path())
-        sds = sd.loadTemp()
-        if len(sds) < 1:
-            raise ValueError("审核机构解析错误,请检查'审核机构信息.xls'模板")
-        # 初始化机构文件夹 工作目录
-        dm = salaryDepart.to_map(sds)
-        for k, v in dm.items():
-            current_folder_path = r"{}\{}\{}".format(
-                self._folder_prefix, period, v.get_depart_salaryScope_and_name())
-            if not exists(current_folder_path):
-                makedirs(current_folder_path)
-         # 解析人员基本信息
-
-        p_engine = PersonEngine(period)
-        persons, old_persons, old_old_persons = p_engine.load_persons_datas_by_code()
-        return persons, period, dm
 
     def start(self, persons, period, departs, banks):
         """
@@ -1626,29 +1594,6 @@ class TexInfo(object):
         if sapinfo._nj < 0:
             self._nj = 0
         self._bz = '{}-{}'.format(sapinfo.one, sapinfo.two)  # 备注
-
-
-class SalaryPeriod(object):
-
-    def __init__(self):
-        self.year: int = 0
-        self.month: int = 0
-
-    def __str__(self):
-        return '审核日期信息: 年 {} - 月 {}'.format(self.year, self.month)
-
-    def getColumnDef(self) -> dict:
-        columns = dict()
-        columns["year"] = "年"
-        columns["month"] = "月"
-
-        return columns
-
-    def get_exl_tpl_folder_path(self):
-        return r'd:\薪酬审核文件夹\当前审核日期.xls'
-
-    def get_period_str(self, year, month):
-        return "{:0>4d}{:0>2d}".format(int(year), int(month))
 
 
 class SalaryDepart(object):

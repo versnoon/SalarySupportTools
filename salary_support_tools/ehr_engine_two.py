@@ -17,7 +17,7 @@ from collections import OrderedDict
 
 import xlwt
 
-from salary_support_tools.ehr_engine import SalaryPeriod
+from salary_support_tools.salary_period_engine import SalaryPeriodEngine
 from salary_support_tools.ehr_engine import SalaryDepart
 from salary_support_tools.ehr_engine import ExlsToClazz
 from salary_support_tools.ehr_engine import ExlToClazz
@@ -40,13 +40,8 @@ class EhrEngineTwo(object):
 
     def initven(self):
         # 解析审核日期
-        salaryPeriod = SalaryPeriod()
-        sp = ExlToClazz(SalaryPeriod, salaryPeriod.getColumnDef(),
-                        salaryPeriod.get_exl_tpl_folder_path())
-        sps = sp.loadTemp()
-        if len(sps) != 1:
-            raise ValueError("审核日期解析错误,请检查'当前审核日期.xls'模板")
-        period = salaryPeriod.get_period_str(sps[0].year, sps[0].month)
+        spe = SalaryPeriodEngine()
+        period, _ = spe.start()
 
         # 初始化日期文件夹 单位目录
         current_folder_path = r"{}\{}".format(self._folder_prefix, period)
