@@ -21,12 +21,12 @@ from salary_support_tools.person_engine import PersonEngine
 from salary_support_tools.salary_period_engine import SalaryPeriodEngine
 from salary_support_tools.salary_depart_engine import SalaryDepartEngine
 from salary_support_tools.salary_bank_engine import SalaryBankEngine
+from salary_support_tools.salary_gz_engine import SalaryGzEngine, SalaryGzInfo
 
-from salary_support_tools.ehr_engine import ExlsToClazz
-from salary_support_tools.ehr_engine import ExlToClazz
-from salary_support_tools.ehr_engine import PersonInfo
+from salary_support_tools.exl_to_clazz import ExlsToClazz
+from salary_support_tools.exl_to_clazz import ExlToClazz
 from salary_support_tools.ehr_engine import SalaryBankInfo
-from salary_support_tools.ehr_engine import SalaryGzInfo
+
 from salary_support_tools.ehr_engine import SalaryJjInfo
 
 
@@ -82,10 +82,8 @@ class EhrEngineTwo(object):
         # load gz
         # load jj
 
-        gz = SalaryGzInfo()
-        gz_cov = ExlsToClazz(
-            SalaryGzInfo, gz.getColumnDef(), current_audited_folder_path, "工资信息")
-        gz_datas = gz_cov.loadTemp()
+        gz_engine = SalaryGzEngine(period)
+        gz_datas = gz_engine.batch_load_data(departs)
 
         jj = SalaryJjInfo()
         jj_cov = ExlsToClazz(
