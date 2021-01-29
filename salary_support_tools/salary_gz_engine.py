@@ -27,7 +27,7 @@ class SalaryGzEngine(object):
         gz = SalaryGzInfo()
         gz_load = ExlToClazz(
             SalaryGzInfo, gz.getColumnDef(), self.get_exl_tpl_folder_path(), 0, True)
-        return gz.to_map(gz_load.loadTemp(), self._period, self._depart)
+        return self.to_map(self.load_data())
 
     def batch_load_data(self, departs):
         gz = SalaryGzInfo()
@@ -52,6 +52,14 @@ class SalaryGzEngine(object):
             if di is not None:
                 gz.depart = di.get_depart_salaryScope_and_name()
         return gzs
+
+    def to_map(self, datas):
+        m = dict()
+        if datas is not None and len(datas) > 0:
+            for i in range(len(datas)):
+                info = datas[i]
+                m[info._code] = datas[i]
+        return m
 
     def get_exl_tpl_folder_path_batch(self):
         return r"{}\{}\{}".format(self._folder_prefix, self._period, "工资奖金数据")
@@ -321,13 +329,3 @@ class SalaryGzInfo(object):
         columns["_nj_qybx"] = "企业年金企业额度"
 
         return columns
-
-    def to_map(self, datas, period, depart):
-        m = dict()
-        if datas is not None and len(datas) > 0:
-            for i in range(len(datas)):
-                info = datas[i]
-                info._period = period
-                info._depart = depart
-                m[info._code] = info
-        return m

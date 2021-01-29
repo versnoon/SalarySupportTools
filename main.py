@@ -11,6 +11,7 @@
 from salary_support_tools import ehr_engine
 from salary_support_tools import ehr_engine_two
 from salary_support_tools import person_engine
+from salary_support_tools import person_salary_engine
 
 if __name__ == "__main__":
     # persons, period, departs = ehr_engine.EhrEngine().initven()
@@ -34,3 +35,7 @@ if __name__ == "__main__":
         # engine.write_audited_info(period, gzm, jjm, errs_mgs)
         engine_audit = ehr_engine.EhrEngine()
         engine_audit.start(persons, period, depart, banks)
+
+        merge_engine = person_salary_engine.PersonSalaryEngine(
+            period, personss, gz_datas, jj_datas, banks)
+        merge_engine.start()
