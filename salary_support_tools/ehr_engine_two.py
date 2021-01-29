@@ -8,6 +8,8 @@
 @Contact :   tongtan@gmail.com
 '''
 
+from salary_support_tools.exl_to_clazz import ExlToClazz
+from salary_support_tools.exl_to_clazz import ExlsToClazz
 from os.path import isfile, exists
 from os import makedirs, listdir, remove
 import time
@@ -23,12 +25,7 @@ from salary_support_tools.salary_depart_engine import SalaryDepartEngine
 from salary_support_tools.salary_bank_engine import SalaryBankEngine
 from salary_support_tools.salary_gz_engine import SalaryGzEngine, SalaryGzInfo
 from salary_support_tools.salary_jj_engine import SalaryJjEngine, SalaryJjInfo
-
-from salary_support_tools.exl_to_clazz import ExlsToClazz
-from salary_support_tools.exl_to_clazz import ExlToClazz
-from salary_support_tools.ehr_engine import SalaryBankInfo
-
-from salary_support_tools.ehr_engine import SalaryJjInfo
+from salary_support_tools.person_salary_engine import PersonSalaryInfo
 
 
 class EhrEngineTwo(object):
@@ -67,7 +64,7 @@ class EhrEngineTwo(object):
     def loadBaseDatas(self, period, departs):
         # 解析人员基本信息
         p_engine = PersonEngine(period)
-        persons, old_ps, old_old_ps = p_engine.load_data()
+        persons = p_engine.load_data()
         # 解析银行卡信息数据
 
         sb_engine = SalaryBankEngine(period, departs)
@@ -77,11 +74,6 @@ class EhrEngineTwo(object):
     def loadAuditedDatas(self, period, departs):
 
         # 加载工资结果，奖金结果数据
-
-        current_audited_folder_path = r"{}\{}\{}".format(
-            self._folder_prefix, period, "工资奖金数据")
-        # load gz
-        # load jj
 
         gz_engine = SalaryGzEngine(period)
         gz_datas = gz_engine.batch_load_data(departs)
@@ -332,42 +324,30 @@ class AuditorInfo(object):
 
         for k, vs in numofpers.items():
             auditorinfo = AuditorInfo()
-            auditorinfo.period = v.period
+            auditorinfo.period = v._period
             auditorinfo.depart = k
             auditorinfo.numofpers = len(vs)
             for c, v in vs.items():
-                if v.gz is not None:
-                    auditorinfo.totalpayable += v.gz._totalPayable
-                    auditorinfo.pay += v.gz._pay
-                    auditorinfo.tex += 0 - v.gz._gts
-                    auditorinfo.gjj_gr += 0 - v.gz._gjj_bx
-                    auditorinfo.gjj_qy += 0 - v.gz._gjj_qybx
-                    auditorinfo.yl_gr += 0 - v.gz._yl_bx
-                    auditorinfo.yl_qy += 0 - v.gz._yl_qybx
-                    auditorinfo.sy_gr += 0 - v.gz._sy_bx
-                    auditorinfo.sy_qy += 0 - v.gz._sy_qybx
-                    auditorinfo.yil_gr += 0 - v.gz._yil_bx
-                    auditorinfo.yil_qy += 0 - v.gz._yil_qybx
-                    auditorinfo.nj_gr += 0 - v.gz._nj_bx
-                    auditorinfo.nj_qy += 0 - v.gz._nj_qybx
-                    auditorinfo.shy_qy += 0 - v.gz._shy_qybx
-                    auditorinfo.gs_qy += 0 - v.gz._gs_qybx
+                if v._gz is not None:
+                    auditorinfo.totalpayable += v._gz._totalPayable
+                    auditorinfo.pay += v._gz._pay
+                    auditorinfo.tex += 0 - v._gz._gts
+                    auditorinfo.gjj_gr += 0 - v._gz._gjj_bx
+                    auditorinfo.gjj_qy += 0 - v._gz._gjj_qybx
+                    auditorinfo.yl_gr += 0 - v._gz._yl_bx
+                    auditorinfo.yl_qy += 0 - v._gz._yl_qybx
+                    auditorinfo.sy_gr += 0 - v._gz._sy_bx
+                    auditorinfo.sy_qy += 0 - v._gz._sy_qybx
+                    auditorinfo.yil_gr += 0 - v._gz._yil_bx
+                    auditorinfo.yil_qy += 0 - v._gz._yil_qybx
+                    auditorinfo.nj_gr += 0 - v._gz._nj_bx
+                    auditorinfo.nj_qy += 0 - v._gz._nj_qybx
+                    auditorinfo.shy_qy += 0 - v._gz._shy_qybx
+                    auditorinfo.gs_qy += 0 - v._gz._gs_qybx
                     auditorinfos[k] = auditorinfo
-                if v.jj is not None:
-                    auditorinfo.totalpayable += v.jj._totalPayable
-                    auditorinfo.pay += v.jj._pay
-                    auditorinfo.tex += 0 - v.jj._gts + 0 - v.jj._gstz
+                if v._jj is not None:
+                    auditorinfo.totalpayable += v._jj._totalPayable
+                    auditorinfo.pay += v._jj._pay
+                    auditorinfo.tex += 0 - v._jj._gts + 0 - v._jj._gstz
             auditorinfos[k] = auditorinfo
         return auditorinfos
-
-
-class PersonSalaryInfo(object):
-    """
-    个人薪酬信息
-    """
-
-    def __init__(self, period, code, gz, jj):
-        self.period = period
-        self.code = code
-        self.gz = gz
-        self.jj = jj

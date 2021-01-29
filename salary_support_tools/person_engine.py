@@ -32,40 +32,48 @@ class PersonEngine(object):
         self.old_persons = []  # 上期人员信息
 
     def start(self):
-        ps, ops, oops = self.loadPersonData()
-        messages = self.comparePerson(ps, ops, oops)
+        ps = self.loadPersonData()
+        messages = self.comparePerson(ps)
         self.write_to(messages)
 
     def loadPersonData(self):
         """
         加载人员信息
         """
+        res = dict()
         person_info = PersonInfo()
         person_load = ExlToClazz(
             PersonInfo, person_info.getColumnDef(), self.get_tpl_path())
         persons = person_info.to_map_by_company(person_load.loadTemp())
+        res["c"] = persons
         old_person_load = ExlToClazz(
             PersonInfo, person_info.getColumnDef(), self.get_old_tpl_path())
         old_persons = person_info.to_map_by_company(old_person_load.loadTemp())
+        res["o"] = old_persons
         old_old_person_load = ExlToClazz(
             PersonInfo, person_info.getColumnDef(), self.get_old_old_tpl_path())
         old_old_persons = person_info.to_map_by_company(
             old_old_person_load.loadTemp())
-        return persons, old_persons, old_old_persons
+        res["o_o"] = old_old_persons
+        return res
 
     def load_data(self):
+        res = dict()
         person_info = PersonInfo()
         person_load = ExlToClazz(
             PersonInfo, person_info.getColumnDef(), self.get_tpl_path())
         persons = person_info.to_map(person_load.loadTemp())
+        res["c"] = persons
         old_person_load = ExlToClazz(
             PersonInfo, person_info.getColumnDef(), self.get_old_tpl_path())
         old_persons = person_info.to_map(old_person_load.loadTemp())
+        res["o"] = old_persons
         old_old_person_load = ExlToClazz(
             PersonInfo, person_info.getColumnDef(), self.get_old_old_tpl_path())
         old_old_persons = person_info.to_map(
             old_old_person_load.loadTemp())
-        return persons, old_persons, old_old_persons
+        res["o_o"] = old_old_persons
+        return res
 
     def get_tpl_path(self):
         return r'{}\{}\{}'.format(self._folder_path, self._period, self._filename)
@@ -76,16 +84,20 @@ class PersonEngine(object):
     def get_old_old_tpl_path(self):
         return r'{}\{}\{}'.format(self._folder_path, self._period, self._old_old_filename)
 
-    def comparePerson(self, persons, old_persons, old_old_persons):
+    def comparePerson(self, persons):
         """
         对比两期数据,分类
         """
         msgs = dict()
-        for k, ps in persons.items():
-            ops = old_persons[k]
-            oops = old_old_persons[k]
+        vs = self.get_perons_by_flag(persons)
+        for k, ps in vs.items():
+            ops = self.get_perons_by_flag(persons, "o")[k]
+            oops = self.get_perons_by_flag(persons, "o")[k]
             msgs[k] = self.compare_detail(ps, ops, oops)
         return msgs
+
+    def get_perons_by_flag(self, persons, flag="c"):
+        return persons[flag]
 
     def compare_detail(self, persons, old_persons, old_old_persons):
         res = []
@@ -119,6 +131,11 @@ class PersonEngine(object):
                 with open(path, 'a', encoding='utf-8') as f:
                     for m in messages:
                         f.write(m + '\n')
+
+    def merge_persions(self):
+        """
+        合并
+        """
 
 
 class PersonInfo(object):

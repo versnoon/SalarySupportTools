@@ -19,7 +19,8 @@ if __name__ == "__main__":
 
     engine = ehr_engine_two.EhrEngineTwo()
     period, depart = engine.initven()
-    persons, banks = engine.loadBaseDatas(period, depart)
+    personss, banks = engine.loadBaseDatas(period, depart)
+    persons = personss["c"]
     if len(persons) > 0:
         engine.clear_file(period, depart)
         gz_datas, jj_datas = engine.loadAuditedDatas(period, depart)
@@ -30,6 +31,6 @@ if __name__ == "__main__":
         errs_mgs = dict()
         errs_mgs = engine.err_info_write_to_depart_folder(period, err_msgs)
         engine.copy_to_depart_folder(period, gzm, jjm, errs_mgs)
-        engine.write_audited_info(period, gzm, jjm, errs_mgs)
+        # engine.write_audited_info(period, gzm, jjm, errs_mgs)
         engine_audit = ehr_engine.EhrEngine()
         engine_audit.start(persons, period, depart, banks)
