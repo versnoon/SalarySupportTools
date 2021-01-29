@@ -22,6 +22,7 @@ from salary_support_tools.salary_period_engine import SalaryPeriodEngine
 from salary_support_tools.salary_depart_engine import SalaryDepartEngine
 from salary_support_tools.salary_bank_engine import SalaryBankEngine
 from salary_support_tools.salary_gz_engine import SalaryGzEngine, SalaryGzInfo
+from salary_support_tools.salary_jj_engine import SalaryJjEngine, SalaryJjInfo
 
 from salary_support_tools.exl_to_clazz import ExlsToClazz
 from salary_support_tools.exl_to_clazz import ExlToClazz
@@ -85,29 +86,10 @@ class EhrEngineTwo(object):
         gz_engine = SalaryGzEngine(period)
         gz_datas = gz_engine.batch_load_data(departs)
 
-        jj = SalaryJjInfo()
-        jj_cov = ExlsToClazz(
-            SalaryJjInfo, jj.getColumnDef(), current_audited_folder_path, "奖金信息")
-        jj_datas = jj_cov.loadTemp()
+        jj_engine = SalaryJjEngine(period)
+        jj_datas = jj_engine.batch_load_data(departs)
 
-        return self.set_period_and_depart(period, departs, gz_datas, jj_datas)
-
-    def set_period_and_depart(self, period, departs, gzs, jjs):
-        """
-        设置工资奖金信息的期间信息和单位信息
-        """
-        for gz in gzs:
-            gz.period = period
-            di = gz._get_depart_from_departLevelTow(departs)
-            if di is not None:
-                gz.depart = di.get_depart_salaryScope_and_name()
-
-        for jj in jjs:
-            jj.period = period
-            di = jj._get_depart_from_departfullinfo(departs)
-            if di is not None:
-                jj.depart = di.get_depart_salaryScope_and_name()
-        return gzs, jjs
+        return gz_datas, jj_datas
 
     def split_salary_data_by_depart(self, departs, gz_datas, jj_datas):
         """
