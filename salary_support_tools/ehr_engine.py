@@ -23,6 +23,8 @@ from salary_support_tools.person_engine import PersonEngine, PersonInfo
 from salary_support_tools.exl_to_clazz import ExlToClazz, ExlsToClazz
 
 from salary_support_tools.salary_period_engine import SalaryPeriodEngine
+from salary_support_tools.salary_depart_engine import SalaryDepartEngine
+from salary_support_tools.salary_bank_engine import SalaryBankInfo
 
 
 class EhrEngine(object):
@@ -507,128 +509,6 @@ class SalaryJjInfo(object):
 
     def get_exl_tpl_file_name_prefix(self):
         return '奖金信息'
-
-
-class SalaryBankInfo(object):
-    """
-    奖金信息
-    """
-
-    def __init__(self, code="", name="", departfullinfo="", financialInstitution="", bankNo="", payment="", purpose="", associalBankNo="", cardType=""):
-        self.period = ""
-        self._code = code
-        self._name = name
-        self._departfullinfo = departfullinfo
-        self._financialInstitution = financialInstitution
-        self._bankNo = bankNo
-        self._payment = payment
-        self._purpose = purpose
-        self._associalBankNo = associalBankNo
-        self._cardType = cardType
-
-    def __str__(self):
-        return '员工银行卡信息: 机构 {} - 工号 {} - 姓名 {} - 金融机构 {} - 卡号 {}'.format(self._departfullinfo, self._code, self._name, self._financialInstitution, self._bankNo)
-
-    def getColumnDef(self) -> dict:
-        columns = dict()
-        columns["_code"] = "员工通行证"
-        columns["_name"] = "员工姓名"
-        columns["_departfullinfo"] = "部门"
-        columns["_financialInstitution"] = "金融机构"
-        columns["_bankNo"] = "卡号"
-        columns["_payment"] = "支付方式"
-        columns["_purpose"] = "卡用途"
-        columns["_associalBankNo"] = "联行号/网点代码"
-        columns["_cardType"] = "卡折类型"
-
-        return columns
-
-    def get_exl_tpl_folder_path(self):
-        return r'd:\薪酬审核文件夹\{}\银行卡信息.xls'.format(self.period)
-
-    def to_map(self, datas, departs):
-
-        # 按单位分组
-        ds = defaultdict(lambda: None)
-       # for k, depart in departs.items():
-       # depart_str = depart.get_depart_salaryScope_and_name()
-        if datas is not None and len(datas) > 0:
-            m = defaultdict(lambda: None)
-            for i in range(len(datas)):
-                info = datas[i]
-                bank_depart = info._get_depart_from_departfullinfo(departs)
-                for k, depart in departs.items():
-                    depart_str = depart.get_depart_salaryScope_and_name()
-                    # 分组
-                    if bank_depart is not None and depart.salaryScope == bank_depart.salaryScope:
-                        if depart_str in ds:
-                            m = ds[depart_str]
-                        v = defaultdict(lambda: None)
-                        if info._code in m:
-                            v = m[info._code]
-                        if self.is_gz_bankno(info._purpose):
-                            v['gz'] = info
-                        if self.is_jj_bankno(info._purpose):
-                            v['jj'] = info
-                        if len(v) > 0:
-                            m[info._code] = v
-                        if len(m) > 0:
-                            ds[depart_str] = m
-        return ds
-
-        # m = dict()
-        # if datas is not None and len(datas) > 0:
-        #     for i in range(len(datas)):
-        #         info = datas[i]
-        #         v = dict()
-        #         if info._code in m:
-        #             v = m[info._code]
-        #         if self.is_gz_bankno(info._purpose):
-        #             v['gz'] = info
-        #         if self.is_jj_bankno(info._purpose):
-        #             v['jj'] = info
-        #         m[info._code] = v
-        # return m
-
-    def _get_departLevelTow(self, i=1):
-        departs = self._departfullinfo.split("\\")
-        if len(departs) < 2:
-            raise ValueError(
-                "机构信息错误：{}-{}".format(self._code, self._departfullinfo))
-        return departs[i]
-
-    def _get_depart_from_departfullinfo(self, departs):
-        for k, v in departs.items():
-            relativeUnits = v.get_departs()
-            for ru in relativeUnits:
-                i = 1
-                if k == '49':  # 投资工资 取 1
-                    i = 0
-                if self._get_departLevelTow(i) == ru:
-                    return v
-        return None
-
-    def get_exl_tpl_folder_path_prefix(self):
-        return r'd:\薪酬审核文件夹\{}'.format(self.period)
-
-    def get_exl_tpl_file_name_prefix(self):
-        return '银行卡信息'
-
-    def is_gz_bankno(self, purpose=""):
-        return self.val_bank_purpost(purpose, "工资卡")
-
-    def is_jj_bankno(self, purpose=""):
-        return self.val_bank_purpost(purpose, "奖金卡")
-
-    def val_bank_purpost(self, purpose="", banktype=""):
-        if len(purpose) == 0:
-            return False
-        if len(banktype) == 0:
-            return False
-        if banktype in purpose:
-            return True
-        else:
-            return False
 
 
 class SapsOperator(object):
@@ -1594,46 +1474,3 @@ class TexInfo(object):
         if sapinfo._nj < 0:
             self._nj = 0
         self._bz = '{}-{}'.format(sapinfo.one, sapinfo.two)  # 备注
-
-
-class SalaryDepart(object):
-    def __init__(self):
-        self.salaryScope = ""  # 工资范围
-        self.name = ""  # 单位名称
-        self.sortno = 0  # 显示顺序
-        self.relativeUnits = ""  # 相关单位
-        self.status = ""  # 审核状态 不为空 及做数据的输出和导出 空不做动作
-
-    def getColumnDef(self) -> dict:
-        columns = dict()
-        columns["sortno"] = "序号"
-        columns["salaryScope"] = "工资范围"
-        columns["name"] = "EHR单位名称"
-        columns["relativeUnits"] = "相关单位"
-        columns["status"] = "审核状态"
-        return columns
-
-    def get_exl_tpl_folder_path(self):
-        return r'd:\薪酬审核文件夹\审核机构信息.xls'
-
-    def to_map(self, datas):
-        m = OrderedDict()
-        if datas is not None and len(datas) > 0:
-            for i in datas:
-                k = i.salaryScope
-                m[k] = i
-        return m
-
-    def get_departs(self):
-        res = []
-        if self.relativeUnits is None or self.relativeUnits == "":
-            res.append(self.name)
-        else:
-            res.extend(self.relativeUnits.split("|"))
-        return res
-
-    def get_depart_salaryScope_and_name(self):
-        return '{}_{}'.format(self.salaryScope, self.name)
-
-    def __str__(self):
-        return '审核机构信息: 序号{} - 工资范围 {} - 审核单位名称 {} - 相关单位 {}'.format(self.sortno, self.salaryScope, self.name, self.get_departs())

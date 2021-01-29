@@ -53,7 +53,7 @@ class PersonEngine(object):
             old_old_person_load.loadTemp())
         return persons, old_persons, old_old_persons
 
-    def load_persons_datas_by_code(self):
+    def load_data(self):
         person_info = PersonInfo()
         person_load = ExlToClazz(
             PersonInfo, person_info.getColumnDef(), self.get_tpl_path())

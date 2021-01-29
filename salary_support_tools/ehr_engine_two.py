@@ -17,8 +17,11 @@ from collections import OrderedDict
 
 import xlwt
 
+from salary_support_tools.person_engine import PersonEngine
 from salary_support_tools.salary_period_engine import SalaryPeriodEngine
-from salary_support_tools.ehr_engine import SalaryDepart
+from salary_support_tools.salary_depart_engine import SalaryDepartEngine
+from salary_support_tools.salary_bank_engine import SalaryBankEngine
+
 from salary_support_tools.ehr_engine import ExlsToClazz
 from salary_support_tools.ehr_engine import ExlToClazz
 from salary_support_tools.ehr_engine import PersonInfo
@@ -39,28 +42,18 @@ class EhrEngineTwo(object):
         self._folder_prefix = r'd:\薪酬审核文件夹'
 
     def initven(self):
+        # 初始化审核环境
+        # 1  读取日期模板，获取当前审核日期信息并完成目录建立
+        # 2  读取单位信息模板，获取当前审核单位信息并完成目录建立
+        # 3  建立工资奖金文件夹
+
         # 解析审核日期
         spe = SalaryPeriodEngine()
         period, _ = spe.start()
-
-        # 初始化日期文件夹 单位目录
-        current_folder_path = r"{}\{}".format(self._folder_prefix, period)
-        if not exists(current_folder_path):
-            makedirs(current_folder_path)
         # 解析单位信息模板
 
-        salaryDepart = SalaryDepart()
-        sd = ExlToClazz(SalaryDepart, salaryDepart.getColumnDef(),
-                        salaryDepart.get_exl_tpl_folder_path())
-        sds = sd.loadTemp()
-        if len(sds) < 1:
-            raise ValueError("审核机构解析错误,请检查'审核机构信息.xls'模板")
-        dm = salaryDepart.to_map(sds)
-        for k, v in dm.items():
-            current_folder_path = r"{}\{}\{}".format(
-                self._folder_prefix, period, v.get_depart_salaryScope_and_name())
-            if not exists(current_folder_path):
-                makedirs(current_folder_path)
+        sde = SalaryDepartEngine(period)
+        dm = sde.start()
         # 初始化工资数据，奖金数据存放目录
 
         current_folder_path = r"{}\{}\{}".format(
@@ -70,20 +63,14 @@ class EhrEngineTwo(object):
 
         return period, dm
 
-    def loadBaseDatas(self, period, depart):
+    def loadBaseDatas(self, period, departs):
         # 解析人员基本信息
-        personInfo = PersonInfo()
-        personInfo.period = period
-        cov = ExlToClazz(
-            PersonInfo, personInfo.getColumnDef(), personInfo.get_exl_tpl_folder_path())
-        persons = personInfo.to_map(cov.loadTemp())
+        p_engine = PersonEngine(period)
+        persons, old_ps, old_old_ps = p_engine.load_data()
         # 解析银行卡信息数据
-        salaryBankInfo = SalaryBankInfo()
-        salaryBankInfo.period = period
-        cov = ExlsToClazz(
-            SalaryBankInfo, salaryBankInfo.getColumnDef(), salaryBankInfo.get_exl_tpl_folder_path_prefix(), salaryBankInfo.get_exl_tpl_file_name_prefix(), 0, True)
-        salaryBanks = cov.loadTemp()
-        banks = salaryBankInfo.to_map(salaryBanks, depart)
+
+        sb_engine = SalaryBankEngine(period, departs)
+        banks = sb_engine.load_data()
         return persons, banks
 
     def loadAuditedDatas(self, period, departs):
