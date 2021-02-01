@@ -46,6 +46,7 @@ class SalaryJjEngine(object):
             di = jj._get_depart_from_departfullinfo(departs)
             if di is not None:
                 jj.depart = di.get_depart_salaryScope_and_name()
+                jj.tex_depart = di.texdepart
         return jjs
 
     def get_exl_tpl_folder_path_batch(self):
@@ -63,6 +64,7 @@ class SalaryJjInfo(object):
     def __init__(self, code="", name="", departfullinfo="", distributionMark="", ysjse=0, bonusTow=0, gtsyj=0, pay=0, jjhj=0, totalPayable=0, jsjseptsl=0, jbjj=0, gts=0, bonusOne=0, bonusThree=0, yseyhsl=0, yse=0, gstz=0, gcjj=0, jssc=0, nddxj=0, jsjj=0, qt=0, gsxyj=0):
         self.period = ""
         self.depart = ""  # 审批单位文件夹名称
+        self.tex_depart = ""  # 税务机构
         self._code = code
         self._name = name
         self._departfullinfo = departfullinfo

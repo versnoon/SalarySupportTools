@@ -48,6 +48,7 @@ class SalaryDepart(object):
         self.sortno = 0  # 显示顺序
         self.relativeUnits = ""  # 相关单位
         self.status = ""  # 审核状态 不为空 及做数据的输出和导出 空不做动作
+        self.texdepart = ""  # "税务机构"
 
     def getColumnDef(self) -> dict:
         columns = dict()
@@ -56,6 +57,7 @@ class SalaryDepart(object):
         columns["name"] = "EHR单位名称"
         columns["relativeUnits"] = "相关单位"
         columns["status"] = "审核状态"
+        columns["texdepart"] = "税务机构"
         return columns
 
     def to_map(self, datas):

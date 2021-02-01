@@ -51,6 +51,7 @@ class SalaryGzEngine(object):
             di = gz._get_depart_from_departLevelTow(departs)
             if di is not None:
                 gz.depart = di.get_depart_salaryScope_and_name()
+                gz.tex_depart = di.texdepart
         return gzs
 
     def to_map(self, datas):
@@ -76,6 +77,7 @@ class SalaryGzInfo(object):
     def __init__(self, code="", name="", departfullinfo="", depart="", branch="", salaryModel="", jobName="", postPrice="", distributionMark="", fzZxkc=0, fdZxkc=0, jxjyZxkc=0, znjyZxkc=0, sylrZxkc=0, zxnf=0, gsgl=0, lxgl=0, bjbl=0, gwxs=0, gwxbz=0, gwgz=0, blgz=0, glgz=0, jbx=0, qtblgz=0, gdgz=0, dtxgz=0, gwx=0, zlx=0, yfjxnx=0, shf=0, jbgzdy=0, rpjgzkk=0, rpjgzjk=0, zybjt=0, jnjt=0, jggzjt=0, gzzjt=0, kjyxjt=0, cznsjt=0, xljt=0, txjt=0, cqjt=0, gwjt=0, mzjt=0, wcjt=0, gsjt=0, gshljt=0, jsjt=0, tsgxjt=0, zwjt=0, gongwjt=0, gxbtjt=0, sdqnwyjt=0, shbtjt=0, shfbcjt=0, totaljt=0, rpjgz=0, qtnssr=0, ygdxz=0, jxgz=0, jdfdyyz=0, khfd=0, shfbt=0, dsznf=0, jkdjf=0, qtdf=0, kdjf=0, gztz=0, qtbf=0, qtkk=0, qtdkk=0, fdjbgz=0, xxrjbgz=0, psjbgz=0, totaljbgz=0, bjkk=0, sjkk=0, kgkk=0, totalkk=0, yl=0, yil=0, sy=0, gjj=0, nj=0, gjjbz=0, yse=0, gts=0, dfxm=0, bfone=0, bftwo=0, totaldk=0, pay=0, ylqybx=0, yilqybx=0, syqybx=0, shyqybx=0, gsqybx=0, gjjqybx=0, njqybx=0, totalPayable=0):
         self.period = ""
         self.depart = ""  # 单位文件夹名称
+        self.tex_depart = ""  # 税务机构
         self._code = ""  # 员工通行证
         self._name = name  # 员工姓名
         self._departfullinfo = departfullinfo  # 机构

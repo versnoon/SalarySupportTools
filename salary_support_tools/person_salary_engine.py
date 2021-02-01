@@ -8,6 +8,9 @@
 @Contact :   tongtan@gmail.com
 '''
 
+from os.path import isfile, exists
+from os import makedirs, listdir, remove
+
 from collections import OrderedDict
 
 
@@ -20,6 +23,7 @@ class PersonSalaryEngine(object):
         self._jjs = jjs  # 奖金
         self._persons = persons  # 人员信息集合
         self._banks = banks  # 银行信息
+        self._folder_prefix = r'd:\薪酬审核文件夹'
 
     def start(self):
         """
@@ -38,6 +42,7 @@ class PersonSalaryEngine(object):
             info = PersonSalaryInfo()
             info._period = self._period  # 期间信息
             info._depart = gz.depart  # 单位信息
+            info._tex_depart = gz.tex_depart  # 税务机构
             info._gz = gz  # 工资信息
             vs = OrderedDict()
             if info._depart in infos:
@@ -56,6 +61,7 @@ class PersonSalaryEngine(object):
             else:
                 info._period = self._period  # 期间信息
                 info._depart = jj.depart  # 单位信息
+                info._tex_depart = jj.tex_depart  # 税务机构
             info._jj = jj  # 奖金信息
             vs[code] = info
             infos[info._depart] = vs
@@ -111,7 +117,7 @@ class PersonSalaryEngine(object):
                     # 实发小于0
                     if gz._pay < 0:
                         err_message.append(self.err_mss(
-                            "工资信息错误", "工资实发异常：工资实发小于0，实发金额{}".format(gz._pay), person))
+                            "工资信息错误", "工资实发小于0，实发金额{}".format(gz._pay), person))
                     # 缺少工资银行卡号
                     if gz._pay > 0:
                         if banks is None or banks[gz] is None:
@@ -136,55 +142,26 @@ class PersonSalaryEngine(object):
 
         return len(err_mgs) > 0, err_mgs
 
-        # for depart, vs in gzm.items():
-        #     err_message = []
-        #     for v in vs:
-        #         if depart in err_mgs:
-        #             err_message = err_mgs[depart]
-        #         if v._pay < 0:
-        #             err_message.append(self.err_mss(
-        #                 persons, v._code, "工资实发异常：工资实发小于0，实发金额{}".format(v._pay)))
-        #         bank = banks[depart][v._code]
-        #         bankno = None
-        #         if bank is not None:
-        #             bankno = banks[depart][v._code]["gz"]
-        #         if v._pay > 0 and (bankno is None or bankno._bankNo is None or bankno._bankNo == ""):
-        #             err_message.append(self.err_mss(
-        #                 persons, v._code, "银行卡信息异常：缺少工资卡信息"))
-        #         if v._salaryModel.startswith("岗位绩效工资制") and v._gwgz == 0:
-        #             err_message.append(self.err_mss(
-        #                 persons, v._code, "岗位工资异常：缺少岗位工资信息"))
-        #         # if v._salaryModel.startswith("生活费") and v._shf != v._totalPayable:
-        #         #     err_message.append(self.err_mss(
-        #         #         persons, v._code, "生活费人员工资异常：其他工资{}不等于应发合计{}".format(v._shf, v._totalPayable)))
-        #     if len(err_message) > 0:
-        #         err_mgs[depart] = err_message
-        # # 验证奖金
-        # # 实发  < 0
-        # # 缺少哦奖金账号
-        # for depart, vs in jjm.items():
-        #     err_message = []
-        #     for v in vs:
-        #         if depart in err_mgs:
-        #             err_message = err_mgs[depart]
-        #         if v._pay < 0:
-        #             err_message.append(self.err_mss(
-        #                 persons, v._code, "奖金实发异常：奖金实发小于0，实发金额{}".format(v._pay)))
-        #         bank = banks[depart][v._code]
-        #         bankno = None
-        #         if bank is not None:
-        #             bankno = banks[depart][v._code]["jj"]
-        #         if v._pay > 0 and (bankno is None or bankno._bankNo is None or bankno._bankNo == ""):
-        #             err_message.append(self.err_mss(
-        #                 persons, v._code, "银行卡信息异常：缺少奖金卡信息"))
-        #     if len(err_message) > 0:
-        #         err_mgs[depart] = err_message
-        # return err_mgs
-
     def err_mss(self, err_type, message, person) -> str:
         if person is not None:
             return '错误信息提示:  ->  错误类型 {} - 错误信息 {} - 错误人员 {}'.format(err_type, message, person)
         return '错误信息提示:  ->  错误类型 {} - 错误信息 {}'.format(err_type, message)
+
+    def err_info_write_to_depart_folder(self, errs_mgs):
+        """
+        写入相应得文件夹
+        """
+        for i, v in errs_mgs.items():
+            path = r'{}\{}\{}\{}'.format(
+                self._folder_prefix, self._period, i, "错误信息.txt")
+            if exists(path):
+                remove(path)
+            if len(v) > 0:
+                with open(path, 'a', encoding='utf-8') as f:
+                    for i in range(len(v)):
+                        msg = v[i]
+                        f.write('{} {}'.format(i+1, msg + '\n'))
+        return errs_mgs
 
 
 class PersonSalaryInfo(object):
@@ -195,6 +172,7 @@ class PersonSalaryInfo(object):
     def __init__(self, period="", depart="", person=None, code="", gz=None, jj=None, banks=None):
         self._period = period
         self._depart = depart
+        self._tex_depart = ""  # 税务机构
         self._code = code
         self._gz = gz
         self._jj = jj

@@ -12,6 +12,7 @@ from salary_support_tools import ehr_engine
 from salary_support_tools import ehr_engine_two
 from salary_support_tools import person_engine
 from salary_support_tools import person_salary_engine
+from salary_support_tools import tex_engine
 
 if __name__ == "__main__":
     # persons, period, departs = ehr_engine.EhrEngine().initven()
@@ -54,7 +55,8 @@ if __name__ == "__main__":
         # 载入所得税信息
 
         # 验证当期所得税
-
+        tex_engine = tex_engine.TexEngine(period, datas, depart)
+        tex_engine.start()
         # 输出
 
         # 数据汇总
