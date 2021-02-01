@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     # 工资奖金文件输出
     salary_op = salary_operator.SalaryOperator(
-        period, departs, gz_datas, jj_datas, sap_datas, err_msgs)
+        period, departs, gz_datas, jj_datas, datas, sap_datas, err_msgs)
     salary_op.export()
     # 税务相关文件输出
     tex_op = tex_operator.TexExport(period, sap_datas, tex_datas, tex_err_msgs)

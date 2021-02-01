@@ -8,13 +8,17 @@
 @Contact :   tongtan@gmail.com
 '''
 
-from salary_support_tools.salary_jj_engine import SalaryJjInfo
-from salary_support_tools.salary_gz_engine import SalaryGzInfo
-import xlwt
 from os.path import exists
 from os import remove, makedirs
+import time
+
 
 from collections import OrderedDict
+
+import xlwt
+
+from salary_support_tools.salary_jj_engine import SalaryJjInfo
+from salary_support_tools.salary_gz_engine import SalaryGzInfo
 
 
 class SalaryOperator(object):
@@ -29,19 +33,20 @@ class SalaryOperator(object):
 
     """
 
-    def __init__(self, period, departs, gz_datas, jj_datas, sap_infos, err_msgs):
+    def __init__(self, period, departs, gz_datas, jj_datas, person_salary_infos, sap_infos, err_msgs):
         self._period = period
         self._departs = departs
         self._gz_datas = gz_datas
         self._jj_datas = jj_datas
         self._sap_infos = sap_infos
+        self._person_salary_infos = person_salary_infos
         self._err_msgs = err_msgs
         self._folder_path = r'd:\薪酬审核文件夹'
 
     def export(self):
         # 输出工资奖金文件
         self.export_gz_jj_datas()
-        # 审核结果输出
+        # 错误信息输出
         self.err_info_write_to_depart_folder()
         # 审核表 格式输出
         self.export_auditor_excel()
@@ -49,6 +54,9 @@ class SalaryOperator(object):
         self.export_sh002_excel()
         # sh003 格式输出
         self.export_sh003_excel()
+
+        # 审核结果输出
+        self.export_audited_info()
 
     def export_gz_jj_datas(self):
         """
@@ -603,3 +611,78 @@ class SalaryOperator(object):
                 makedirs(path)
             b.save(r'{}\{}_{}_{}'.format(
                 path, depart, self._period, "SAPSH003.xls"))
+
+    def create_auditorInfos(self):
+        auditorInfos = dict()
+        for depart, psis in self._person_salary_infos.items():
+            a = AuditorInfo()
+            a.period = self._period
+            a.depart = depart
+            a.numofpers = len(psis)
+            for code, pis in psis.items():
+                gz = pis._gz
+                jj = pis._jj
+                if gz is not None:
+                    a.totalpayable += gz._totalPayable
+                    a.pay += gz._pay
+                    a.tex += 0 - gz._gts
+                    a.gjj_gr += 0 - gz._gjj_bx
+                    a.gjj_qy += 0 - gz._gjj_qybx
+                    a.yl_gr += 0 - gz._yl_bx
+                    a.yl_qy += 0 - gz._yl_qybx
+                    a.sy_gr += 0 - gz._sy_bx
+                    a.sy_qy += 0 - gz._sy_qybx
+                    a.yil_gr += 0 - gz._yil_bx
+                    a.yil_qy += 0 - gz._yil_qybx
+                    a.nj_gr += 0 - gz._nj_bx
+                    a.nj_qy += 0 - gz._nj_qybx
+                    a.shy_qy += 0 - gz._shy_qybx
+                    a.gs_qy += 0 - gz._gs_qybx
+                if jj is not None:
+                    a.totalpayable += jj._totalPayable
+                    a.pay += jj._pay
+                    a.tex += 0 - jj._gts + 0 - jj._gstz
+            auditorInfos[depart] = a
+        return auditorInfos
+
+    def export_audited_info(self):
+        """
+        将审核结果写入txt文件
+        """
+        aus = self.create_auditorInfos()
+        for k, vs in aus.items():
+            otherStyleStr = time.strftime(
+                "%Y%m%d%H%M%S", time.localtime(int(time.time())))
+            path = r'{}\{}\{}\{}{}{}'.format(
+                self._folder_path, self._period, k, "审核结果", otherStyleStr, ".txt")
+            with open(path, 'a', encoding='utf-8') as f:
+                f.write('{}'.format(vs))
+
+
+class AuditorInfo(object):
+    """
+    审核结果
+    """
+
+    def __init__(self):
+        self.period = ""  # 薪酬期间
+        self.depart = ""  # 单位信息
+        self.numofpers = 0  # 发薪人数
+        self.totalpayable = 0  # 应发合计
+        self.pay = 0  # 实发合计
+        self.tex = 0  # 所得税合计
+        self.gjj_gr = 0  # 公积金个人
+        self.yl_gr = 0  # 养老保险个人
+        self.sy_gr = 0  # 失业保险个人
+        self.yil_gr = 0  # 医疗保险个人
+        self.nj_gr = 0  # 年金个人
+        self.gjj_qy = 0  # 公积金企业
+        self.yl_qy = 0  # 养老保险企业
+        self.sy_qy = 0  # 失业保险企业
+        self.yil_qy = 0  # 医疗保险企业
+        self.nj_qy = 0  # 年金企业
+        self.gs_qy = 0  # 工伤保险企业
+        self.shy_qy = 0  # 生育企业
+
+    def __str__(self):
+        return '审核结果:  基本信息--> 发薪期间 {} - 发薪单位 {} - 发薪人数 {} | 薪酬信息 - -> 应发合计 {:.2f} - 实发合计 {:.2f} - 代缴信息 -->  所得税 {:.2f} - 公积金个人 {:.2f} - 公积金企业 {:.2f} - 养老个人 {:.2f} - 养老企业 {:.2f} - 失业个人 {:.2f} - 失业企业 {:.2f} - 医疗个人 {:.2f} - 医疗企业 {:.2f} - 年金个人 {:.2f} - 年金企业 {:.2f} - 生育企业 {:.2f} - 工伤企业 {:.2f}'.format(self.period, self.depart, self.numofpers, self.totalpayable, self.pay, self.tex, self.gjj_gr, self.gjj_qy, self.yl_gr, self.yl_qy, self.sy_gr, self.sy_qy, self.yil_gr, self.yil_qy, self.nj_gr, self.nj_qy, self.shy_qy, self.gs_qy)
