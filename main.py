@@ -19,6 +19,7 @@ from salary_support_tools import salary_bank_engine
 from salary_support_tools import salary_gz_engine
 from salary_support_tools import salary_jj_engine
 from salary_support_tools import tex_operator
+from salary_support_tools import salary_operator
 
 if __name__ == "__main__":
     # persons, period, departs = ehr_engine.EhrEngine().initven()
@@ -79,6 +80,12 @@ if __name__ == "__main__":
     tex_err_msgs, tex_datas = tex_engine.start()
 
     # 输出
+
+    # 工资奖金文件输出
+    salary_op = salary_operator.SalaryOperator(
+        period, departs, gz_datas, jj_datas, sap_datas, err_msgs)
+    salary_op.export()
+    # 税务相关文件输出
     tex_op = tex_operator.TexExport(period, sap_datas, tex_datas, tex_err_msgs)
     tex_op.export()
     # 数据汇总

@@ -33,7 +33,6 @@ class PersonSalaryEngine(object):
             self._persons, self._banks, self.merge_salary_info(self._gzs, self._jjs))
         _, err_msgs = self.validate(datas)
         sap_datas = self.to_sap_info(datas)
-        # self.err_info_write_to_depart_folder(err_msgs)
         return err_msgs, datas, sap_datas
 
     def merge_salary_info(self, gzs, jjs):
@@ -159,22 +158,6 @@ class PersonSalaryEngine(object):
                 vs[code] = ssi
             res[depart] = vs
         return res
-
-    def err_info_write_to_depart_folder(self, errs_mgs):
-        """
-        写入相应得文件夹
-        """
-        for i, v in errs_mgs.items():
-            path = r'{}\{}\{}\{}'.format(
-                self._folder_prefix, self._period, i, "错误信息.txt")
-            if exists(path):
-                remove(path)
-            if len(v) > 0:
-                with open(path, 'a', encoding='utf-8') as f:
-                    for i in range(len(v)):
-                        msg = v[i]
-                        f.write('{} {}'.format(i+1, msg + '\n'))
-        return errs_mgs
 
 
 class PersonSalaryInfo(object):

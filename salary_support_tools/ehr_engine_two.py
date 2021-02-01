@@ -83,58 +83,6 @@ class EhrEngineTwo(object):
 
         return gz_datas, jj_datas
 
-    def split_salary_data_by_depart(self, departs, gz_datas, jj_datas):
-        """
-        将载入的工资数据和奖金数据根据单位信息分类
-        """
-        gz_map = OrderedDict()
-
-        # 按照文件夹名称分类
-        for gz in gz_datas:
-            gz_values = []
-            k = gz.depart
-            if k in gz_map:
-                gz_values = gz_map[k]
-            gz_values.append(gz)
-            if self._need_audit_by_depart(departs, k):
-                gz_map[k] = gz_values
-        jj_map = OrderedDict()
-
-        for jj in jj_datas:
-            jj_values = []
-            k = jj.depart
-            if k in jj_map:
-                jj_values = jj_map[k]
-            jj_values.append(jj)
-            if self._need_audit_by_depart(departs, k):
-                jj_map[k] = jj_values
-        return gz_map, jj_map
-
-    def _need_audit_by_depart(self, departs, departname):
-        """
-        当为空的时候不进行操作
-        """
-        for k, v in departs.items():
-            if departname == v.get_depart_salaryScope_and_name():
-                return v.status is not None and v.status != ''
-        return False
-
-    def copy_to_depart_folder(self, period, gz_datas, jj_datas, errs_mgs):
-        """
-        写入相应的单位文件夹
-        """
-        # 清理已有文件
-        gz = SalaryGzInfo()
-        gz_columndef = gz.getColumnDef()
-        for k, v in gz_datas.items():
-            if k not in errs_mgs:
-                self.createExcel(period, k, "工资信息", v, gz_columndef)
-        jj = SalaryJjInfo()
-        jj_columndef = jj.getColumnDef()
-        for k, v in jj_datas.items():
-            if k not in errs_mgs:
-                self.createExcel(period, k, "奖金信息", v, jj_columndef)
-
     def write_audited_info(self, period, gz_datas, jj_datas, errs_mgs):
         """
         将审核结果写入txt文件
