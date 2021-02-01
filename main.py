@@ -8,8 +8,6 @@
 @Contact :   tongtan@gmail.com
 '''
 
-from salary_support_tools import ehr_engine
-from salary_support_tools import ehr_engine_two
 from salary_support_tools import person_engine
 from salary_support_tools import person_salary_engine
 from salary_support_tools import tex_engine

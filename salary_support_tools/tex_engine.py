@@ -12,7 +12,7 @@
 from os.path import isfile, exists
 from os import makedirs, listdir, remove
 
-from salary_support_tools.ehr_engine import ExlToClazz
+from salary_support_tools.exl_to_clazz import ExlToClazz
 
 
 class TexEngine(object):
