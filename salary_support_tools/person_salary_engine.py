@@ -32,6 +32,7 @@ class PersonSalaryEngine(object):
         datas = self.merge_salary_person_bank_info(
             self._persons, self._banks, self.merge_salary_info(self._gzs, self._jjs))
         has_err, err_msgs = self.validate(datas)
+        self.err_info_write_to_depart_folder(err_msgs)
         return has_err, err_msgs, datas
 
     def merge_salary_info(self, gzs, jjs):
@@ -78,8 +79,8 @@ class PersonSalaryEngine(object):
                 if depart_str in banks:
                     banks_info = banks[depart_str]
                     if code in banks_info:
-                        banks = banks_info[code]
-                        psi._banks = banks
+                        bs = banks_info[code]
+                        psi._banks = bs
         return person_salary_infos
 
     def get_person(self, code, persons):
@@ -120,7 +121,7 @@ class PersonSalaryEngine(object):
                             "工资信息错误", "工资实发小于0，实发金额{}".format(gz._pay), person))
                     # 缺少工资银行卡号
                     if gz._pay > 0:
-                        if banks is None or banks[gz] is None:
+                        if banks is None or banks["gz"] is None:
                             err_message.append(self.err_mss(
                                 "银行卡信息错误", "缺少工资卡信息", person))
                     # 缺少岗位工资
@@ -134,7 +135,7 @@ class PersonSalaryEngine(object):
                             "奖金信息错误", "奖金实发小于0，实发金额{}".format(gz._pay), person))
                     # 缺少工资银行卡号
                     if jj._pay > 0:
-                        if banks is None or banks[jj] is None:
+                        if banks is None or banks["jj"] is None:
                             err_message.append(self.err_mss(
                                 "银行卡信息错误", "缺少奖金卡信息", person))
             if len(err_message) > 0:
