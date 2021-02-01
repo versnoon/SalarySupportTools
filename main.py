@@ -36,6 +36,27 @@ if __name__ == "__main__":
         engine_audit = ehr_engine.EhrEngine()
         engine_audit.start(persons, period, depart, banks)
 
+        # 载入区间信息
+
+        # 载入单位信息
+
+        # 载入人员信息
+
+        # 载入工资信息
+
+        # 载入奖金信息
+
+        # 完成 信息 汇总 及 错误检查
         merge_engine = person_salary_engine.PersonSalaryEngine(
             period, personss, gz_datas, jj_datas, banks)
-        merge_engine.start()
+        has_err, err_msgs, datas = merge_engine.start()
+
+        # 载入所得税信息
+
+        # 验证当期所得税
+
+        # 输出
+
+        # 数据汇总
+
+        # 固定格式报表生成

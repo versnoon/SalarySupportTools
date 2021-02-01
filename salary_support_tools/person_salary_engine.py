@@ -27,7 +27,8 @@ class PersonSalaryEngine(object):
         """
         datas = self.merge_salary_person_bank_info(
             self._persons, self._banks, self.merge_salary_info(self._gzs, self._jjs))
-        err_msgs = self.validate(datas)
+        has_err, err_msgs = self.validate(datas)
+        return has_err, err_msgs, datas
 
     def merge_salary_info(self, gzs, jjs):
         # 根据单位分组工资奖金数据
