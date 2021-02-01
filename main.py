@@ -18,6 +18,7 @@ from salary_support_tools import salary_depart_engine
 from salary_support_tools import salary_bank_engine
 from salary_support_tools import salary_gz_engine
 from salary_support_tools import salary_jj_engine
+from salary_support_tools import tex_operator
 
 if __name__ == "__main__":
     # persons, period, departs = ehr_engine.EhrEngine().initven()
@@ -68,18 +69,18 @@ if __name__ == "__main__":
     jj_engine = salary_jj_engine.SalaryJjEngine(period)
     jj_datas = jj_engine.batch_load_data(departs)
 
-    # 完成 信息 汇总 及 错误检查
+    # 完成 信息 汇总 及 错误检查 输出审核结果
     merge_engine = person_salary_engine.PersonSalaryEngine(
         period, persons, gz_datas, jj_datas, banks)
-    has_err, err_msgs, datas = merge_engine.start()
+    err_msgs, datas, sap_datas = merge_engine.start()
 
-    # 载入所得税信息
-
-    # 验证当期所得税
+    # 验证当期所得税并输出审核结果
     tex_engine = tex_engine.TexEngine(period, datas, departs)
-    tex_engine.start()
-    # 输出
+    tex_err_msgs, tex_datas = tex_engine.start()
 
+    # 输出
+    tex_op = tex_operator.TexExport(period, sap_datas, tex_datas, tex_err_msgs)
+    tex_op.export()
     # 数据汇总
 
     # 固定格式报表生成

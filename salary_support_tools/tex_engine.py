@@ -3,7 +3,7 @@
 '''
 @File    :   tex_engine.py
 @Time    :   2021/01/28 14:29:05
-@Author  :   Tong tan 
+@Author  :   Tong tan
 @Version :   1.0
 @Contact :   tongtan@gmail.com
 '''
@@ -36,8 +36,9 @@ class TexEngine(object):
 
     def start(self):
         tex_datas = self.load_data()
-        has_err, err_msgs = self.validate(tex_datas)
-        self.err_info_write_to_depart_folder(err_msgs)
+        _, err_msgs = self.validate(tex_datas)
+        tex_datas_split_by_depart = self.split_tex_data_by_depart(tex_datas)
+        return err_msgs, tex_datas_split_by_depart
 
     def load_data(self):
 
@@ -118,22 +119,24 @@ class TexEngine(object):
             return '错误信息提示:  ->  错误类型 {} - 错误信息 {} - 错误人员 {}'.format(err_type, message, person)
         return '错误信息提示:  ->  错误类型 {} - 错误信息 {}'.format(err_type, message)
 
-    def err_info_write_to_depart_folder(self, errs_mgs):
-        """
-        写入相应得文件夹
-        """
-        for vs in errs_mgs.values():
-            for i, v in vs.items():
-                path = r'{}\{}\{}\{}'.format(
-                    self._folder_path, self._period, i, "个税核对结果.txt")
-                if exists(path):
-                    remove(path)
-                if len(v) > 0:
-                    with open(path, 'a', encoding='utf-8') as f:
-                        for i in range(len(v)):
-                            msg = v[i]
-                            f.write('{} {}'.format(i+1, msg + '\n'))
-        return errs_mgs
+    def split_tex_data_by_depart(self, tex_datas):
+        res = dict()
+        for tex_depart, datas in tex_datas.items():
+            if datas is not None:
+                dep_res = dict()
+                for tex in datas:
+                    idno = tex._idno  # 身份证号
+                    person, depart, _total_payable, _total_tex = self.get_person_salary_info_by_idno(
+                        tex_depart, idno)
+                    if person is not None:
+                        vs = []
+                        if depart in dep_res:
+                            vs = dep_res[depart]
+                        vs.append(tex)
+                        dep_res[depart] = vs
+                if len(dep_res) > 0:
+                    res[tex_depart] = dep_res
+        return res
 
 
 class TexSysStruct(object):
@@ -146,26 +149,84 @@ class TexSysStruct(object):
         self._name = ""  # 姓名
         self._idtype = "居民身份证"  # 证件类型
         self._idno = ""  # 证件号码
+        self._skssqq = ""  # 税款所属期起
+        self._skssqz = ""  # 税款所属期止
         self._itemname = "正常工资薪金"  # 所得项目
         self._totalpayable = 0  # 应发合计
+        self._bqfy = 0  # 本期费用
+        self._bqmssr = 0  # 本期免税收入
         self._tex = 0  # 所得税合计
         self._gjj_gr = 0  # 公积金个人
         self._yl_gr = 0  # 养老保险个人
         self._sy_gr = 0  # 失业保险个人
         self._yil_gr = 0  # 医疗保险个人
         self._nj_gr = 0  # 年金个人
+        self._sujkbx = 0  # 本期商业健康保险费
+        self._syyl = 0  # 本期税延养老保险费
+        self._qtkc = 0  # 本期其他扣除(其他)
+        self._ljsr = 0  # 累计收入额
+        self._ljms = 0  # 累计免税收入
+        self._ljjc = 0  # 累计减除费用
+        self._ljzx = 0  # 累计专项扣除
+        self._ljznjy = 0  # 累计子女教育支出扣除
+        self._ljjxjy = 0  # 累计继续教育支出扣除
+        self._ljzfdk = 0  # 累计住房贷款利息支出扣除
+        self._ljzfzz = 0  # 累计住房租金支出扣除
+        self._ljsylr = 0  # 累计赡养老人支出扣除
+        self._ljqtkc = 0  # 累计其他扣除
+        self._ljzykc = 0  # 累计准予扣除的捐赠
+        self._ljynse = 0  # 累计应纳税所得额
+        self._sl = 0  # 税率
+        self._sskc = 0  # 速算扣除数
+        self._ljynse = 0  # 累计应纳税额
+        self._ljjm = 0  # 累计减免税额
+        self._ljykj = 0  # 累计应扣缴税额
+        self._ljynse = 0  # 累计已预缴税额
 
     def getColumnDef(self) -> dict:
         columns = dict()
         columns["_code"] = "工号"
         columns["_name"] = "姓名"
-
+        columns["_idtype"] = "证件类型"
         columns["_idno"] = "证件号码"
+        columns["_skssqq"] = "税款所属期起"
+        columns["_skssqz"] = "税款所属期止"
+        columns["_itemname"] = "所得项目"
+
         columns["_totalpayable"] = "本期收入"
-        columns["_tex"] = "累计应补(退)税额"
+        columns["_bqfy"] = "本期费用"
+
+        columns["_bqmssr"] = "本期免税收入"
         columns["_yl_gr"] = "本期基本养老保险费"
         columns["_yil_gr"] = "本期基本医疗保险费"
         columns["_sy_gr"] = "本期失业保险费"
         columns["_gjj_gr"] = "本期住房公积金"
         columns["_nj_gr"] = "本期企业(职业)年金"
+
+        columns["_sujkbx"] = "本期商业健康保险费"
+        columns["_syyl"] = "本期税延养老保险费"
+        columns["_qtkc"] = "本期其他扣除"
+        columns["_ljsr"] = "累计收入额"
+        columns["_ljms"] = "累计免税收入"
+
+        columns["_ljjc"] = "本累计减除费用"
+        columns["_ljzx"] = "累计专项扣除"
+        columns["_ljznjy"] = "累计子女教育支出扣除"
+        columns["_ljjxjy"] = "累计继续教育支出扣除"
+        columns["_ljzfdk"] = "累计住房贷款利息支出扣除"
+        columns["_ljzfzz"] = "累计住房租金支出扣除"
+        columns["_ljsylr"] = "累计赡养老人支出扣除"
+
+        columns["_ljqtkc"] = "累计其他扣除"
+        columns["_ljzykc"] = "累计准予扣除的捐赠"
+        columns["_ljynse"] = "累计应纳税所得额"
+        columns["_sl"] = "税率"
+        columns["_sskc"] = "速算扣除数"
+        columns["_ljynse"] = "累计应纳税额"
+        columns["_ljjm"] = "累计减免税额"
+        columns["_ljykj"] = "累计应扣缴税额"
+        columns["_ljynse"] = "累计已预缴税额"
+
+        columns["_tex"] = "累计应补(退)税额"
+
         return columns
