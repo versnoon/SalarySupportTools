@@ -8,6 +8,8 @@
 @Contact :   tongtan@gmail.com
 '''
 
+import time
+
 from salary_support_tools import salary_period_engine
 from salary_support_tools import salary_depart_engine
 from salary_support_tools.runner import AuditorRunner

@@ -29,11 +29,11 @@ class PersonSalaryEngine(object):
         """
         组装人员的薪酬信息 包括 persons code depart
         """
-        datas = self.merge_salary_person_bank_info(
+        datas, datas_idno = self.merge_salary_person_bank_info(
             self._persons, self._banks, self.merge_salary_info(self._gzs, self._jjs))
         _, err_msgs = self.validate(datas)
         sap_datas = self.to_sap_info(datas)
-        return err_msgs, datas, sap_datas
+        return err_msgs, datas, sap_datas, datas_idno
 
     def merge_salary_info(self, gzs, jjs):
         # 根据单位分组工资奖金数据
@@ -70,18 +70,25 @@ class PersonSalaryEngine(object):
 
     def merge_salary_person_bank_info(self, persons, banks, person_salary_infos):
         # 合并人员数据
+        person_salary_infos_by_idno = dict()
         for depart_str, psis in person_salary_infos.items():
+            person_salary_infos_by_idnos = dict()
             for code, psi in psis.items():
                 person, person_flag = self.get_person(code, persons)
+                idno = ""
                 if person is not None:
                     psi._person = person
                     psi._person_flag = person_flag
+                    idno = person._idNo  # 身份证
                 if depart_str in banks:
                     banks_info = banks[depart_str]
                     if code in banks_info:
                         bs = banks_info[code]
                         psi._banks = bs
-        return person_salary_infos
+                if idno != "":
+                    person_salary_infos_by_idnos[idno] = psi
+            person_salary_infos_by_idno[depart_str] = person_salary_infos_by_idnos
+        return person_salary_infos, person_salary_infos_by_idno
 
     def get_person(self, code, persons):
         person = None

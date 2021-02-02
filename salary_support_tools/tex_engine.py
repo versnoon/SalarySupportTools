@@ -20,11 +20,12 @@ class TexEngine(object):
     所得税核对及拆分
     """
 
-    def __init__(self, period, person_salarys, departs):
+    def __init__(self, period, person_salarys, person_salarys_idno, departs):
         self._name = "tex"
         self._period = period  # 期间信息
         self._departs = departs  # 审核机构信息
         self._person_salarys = person_salarys  # 人员薪酬信息
+        self._person_salarys_idno = person_salarys_idno  # 人员薪酬信息根据身份证汇总
         self._folder_path = r'd:\薪酬审核文件夹'
 
     def get_tpl_path(self, tex_depart):
@@ -36,8 +37,9 @@ class TexEngine(object):
 
     def start(self):
         tex_datas = self.load_data()
-        _, err_msgs = self.validate(tex_datas)
         tex_datas_split_by_depart = self.split_tex_data_by_depart(tex_datas)
+        _, err_msgs = self.validate(tex_datas)
+
         return err_msgs, tex_datas_split_by_depart
 
     def load_data(self):
@@ -60,6 +62,53 @@ class TexEngine(object):
             if depart.texdepart not in res:
                 res[depart.texdepart] = depart.texdepart
         return res
+
+    def get_person_salary_info_by_idno_two(self, tex_depart, idno):
+        # 通过身份证号获取员工的薪酬信息
+        _total_payable = 0  # 应发
+        _total_tex = 0  # 当期所得税
+        person = None  # 人员信息
+        depart = ""  # 文件夹信息
+        for depart, person_salary_infos in self._person_salarys_idno.items():
+            if idno in person_salary_infos:
+                # 相同税务机构
+                person_salary_info = person_salary_infos[idno]
+                if tex_depart == person_salary_info._tex_depart:
+                    person = person_salary_info._person
+                    if person is not None:
+                        if idno == person._idNo:  # 身份证号相同
+                            gz = person_salary_info._gz  # 工资
+                            jj = person_salary_info._jj  # 奖金
+
+                            if gz is not None:
+                                _total_payable += gz._totalPayable
+                                _total_tex += 0 - gz._gts
+                                depart = gz.depart
+                            if jj is not None:
+                                _total_payable += jj._totalPayable - jj._nddxj  # 去除一次性优惠税率
+                                _total_tex += 0 - jj._gts + 0 - jj._gstz
+                                depart = jj.depart
+                            return person, depart, _total_payable, _total_tex
+        return None, "", _total_payable, _total_tex
+
+        #     for idno, person_salary_info in person_salary_infos.items():
+        #         if tex_depart == person_salary_info._tex_depart:  # 相同税务机构
+        #             person = person_salary_info._person
+        #             if person is not None:
+        #                 if idno == person._idNo:  # 身份证号相同
+        #                     gz = person_salary_info._gz  # 工资
+        #                     jj = person_salary_info._jj  # 奖金
+
+        #                     if gz is not None:
+        #                         _total_payable += gz._totalPayable
+        #                         _total_tex += 0 - gz._gts
+        #                         depart = gz.depart
+        #                     if jj is not None:
+        #                         _total_payable += jj._totalPayable - jj._nddxj  # 去除一次性优惠税率
+        #                         _total_tex += 0 - jj._gts + 0 - jj._gstz
+        #                         depart = jj.depart
+        #                     return person, depart, _total_payable, _total_tex
+        # return None, "", _total_payable, _total_tex
 
     def get_person_salary_info_by_idno(self, tex_depart, idno):
         # 通过身份证号获取员工的薪酬信息
@@ -97,7 +146,7 @@ class TexEngine(object):
                     idno = tex._idno  # 身份证号
                     _tex_total_payable = tex._totalpayable
                     _tex_total_tex = tex._tex
-                    person, depart, _total_payable, _total_tex = self.get_person_salary_info_by_idno(
+                    person, depart, _total_payable, _total_tex = self.get_person_salary_info_by_idno_two(
                         tex_depart, idno)
                     if person is not None:
                         err_message = []
@@ -126,7 +175,7 @@ class TexEngine(object):
                 dep_res = dict()
                 for tex in datas:
                     idno = tex._idno  # 身份证号
-                    person, depart, _total_payable, _total_tex = self.get_person_salary_info_by_idno(
+                    person, depart, _total_payable, _total_tex = self.get_person_salary_info_by_idno_two(
                         tex_depart, idno)
                     if person is not None:
                         vs = []

@@ -52,10 +52,10 @@ class AuditorRunner(object):
         # 完成 信息 汇总 及 错误检查 输出审核结果
         merge_engine = PersonSalaryEngine(
             self._period, persons, gz_datas, jj_datas, banks)
-        err_msgs, datas, sap_datas = merge_engine.start()
+        err_msgs, datas, sap_datas, datas_idno = merge_engine.start()
 
         # 验证当期所得税
-        tex_engine = TexEngine(self._period, datas, self._departs)
+        tex_engine = TexEngine(self._period, datas, datas_idno, self._departs)
         tex_err_msgs, tex_datas = tex_engine.start()
 
         # 输出
