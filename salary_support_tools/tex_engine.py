@@ -77,11 +77,11 @@ class TexEngine(object):
                     person = person_salary_info._person
                     if person is not None:
                         if idno == person._idNo:  # 身份证号相同
-                            gz = person_salary_info._gz  # 工资
+                            gz = person_salary_info._gz    # 工资
                             jj = person_salary_info._jj  # 奖金
 
                             if gz is not None:
-                                _total_payable += gz._totalPayable
+                                _total_payable += gz._totalPayable + gz._jkdjf  # 应发+教育经费
                                 _total_tex += 0 - gz._gts
                                 depart = gz.depart
                             if jj is not None:

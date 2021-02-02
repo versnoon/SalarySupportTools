@@ -469,8 +469,9 @@ class SapSalaryInfo(object):
             self._jjpay = jjinfo._pay  # 奖金实发
 
         if bankinfo is not None:
-            self._bankno1 = bankinfo['gz']._bankNo
-            self._bankinfo1 = bankinfo['gz']._financialInstitution
+            if bankinfo['gz'] is not None:
+                self._bankno1 = bankinfo['gz']._bankNo
+                self._bankinfo1 = bankinfo['gz']._financialInstitution
             if 'jj' in bankinfo and bankinfo['jj'] is not None:
                 self._bankno2 = bankinfo['jj']._bankNo
                 self._bankinfo2 = bankinfo['jj']._financialInstitution
