@@ -33,6 +33,7 @@ class TexExport(object):
         self._sap_salary_infos = sap_salary_infos  # sap数据格式
         self._tex_datas = tex_datas
         self._err_msgs = err_msgs
+        self._exportable = False
 
     def export(self):
         # 输出宝武数据
@@ -63,6 +64,8 @@ class TexExport(object):
         创建excel
         """
         for depart, vs in self._sap_salary_infos.items():
+            if not self.exportable(depart):
+                continue
             b = xlwt.Workbook(encoding='uft-8')
             s = b.add_sheet('正常工资薪金收入')
 
@@ -92,6 +95,8 @@ class TexExport(object):
     def export_tex_datas_to_excel(self):
         for tex_depart, vsm in self._tex_datas.items():
             for depart, vs in vsm.items():
+                if not self.exportable(depart):
+                    continue
                 b = xlwt.Workbook(encoding='uft-8')
                 s = b.add_sheet('综合所得申报税款计算')
 
@@ -148,6 +153,12 @@ class TexExport(object):
         所得税系统导入模板对应关系
         """
         return TexSysStruct().getColumnDef()
+
+    def exportable(self, depart):
+        for vss in self._err_msgs.values():  # 如果有错误信息就跳过
+            if depart in vss:
+                return False or self._exportable
+        return True
 
 
 class TexInfo(object):

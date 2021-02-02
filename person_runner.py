@@ -9,11 +9,12 @@
 '''
 
 
-from salary_support_tools import ehr_engine_two
-from salary_support_tools import person_engine
+# from salary_support_tools import ehr_engine_two
+# from salary_support_tools import person_engine
 
 if __name__ == "__main__":
-    engine = ehr_engine_two.EhrEngineTwo()
-    period, depart = engine.initven()
-    p_engine = person_engine.PersonEngine(period)
-    p_engine.start()
+    # engine = ehr_engine_two.EhrEngineTwo()
+    # period, depart = engine.initven()
+    # p_engine = person_engine.PersonEngine(period)
+    # p_engine.start()
+    pass

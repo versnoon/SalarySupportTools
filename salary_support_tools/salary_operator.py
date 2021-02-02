@@ -42,6 +42,7 @@ class SalaryOperator(object):
         self._person_salary_infos = person_salary_infos
         self._err_msgs = err_msgs
         self._folder_path = r'd:\薪酬审核文件夹'
+        self._exportable = False  # 导出开关 如果为True 无论验证结果 都导出
 
     def export(self):
         # 输出工资奖金文件
@@ -67,11 +68,13 @@ class SalaryOperator(object):
         gz = SalaryGzInfo()
         gz_columndef = gz.getColumnDef()
         for k, v in gzs.items():
-            self.createExcel(self._period, k, "工资信息", v, gz_columndef)
+            if self.exportable(k):
+                self.createExcel(self._period, k, "工资信息", v, gz_columndef)
         jj = SalaryJjInfo()
         jj_columndef = jj.getColumnDef()
         for k, v in jjs.items():
-            self.createExcel(self._period, k, "奖金信息", v, jj_columndef)
+            if self.exportable(k):
+                self.createExcel(self._period, k, "奖金信息", v, jj_columndef)
 
     def createExcel(self, period, depart_folder_name, file_name, datas, columndefs):
         """
@@ -251,6 +254,8 @@ class SalaryOperator(object):
         """
         columndefs = self.auditor_columns()
         for depart, vs in self._sap_infos.items():
+            if not self.exportable(depart):  # 如果有错误信息就跳过
+                continue
             datas = vs.values()
             b = xlwt.Workbook(encoding='uft-8')
             s = b.add_sheet('Sheet1')
@@ -404,6 +409,8 @@ class SalaryOperator(object):
         """
         columndefs = self.sh002_columns()
         for depart, vs in self._sap_infos.items():
+            if not self.exportable(depart):  # 如果有错误信息就跳过
+                continue
             datas = vs.values()
             b = xlwt.Workbook(encoding='uft-8')
             s = b.add_sheet('Sheet1')
@@ -574,6 +581,8 @@ class SalaryOperator(object):
         """
         columndefs = self.sh003_columns()
         for depart, vs in self._sap_infos.items():
+            if not self.exportable(depart):  # 如果有错误信息就跳过
+                continue
             datas = vs.values()
             b = xlwt.Workbook(encoding='uft-8')
             s = b.add_sheet('Sheet1')
@@ -615,6 +624,8 @@ class SalaryOperator(object):
     def create_auditorInfos(self):
         auditorInfos = dict()
         for depart, psis in self._person_salary_infos.items():
+            if self.exportable(depart):  # 如果有错误信息就跳过
+                continue
             a = AuditorInfo()
             a.period = self._period
             a.depart = depart
@@ -657,6 +668,11 @@ class SalaryOperator(object):
                 self._folder_path, self._period, k, "审核结果", otherStyleStr, ".txt")
             with open(path, 'a', encoding='utf-8') as f:
                 f.write('{}'.format(vs))
+
+    def exportable(self, depart):
+        if depart in self._err_msgs:  # 如果有错误信息就跳过
+            return False or self._exportable
+        return True
 
 
 class AuditorInfo(object):

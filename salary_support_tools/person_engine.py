@@ -232,4 +232,4 @@ class PersonInfo(object):
         return res
 
     def __str__(self):
-        return '员工基本信息: 公司 {} - 部门 {} - 分厂 {} - 作业区 {} - 班组 {} - 工号 {} - 姓名 {} - 岗位 {}'.format(self._complayLevelOne, self._departLevelTow, self._branchLevelThree, self._assignmentSectionLevelFour, self._groupLevelFive, self._code, self._name, self._cJobTitle)
+        return '员工基本信息: 工号 {} - 姓名 {} - 公司 {} - 部门 {} - 分厂 {} - 作业区 {} - 班组 {} - 岗位 {}'.format(self._code, self._name, self._complayLevelOne, self._departLevelTow, self._branchLevelThree, self._assignmentSectionLevelFour, self._groupLevelFive,  self._cJobTitle)
