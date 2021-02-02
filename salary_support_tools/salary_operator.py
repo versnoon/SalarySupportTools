@@ -624,7 +624,7 @@ class SalaryOperator(object):
     def create_auditorInfos(self):
         auditorInfos = dict()
         for depart, psis in self._person_salary_infos.items():
-            if self.exportable(depart):  # 如果有错误信息就跳过
+            if not self.exportable(depart):  # 如果有错误信息就跳过
                 continue
             a = AuditorInfo()
             a.period = self._period
