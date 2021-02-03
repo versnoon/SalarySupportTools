@@ -79,5 +79,20 @@ class SalaryDepart(object):
     def get_depart_salaryScope_and_name(self):
         return '{}_{}'.format(self.salaryScope, self.name)
 
+    def contain_relativeunits(self):
+        """
+        判断是否有相关单位
+        """
+        return len(self.relativeUnits) > 0
+
+    def is_depart(self, departname):
+        if self.name == departname:
+            return True
+        relativeUnits = self.get_departs()
+        for unit in relativeUnits:
+            if unit == departname:
+                return True
+        return False
+
     def __str__(self):
         return '审核机构信息: 序号{} - 工资范围 {} - 审核单位名称 {} - 相关单位 {}'.format(self.sortno, self.salaryScope, self.name, self.get_departs())
