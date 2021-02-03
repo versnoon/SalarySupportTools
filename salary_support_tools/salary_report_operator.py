@@ -50,6 +50,9 @@ class SalaryReportOperator(object):
         # sh003 格式输出
         self.export_sh003_excel()
 
+        # 合并sh002表
+        self.merge_sh002_excel()
+
     def sh002_columns(self):
         columns = dict()
         columns["_sfhd"] = "实发核对"
@@ -384,7 +387,8 @@ class SalaryReportOperator(object):
                             s.write(
                                 i+1, j, getattr(v, propertyName, 0))
                     except TypeError:
-                        print(propertyName)
+                        pass
+                        # print(propertyName)
 
             path = r'{}\{}\{}\导出文件'.format(
                 self._folder_path, self._period, depart)
@@ -392,6 +396,51 @@ class SalaryReportOperator(object):
                 makedirs(path)
             b.save(r'{}\{}_{}_{}'.format(
                 path, depart, self._period, "SAPSH003.xls"))
+
+    def merge_sh002_excel(self):
+        """
+        合并sh002
+        """
+        columndefs = self.sh002_columns()
+        b = xlwt.Workbook(encoding='uft-8')
+        s = b.add_sheet('Sheet1')
+        # 写入标题
+        for i, v in enumerate(columndefs.values()):
+            s.write(0, i, v)
+        datas = []
+        for depart, vs in self._sap_infos.items():
+            datas.extend(vs.values())
+
+        for i, v in enumerate(datas):
+            for j, propertyName in enumerate(columndefs.keys()):
+                try:
+                    if propertyName == "one":
+                        s.write(
+                            i + 1, j, "马钢集团")
+                    elif propertyName == "two" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(datas[i], "one", 0))
+                    elif propertyName == "three" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(v, "two", 0))
+                    elif propertyName == "four" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(v, "three", 0))
+                    elif propertyName == "five" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
+                        s.write(
+                            i + 1, j, getattr(v, "four", 0))
+                    else:
+                        s.write(
+                            i+1, j, getattr(v, propertyName, 0))
+                except TypeError:
+                    print(propertyName)
+
+        path = r'{}\{}\{}'.format(
+            self._folder_path, self._period, "导出文件汇总")
+        if not exists(path):
+            makedirs(path)
+        b.save(r'{}\{}_{}'.format(
+            path, self._period, "SAPSH002_汇总.xls"))
 
     def exportable(self, depart):
         if depart in self._err_msgs:  # 如果有错误信息就跳过
