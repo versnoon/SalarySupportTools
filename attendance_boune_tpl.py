@@ -11,7 +11,7 @@
 
 from salary_support_tools import salary_period_engine
 from salary_support_tools import salary_depart_engine
-from salary_support_tools.attendance_boune_tpl_runner import AttendanceBouneTplRunner
+from salary_support_tools.attendance_bonus_tpl_runner import AttendanceBonusTplRunner
 
 if __name__ == "__main__":
 
@@ -24,4 +24,4 @@ if __name__ == "__main__":
     depart_engine = salary_depart_engine.SalaryDepartEngine(period)
     departs = depart_engine.start()
 
-    AttendanceBouneTplRunner(period, departs).run()
+    AttendanceBonusTplRunner(period, departs).run()
