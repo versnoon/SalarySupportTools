@@ -428,7 +428,7 @@ class SalaryOperator(object):
                                 i + 1, j, "马钢集团")
                         elif propertyName == "two" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
                             s.write(
-                                i + 1, j, getattr(datas[i], "one", 0))
+                                i + 1, j, getattr(v, "one", 0))
                         elif propertyName == "three" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
                             s.write(
                                 i + 1, j, getattr(v, "two", 0))
@@ -601,7 +601,7 @@ class SalaryOperator(object):
                                 i + 1, j, "马钢集团")
                         elif propertyName == "two" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
                             s.write(
-                                i + 1, j, getattr(datas[i], "one", 0))
+                                i + 1, j, getattr(v, "one", 0))
                         elif propertyName == "three" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
                             s.write(
                                 i + 1, j, getattr(v, "two", 0))

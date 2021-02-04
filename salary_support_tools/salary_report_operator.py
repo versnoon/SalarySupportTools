@@ -33,13 +33,9 @@ class SalaryReportOperator(object):
 
     """
 
-    def __init__(self, period, departs, gz_datas, jj_datas, person_salary_infos, sap_infos, err_msgs):
+    def __init__(self, period, sap_infos, err_msgs):
         self._period = period
-        self._departs = departs
-        self._gz_datas = gz_datas
-        self._jj_datas = jj_datas
         self._sap_infos = sap_infos
-        self._person_salary_infos = person_salary_infos
         self._err_msgs = err_msgs
         self._folder_path = r'd:\薪酬审核文件夹'
         self._exportable = False  # 导出开关 如果为True 无论验证结果 都导出
@@ -201,7 +197,7 @@ class SalaryReportOperator(object):
                                 i + 1, j, "马钢集团")
                         elif propertyName == "two" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
                             s.write(
-                                i + 1, j, getattr(datas[i], "one", 0))
+                                i + 1, j, getattr(v, "one", 0))
                         elif propertyName == "three" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
                             s.write(
                                 i + 1, j, getattr(v, "two", 0))
@@ -373,7 +369,7 @@ class SalaryReportOperator(object):
                                 i + 1, j, "马钢集团")
                         elif propertyName == "two" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
                             s.write(
-                                i + 1, j, getattr(datas[i], "one", 0))
+                                i + 1, j, getattr(v, "one", 0))
                         elif propertyName == "three" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
                             s.write(
                                 i + 1, j, getattr(v, "two", 0))
@@ -419,7 +415,7 @@ class SalaryReportOperator(object):
                             i + 1, j, "马钢集团")
                     elif propertyName == "two" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
                         s.write(
-                            i + 1, j, getattr(datas[i], "one", 0))
+                            i + 1, j, getattr(v, "one", 0))
                     elif propertyName == "three" and getattr(v, "one", 0) != "马钢（集团）控股有限公司(总部)":
                         s.write(
                             i + 1, j, getattr(v, "two", 0))

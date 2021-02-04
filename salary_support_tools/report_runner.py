@@ -55,6 +55,6 @@ class ReportRunner(object):
 
         # 工资奖金文件输出
         report_op = SalaryReportOperator(
-            self._period, self._departs, gz_datas, jj_datas, datas, sap_datas, err_msgs)
+            self._period, sap_datas, err_msgs)
         report_op._exportable = True
         report_op.export()
