@@ -63,10 +63,10 @@ class PersonCompareEngine(object):
                 if person_salary_info._gz is not None and person_salary_info._gz._totalPayable != 0 and person_salary_info._jj is not None and person_salary_info._jj._totalPayable != 0:  # 有工资奖金得减员
                     res.append(PersonChangeInfo(
                         self._period, depart_str, code, person_salary_info._person, "减员人员-奖金"))
-                elif person_salary_info._gz is None and person_salary_info._jj is not None and person_salary_info._jj._totalPayable != 0:
-
-                    res.append(PersonChangeInfo(self._period, depart_str, code,
-                                                person_salary_info._person, "减员人员-净减员"))
+                else:
+                    if person_salary_info._gz is not None and (person_salary_info._jj is None or person_salary_info._jj._totalPayable == 0):
+                        res.append(PersonChangeInfo(self._period, depart_str, code,
+                                                    person_salary_info._person, "减员人员-净减员"))
         return res
 
     def pre_period(self):

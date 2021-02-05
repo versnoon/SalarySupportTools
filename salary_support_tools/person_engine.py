@@ -13,7 +13,7 @@ from os import makedirs
 
 from collections import OrderedDict
 
-from salary_support_tools.exl_to_clazz import ExlToClazz
+from salary_support_tools.exl_to_clazz import ExlToClazz, ExlsToClazz
 
 
 class PersonEngine(object):
@@ -25,6 +25,7 @@ class PersonEngine(object):
         self._name = "person"
         self._period = period
         self._folder_path = r'd:\薪酬审核文件夹'
+        self._person_info_filename = "人员信息导出结果"
         self._filename = '人员信息.xls'
         self._older_filename = '上期人员信息.xls'
         self._old_old_filename = '上上期人员信息.xls'
@@ -55,6 +56,17 @@ class PersonEngine(object):
         old_old_persons = person_info.to_map_by_company(
             old_old_person_load.loadTemp())
         res["o_o"] = old_old_persons
+
+        return res
+
+    def load_data_new(self):
+        res = dict()
+        person_new = PersonInfo()  # 人员信息维护表
+        person_load_new = ExlsToClazz(
+            PersonInfo, person_new.get_person_maintain_info_columns(), self.filepath_prefix(), self.filename_prefix())
+        current_persons = person_new.to_map_by_company(
+            person_load_new.loadTemp())
+        res["c"] = current_persons
         return res
 
     def load_data(self):
@@ -74,6 +86,12 @@ class PersonEngine(object):
             old_old_person_load.loadTemp())
         res["o_o"] = old_old_persons
         return res
+
+    def filepath_prefix(self):
+        return r'{}\{}'.format(self._folder_path, self._period)
+
+    def filename_prefix(self):
+        return self._person_info_filename
 
     def get_tpl_path(self):
         return r'{}\{}\{}'.format(self._folder_path, self._period, self._filename)
@@ -168,6 +186,21 @@ class PersonInfo(object):
         self._cJobTitle = cJobTitle  # 执行岗位名称
         self._postType = postType  # 岗位类型
         self._jobStatus = jobStatus  # 人员类型
+
+    def get_person_maintain_info_columns(self) -> dict:
+        columns = dict()
+        columns["_complayLevelOne"] = "一级机构名称"
+        columns["_departLevelTow"] = "二级机构名称"
+        columns["_branchLevelThree"] = "三级机构名称"
+        columns["_code"] = "通行证"
+        columns["_name"] = "姓名"
+        columns["_gender"] = "性别"
+        columns["_idNo"] = "证件号码"
+        columns["_personType"] = "人员类型"
+        columns["_timeOfWork"] = "参加工作日期"
+        columns["_vJobTile"] = "岗位名称"
+        columns["_jobStatus"] = "在职状态"
+        return columns
 
     def getColumnDef(self) -> dict:
         columns = dict()

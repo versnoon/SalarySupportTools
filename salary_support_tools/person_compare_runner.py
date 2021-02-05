@@ -34,7 +34,7 @@ class PersonCompareRunner(object):
 
         # 当期人员信息
         current_p_engine = PersonEngine(self._period)
-        current_persons = self.to_depart_map(current_p_engine.load_data())
+        current_persons = self.to_depart_map(current_p_engine.load_data_new())
 
         # 上期相关信息
 
@@ -88,24 +88,27 @@ class PersonCompareRunner(object):
         res = dict()
         ps = persons["c"]
         depart_str = ""
-        for person in ps.values():
-            vs = dict()
-            one = person._complayLevelOne  # 一级公司
-            two = person._departLevelTow  # 二级公司
-            code = person._code  # 职工编码
-            if one == '马钢（集团）控股有限公司(总部)' or one == '马鞍山钢铁股份有限公司（总部）':  # 集团本部  股份本部
-                depart = self._get_depart_from_departname(
-                    one, two, self._departs)
-                if depart is not None:
-                    depart_str = depart.get_depart_salaryScope_and_name()
-                    if depart_str in res:
-                        vs = res[depart_str]
-                    vs[code] = person
-            if len(vs) > 0:
-                res[depart_str] = vs
+        for one, persons in ps.items():
+            for code, person in persons.items():
+                vs = dict()
+                one = person._complayLevelOne  # 一级公司
+                two = person._departLevelTow  # 二级公司
+                code = person._code  # 职工编码
+                if one == '马钢（集团）控股有限公司(总部)' or one == '马鞍山钢铁股份有限公司（总部）':  # 集团本部  股份本部
+                    depart = self._get_depart_from_departname(
+                        one, two, self._departs)
+                    if depart is not None:
+                        depart_str = depart.get_depart_salaryScope_and_name()
+                        if depart_str in res:
+                            vs = res[depart_str]
+                        vs[code] = person
+                if len(vs) > 0:
+                    res[depart_str] = vs
         return res
 
     def _get_depart_from_departname(self, companyname, departname, departs):
+        if departname is None or len(departname) == 0:  # 排除减员人员
+            return None
         for k, v in departs.items():
             if companyname == v.texdepart:
                 relativeUnits = v.get_departs()
