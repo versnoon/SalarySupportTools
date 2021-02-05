@@ -42,11 +42,17 @@ class PersonEngine(object):
         加载人员信息
         """
         res = dict()
-        person_info = PersonInfo()
-        person_load = ExlToClazz(
-            PersonInfo, person_info.getColumnDef(), self.get_tpl_path())
-        persons = person_info.to_map_by_company(person_load.loadTemp())
-        res["c"] = persons
+        # person_info = PersonInfo()
+        # person_load = ExlToClazz(
+        #     PersonInfo, person_info.getColumnDef(), self.get_tpl_path())
+        # persons = person_info.to_map_by_company(person_load.loadTemp())
+        # res["c"] = persons
+        person_info = PersonInfo()  # 人员信息维护表
+        person_load_new = ExlsToClazz(
+            PersonInfo, person_info.get_person_maintain_info_columns(), self.filepath_prefix(), self.filename_prefix())
+        current_persons = person_info.to_map_by_company(
+            person_load_new.loadTemp())
+        res["c"] = current_persons
         old_person_load = ExlToClazz(
             PersonInfo, person_info.getColumnDef(), self.get_old_tpl_path())
         old_persons = person_info.to_map_by_company(old_person_load.loadTemp())
@@ -72,10 +78,11 @@ class PersonEngine(object):
     def load_data(self):
         res = dict()
         person_info = PersonInfo()
-        person_load = ExlToClazz(
-            PersonInfo, person_info.getColumnDef(), self.get_tpl_path())
-        persons = person_info.to_map(person_load.loadTemp())
-        res["c"] = persons
+        person_load_new = ExlsToClazz(
+            PersonInfo, person_info.get_person_maintain_info_columns(), self.filepath_prefix(), self.filename_prefix())
+        current_persons = person_info.to_map_by_company(
+            person_load_new.loadTemp())
+        res["c"] = current_persons
         old_person_load = ExlToClazz(
             PersonInfo, person_info.getColumnDef(), self.get_old_tpl_path(), titleindex=0, noneable=True)
         old_persons = person_info.to_map(old_person_load.loadTemp())
