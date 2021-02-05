@@ -65,11 +65,11 @@ class PersonEngine(object):
         persons = person_info.to_map(person_load.loadTemp())
         res["c"] = persons
         old_person_load = ExlToClazz(
-            PersonInfo, person_info.getColumnDef(), self.get_old_tpl_path())
+            PersonInfo, person_info.getColumnDef(), self.get_old_tpl_path(), titleindex=0, noneable=True)
         old_persons = person_info.to_map(old_person_load.loadTemp())
         res["o"] = old_persons
         old_old_person_load = ExlToClazz(
-            PersonInfo, person_info.getColumnDef(), self.get_old_old_tpl_path())
+            PersonInfo, person_info.getColumnDef(), self.get_old_old_tpl_path(), titleindex=0, noneable=True)
         old_old_persons = person_info.to_map(
             old_old_person_load.loadTemp())
         res["o_o"] = old_old_persons

@@ -203,7 +203,12 @@ class SalaryGzInfo(object):
         if len(departs) < 2:
             raise ValueError(
                 "机构信息错误：{}-{}".format(self._code, self._departfullinfo))
-        return departs[i]
+        name = departs[i]
+        if i == 1:
+            t = self._departLevelTow
+            if t != name:
+                name = t
+        return name
 
     def _get_depart_from_departLevelTow(self, departs):
         for k, v in departs.items():
