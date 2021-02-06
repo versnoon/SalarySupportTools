@@ -76,10 +76,10 @@ class PersonJonEngine(object):
         for jobinfo in datas:
             company, depart_str = self._get_depart_byfullname(
                 jobinfo._depart_fullname)
-            jobs = []
+            jobs = OrderedDict()
             if depart_str in m:
                 jobs = m[depart_str]
-            jobs.append(jobinfo)
+            jobs[jobinfo._code] = jobinfo
             m[depart_str] = jobs
         return m
 

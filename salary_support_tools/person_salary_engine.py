@@ -16,13 +16,14 @@ from collections import OrderedDict
 
 class PersonSalaryEngine(object):
 
-    def __init__(self, period, persons, gzs, jjs, banks):
+    def __init__(self, period, persons, gzs, jjs, banks, jobs):
         self._name = "person_salary"
         self._period = period  # 期间
         self._gzs = gzs   # 工资
         self._jjs = jjs  # 奖金
         self._persons = persons  # 人员信息集合
         self._banks = banks  # 银行信息
+        self._jobs = jobs  # 岗位信息
         self._folder_prefix = r'd:\薪酬审核文件夹'
 
     def start(self):
@@ -30,7 +31,7 @@ class PersonSalaryEngine(object):
         组装人员的薪酬信息 包括 persons code depart
         """
         datas, datas_idno = self.merge_salary_person_bank_info(
-            self._persons, self._banks, self.merge_salary_info(self._gzs, self._jjs))
+            self._persons, self._banks, self._jobs, self.merge_salary_info(self._gzs, self._jjs))
         _, err_msgs = self.validate(datas)
         sap_datas = self.to_sap_info(datas)
         return err_msgs, datas, sap_datas, datas_idno
@@ -68,7 +69,7 @@ class PersonSalaryEngine(object):
             infos[info._depart] = vs
         return infos
 
-    def merge_salary_person_bank_info(self, persons, banks, person_salary_infos):
+    def merge_salary_person_bank_info(self, persons, banks, jobs, person_salary_infos):
         # 合并人员数据
         person_salary_infos_by_idno = dict()
         for depart_str, psis in person_salary_infos.items():
@@ -85,6 +86,13 @@ class PersonSalaryEngine(object):
                     if code in banks_info:
                         bs = banks_info[code]
                         psi._banks = bs
+                for de_key, jobsm in jobs.items():
+                    if depart_str in jobsm and person._complayLevelOne == de_key:
+                        jobs_info = jobsm[depart_str]
+                        if code in jobs_info:
+                            job = jobs_info[code]
+                            psi._job = job
+                            break
                 if idno != "":
                     person_salary_infos_by_idnos[idno] = psi
             person_salary_infos_by_idno[depart_str] = person_salary_infos_by_idnos
@@ -172,7 +180,7 @@ class PersonSalaryInfo(object):
     个人薪酬信息
     """
 
-    def __init__(self, period="", depart="", person=None, code="", gz=None, jj=None, banks=None):
+    def __init__(self, period="", depart="", person=None, code="", gz=None, jj=None, banks=None, job=None):
         self._period = period
         self._depart = depart
         self._tex_depart = ""  # 税务机构
@@ -181,6 +189,7 @@ class PersonSalaryInfo(object):
         self._jj = jj
         self._banks = banks
         self._person = person
+        self._job = job  # 岗位信息
         self._person_flag = "c"  # "current"
 
     def salary_scope(self):
@@ -341,6 +350,7 @@ class SapSalaryInfo(object):
         gzinfo = person_salary_info._gz
         jjinfo = person_salary_info._jj
         bankinfo = person_salary_info._banks
+        job = person_salary_info._job
         if personinfo is not None:
             self.one = personinfo._complayLevelOne
             self.two = personinfo._departLevelTow
@@ -353,8 +363,9 @@ class SapSalaryInfo(object):
             self._ygz = personinfo._personType
             self._ygzz = personinfo._jobStatus
 
-            self.zw = personinfo._cJobTitle
-            self.zz = personinfo._postType
+            if job is not None:
+                self.zw = job._zx_jobname
+                self.zz = job._job_type
 
             self._mggl = personinfo._timeOfJoinBaowu  # 进宝武时间
             self._gl = personinfo._timeOfWork  # 参加工作时间
