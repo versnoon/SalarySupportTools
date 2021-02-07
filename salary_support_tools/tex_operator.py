@@ -194,7 +194,8 @@ class TexInfo(object):
         self._code = sapinfo._code  # 工号
         self._name = sapinfo._name  # *姓名
         self._idno = sapinfo._idno  # 证件号码
-        self._totalpayable = sapinfo._totalpayable  # 本期收入
+        self._totalpayable = sapinfo._totalpayable + \
+            sapinfo._gjj - 2410 + sapinfo._nj - 804  # 本期收入
         self._yl = sapinfo._yl  # 基本养老保险费
         if sapinfo._yl < 0:
             self._yl = 0
