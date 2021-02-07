@@ -75,7 +75,9 @@ class PersonSalaryEngine(object):
         for depart_str, psis in person_salary_infos.items():
             person_salary_infos_by_idnos = dict()
             for code, psi in psis.items():
-                person, person_flag = self.get_person(code, persons)
+                # 获取人员信息
+                person, person_flag = self.get_person_by_code(
+                    code, depart_str, persons)
                 idno = ""
                 if person is not None:
                     psi._person = person
@@ -86,31 +88,37 @@ class PersonSalaryEngine(object):
                     if code in banks_info:
                         bs = banks_info[code]
                         psi._banks = bs
-                for de_key, jobsm in jobs.items():
-                    if depart_str in jobsm and person._complayLevelOne == de_key:
-                        jobs_info = jobsm[depart_str]
-                        if code in jobs_info:
-                            job = jobs_info[code]
-                            psi._job = job
-                            break
+                if person is not None:
+                    for de_key, jobsm in jobs.items():
+                        if depart_str in jobsm and person._complayLevelOne == de_key:
+                            jobs_info = jobsm[depart_str]
+                            if code in jobs_info:
+                                job = jobs_info[code]
+                                psi._job = job
+                                break
                 if idno != "":
                     person_salary_infos_by_idnos[idno] = psi
             person_salary_infos_by_idno[depart_str] = person_salary_infos_by_idnos
         return person_salary_infos, person_salary_infos_by_idno
 
-    def get_person(self, code, persons):
-        person = None
-        if code in persons["c"]:  # 当前人员信息
-            person = persons["c"][code]
-            return person, "c"
-        elif code in persons["o"]:  # 上期人员信息
-            person = persons["o"][code]
-            return person, "o"
-        elif code in persons["o_o"]:
-            person = persons["o"][code]
-            return person, "o_o"
-        else:
-            return person, "n"
+    def get_person_by_code(self, code, depart, persons):
+        person, flag = self.__get_person_by_code(code, depart, persons, "c")
+        if person is None:
+            person, flag = self.__get_person_by_code(
+                code, depart, persons, "o")
+        if person is None:
+            person, flag = self.__get_person_by_code(
+                code, depart, persons, "o_o")
+        return person, flag
+
+    def __get_person_by_code(self, code, depart, persons, person_flag):
+        current_persons = persons[person_flag]
+        for _, c_ps in current_persons.items():
+            for depart_key, ps in c_ps.items():
+                if depart_key == depart:
+                    if code in ps:
+                        return ps[code], person_flag
+        return None, "n"
 
     def validate(self, person_salary_infos):
         """
@@ -131,7 +139,7 @@ class PersonSalaryEngine(object):
                 banks = person_salary_info._banks
                 if gz is not None:
                     # 实发小于0
-                    if gz._pay < 0:
+                    if gz._pay is not None and gz._pay < 0:
                         err_message.append(self.err_mss(
                             "工资信息错误", "工资实发小于0，实发金额{}".format(gz._pay), person))
                     # 缺少工资银行卡号
@@ -145,9 +153,9 @@ class PersonSalaryEngine(object):
                             "工资信息错误", "岗位工资异常：缺少岗位工资信息", person))
                 if jj is not None:
                     # 实发小于0
-                    if jj._pay < 0:
+                    if jj._pay is not None and jj._pay < 0:
                         err_message.append(self.err_mss(
-                            "奖金信息错误", "奖金实发小于0，实发金额{}".format(gz._pay), person))
+                            "奖金信息错误", "奖金实发小于0，实发金额{}".format(jj._pay), person))
                     # 缺少工资银行卡号
                     if jj._pay > 0:
                         if banks is None or banks["jj"] is None:

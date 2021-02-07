@@ -3,7 +3,7 @@
 '''
 @File    :   person_engine.py
 @Time    :   2021/01/28 12:04:31
-@Author  :   Tong tan 
+@Author  :   Tong tan
 @Version :   1.0
 @Contact :   tongtan@gmail.com
 '''
@@ -21,9 +21,10 @@ class PersonEngine(object):
     人员信息处理引擎
     """
 
-    def __init__(self, period):
+    def __init__(self, period, departs):
         self._name = "person"
         self._period = period
+        self._departs = departs
         self._folder_path = r'd:\薪酬审核文件夹'
         self._person_info_filename = "人员信息导出结果"
         self._filename = '人员信息.xls'
@@ -49,53 +50,74 @@ class PersonEngine(object):
         # res["c"] = persons
         person_info = PersonInfo()  # 人员信息维护表
         person_load_new = ExlsToClazz(
-            PersonInfo, person_info.get_person_maintain_info_columns(), self.filepath_prefix(), self.filename_prefix())
-        current_persons = person_info.to_map_by_company(
+            PersonInfo, person_info.get_person_maintain_info_columns(), self.filepath_prefix(self._period), self.filename_prefix())
+        current_persons = self.__to_company_map(
             person_load_new.loadTemp())
         res["c"] = current_persons
-        old_person_load = ExlToClazz(
-            PersonInfo, person_info.getColumnDef(), self.get_old_tpl_path())
-        old_persons = person_info.to_map_by_company(old_person_load.loadTemp())
+        pre_period = self.pre_period(self._period)
+        old_person_load = ExlsToClazz(
+            PersonInfo, person_info.get_person_maintain_info_columns(), self.filepath_prefix(pre_period), self.filename_prefix(), noneable=True)
+        old_persons = self.__to_company_map(old_person_load.loadTemp())
         res["o"] = old_persons
-        old_old_person_load = ExlToClazz(
-            PersonInfo, person_info.getColumnDef(), self.get_old_old_tpl_path())
-        old_old_persons = person_info.to_map_by_company(
+        pre_pre_period = self.pre_period(pre_period)
+        old_old_person_load = ExlsToClazz(
+            PersonInfo, person_info.get_person_maintain_info_columns(), self.filepath_prefix(pre_pre_period), self.filename_prefix(), noneable=True)
+        old_old_persons = self.__to_company_map(
             old_old_person_load.loadTemp())
         res["o_o"] = old_old_persons
 
         return res
 
+    def pre_period(self, period):
+        month = 0
+        year = 0
+        try:
+            month = int(period[4:])
+            year = int(period[:4])
+        except ValueError:
+            raise("获取上期期间数据错误{}".format(period))
+        if month == 1 or month > 12:
+            month = 12
+            year -= 1
+        else:
+            month -= 1
+        return "{:0>4d}{:0>2d}".format(year, month)
+
     def load_data_new(self):
         res = dict()
         person_new = PersonInfo()  # 人员信息维护表
         person_load_new = ExlsToClazz(
-            PersonInfo, person_new.get_person_maintain_info_columns(), self.filepath_prefix(), self.filename_prefix())
-        current_persons = person_new.to_map_by_company(
+            PersonInfo, person_new.get_person_maintain_info_columns(), self.filepath_prefix(self._period), self.filename_prefix())
+        current_persons = self.to_depart_map(
             person_load_new.loadTemp())
         res["c"] = current_persons
         return res
 
     def load_data(self):
         res = dict()
+        period = self._period  # 当期
         person_info = PersonInfo()
         person_load_new = ExlsToClazz(
-            PersonInfo, person_info.get_person_maintain_info_columns(), self.filepath_prefix(), self.filename_prefix())
-        current_persons = person_info.to_map_by_company(
+            PersonInfo, person_info.get_person_maintain_info_columns(), self.filepath_prefix(period), self.filename_prefix())
+        current_persons = self.__to_company_map(
             person_load_new.loadTemp())
         res["c"] = current_persons
-        old_person_load = ExlToClazz(
-            PersonInfo, person_info.getColumnDef(), self.get_old_tpl_path(), titleindex=0, noneable=True)
-        old_persons = person_info.to_map(old_person_load.loadTemp())
+        pre_period = self.pre_period(period)
+        old_person_load = ExlsToClazz(
+            PersonInfo, person_info.get_person_maintain_info_columns(), self.filepath_prefix(pre_period), self.filename_prefix(), noneable=True)
+        old_persons = self.__to_company_map(
+            old_person_load.loadTemp())
         res["o"] = old_persons
-        old_old_person_load = ExlToClazz(
-            PersonInfo, person_info.getColumnDef(), self.get_old_old_tpl_path(), titleindex=0, noneable=True)
-        old_old_persons = person_info.to_map(
+        pre_pre_period = self.pre_period(pre_period)
+        old_old_person_load = ExlsToClazz(
+            PersonInfo, person_info.get_person_maintain_info_columns(), self.filepath_prefix(pre_pre_period), self.filename_prefix(), noneable=True)
+        old_old_persons = self.__to_company_map(
             old_old_person_load.loadTemp())
         res["o_o"] = old_old_persons
         return res
 
-    def filepath_prefix(self):
-        return r'{}\{}'.format(self._folder_path, self._period)
+    def filepath_prefix(self, peirod):
+        return r'{}\{}'.format(self._folder_path, peirod)
 
     def filename_prefix(self):
         return self._person_info_filename
@@ -156,6 +178,58 @@ class PersonEngine(object):
                 with open(path, 'a', encoding='utf-8') as f:
                     for m in messages:
                         f.write(m + '\n')
+
+    def __to_company_map(self, persons):
+        """
+        根据单位分组
+        """
+        m = OrderedDict()
+        ps = []
+        for person in persons:
+            one = person._complayLevelOne  # 一级公司
+            if one in m:
+                ps = m[one]
+            ps.append(person)
+            m[one] = ps
+
+        res = OrderedDict()
+        for k, vs in m.items():
+            res[k] = self.to_depart_map(vs)
+        return res
+
+    def to_depart_map(self, persons):
+        res = dict()
+        depart_str = ""
+        for person in persons:
+            vs = dict()
+            one = person._complayLevelOne  # 一级公司
+            two = person._departLevelTow  # 二级公司
+            code = person._code  # 职工编码
+            if one == '马钢（集团）控股有限公司(总部)' or one == '马鞍山钢铁股份有限公司（总部）':  # 集团本部  股份本部
+                depart = self._get_depart_from_departname(
+                    one, two, self._departs)
+                if depart is not None:
+                    depart_str = depart.get_depart_salaryScope_and_name()
+                    if depart_str in res:
+                        vs = res[depart_str]
+                    vs[code] = person
+            if len(vs) > 0:
+                res[depart_str] = vs
+        return res
+
+    def _get_depart_from_departname(self, companyname, departname, departs):
+        if departname is None or len(departname) == 0:  # 排除减员人员
+            return None
+        for k, v in departs.items():
+            if companyname == v.texdepart:
+                relativeUnits = v.get_departs()
+                for ru in relativeUnits:
+                    i = 1
+                    if k == '49':  # 投资工资 取 1
+                        i = 0
+                    if departname == ru:
+                        return v
+        return None
 
     def merge_persions(self):
         """

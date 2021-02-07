@@ -18,6 +18,7 @@ from salary_support_tools.tex_engine import TexEngine
 from salary_support_tools.salary_bank_engine import SalaryBankEngine
 from salary_support_tools.salary_gz_engine import SalaryGzEngine
 from salary_support_tools.salary_jj_engine import SalaryJjEngine
+from salary_support_tools.person_job_engine import PersonJonEngine
 from salary_support_tools.tex_operator import TexExport
 from salary_support_tools.salary_operator import SalaryOperator
 
@@ -33,13 +34,17 @@ class AuditorRunner(object):
 
         self.clearPath()
 
-        p_engine = PersonEngine(self._period)
+        p_engine = PersonEngine(self._period, self._departs)
         persons = p_engine.load_data()
         # 解析银行卡信息数据
 
         banks_engine = SalaryBankEngine(
             self._period, self._departs)
         banks = banks_engine.load_data()
+
+        jobs_engine = PersonJonEngine(
+            self._period, self._departs)
+        jobs = jobs_engine.load_data()
 
         # 载入工资信息
         gz_engine = SalaryGzEngine(self._period)
@@ -51,7 +56,7 @@ class AuditorRunner(object):
 
         # 完成 信息 汇总 及 错误检查 输出审核结果
         merge_engine = PersonSalaryEngine(
-            self._period, persons, gz_datas, jj_datas, banks)
+            self._period, persons, gz_datas, jj_datas, banks, jobs)
         err_msgs, datas, sap_datas, datas_idno = merge_engine.start()
 
         # 验证当期所得税

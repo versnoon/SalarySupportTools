@@ -8,7 +8,7 @@
 @Contact :   tongtan@gmail.com
 '''
 
-from os.path import isfile, join
+from os.path import isfile, join, exists
 from os import listdir
 
 import xlrd
@@ -79,6 +79,8 @@ class ExlsToClazz(object):
         self.noneable = noneable
 
     def loadTemp(self) -> []:
+        if not exists(self.filepath_prefix):
+            return []
         file_list = listdir(self.filepath_prefix)
         # for base_path, folder_list, file_list in walk(self.filepath_prefix):
         datas = []

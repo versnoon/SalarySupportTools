@@ -25,7 +25,6 @@ class PersonCompareEngine(object):
         reds = dict()
         for depart_str, c_ps in self._current_persons.items():
             vs = dict()
-            c_ps = self._current_persons[depart_str]
             if depart_str in self._person_salary_infos:
                 pre_ps = self._person_salary_infos[depart_str]
                 inc, red = self.compare_detail(depart_str, c_ps, pre_ps)

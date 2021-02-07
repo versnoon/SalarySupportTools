@@ -31,7 +31,7 @@ class ReportRunner(object):
 
     def run(self):
 
-        p_engine = PersonEngine(self._period)
+        p_engine = PersonEngine(self._period, self._departs)
         persons = p_engine.load_data()
         # 解析银行卡信息数据
 
