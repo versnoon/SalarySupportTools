@@ -459,7 +459,7 @@ class SapSalaryInfo(object):
 
             self._cwdf = gzinfo._qtnssr  # 其他纳税收入
 
-            self._totalpayable = gzinfo._totalPayable + gzinfo._dsznf    # 工资应发 独补合计
+            self._totalpayable = gzinfo._totalPayable    # 工资应发合计
             self._totalpay = gzinfo._pay - gzinfo._jkdjf  # 工资实发
             self._gzpay = gzinfo._pay - gzinfo._jkdjf  # 工资实发 - 教育经费
 
