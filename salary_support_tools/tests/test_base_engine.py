@@ -33,6 +33,6 @@ class TestBaseEngine(object):
         name = "期间引擎"
         engine = BasePeriodEngine(name, period)
         assert name == engine.name
-        assert r'd:\薪酬审核文件夹' == engine.base_folder_path
+        assert r'd:\薪酬审核文件夹\202102' == engine.base_folder_path
         assert engine.period.year == 2021
         assert engine.period.month == 2

@@ -8,6 +8,9 @@
 @Contact :   tongtan@gmail.com
 '''
 
+
+from os.path import join
+
 from salary_support_tools.engine.base_engine import BaseEngine
 from salary_support_tools.model.salary_period import SalaryPeriod
 
@@ -21,3 +24,7 @@ class BasePeriodEngine(BaseEngine):
     @property
     def period(self):
         return self.__period
+
+    @property
+    def base_folder_path(self):
+        return join(super().base_folder_path, self.period.period)
