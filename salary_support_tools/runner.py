@@ -21,6 +21,7 @@ from salary_support_tools.salary_jj_engine import SalaryJjEngine
 from salary_support_tools.person_job_engine import PersonJonEngine
 from salary_support_tools.tex_operator import TexExport
 from salary_support_tools.salary_operator import SalaryOperator
+from salary_support_tools.salary_report_operator import SalaryReportOperator
 
 
 class AuditorRunner(object):
@@ -70,6 +71,10 @@ class AuditorRunner(object):
             self._period, self._departs, gz_datas, jj_datas, datas, sap_datas, err_msgs)
         salary_op._exportable = True
         salary_op.export()
+        report_op = SalaryReportOperator(
+            self._period, sap_datas, err_msgs)
+        report_op._exportable = True
+        report_op.export()
         # 税务相关文件输出
         tex_op = TexExport(
             self._period, sap_datas, tex_datas, tex_err_msgs)

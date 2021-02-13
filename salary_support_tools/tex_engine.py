@@ -227,10 +227,10 @@ class TexSysStruct(object):
         self._ljynse = 0  # 累计应纳税所得额
         self._sl = 0  # 税率
         self._sskc = 0  # 速算扣除数
-        self._ljynse = 0  # 累计应纳税额
+        self._ljynse1 = 0  # 累计应纳税额
         self._ljjm = 0  # 累计减免税额
         self._ljykj = 0  # 累计应扣缴税额
-        self._ljynse = 0  # 累计已预缴税额
+        self._ljynse2 = 0  # 累计已预缴税额
 
     def getColumnDef(self) -> dict:
         columns = dict()
@@ -271,11 +271,10 @@ class TexSysStruct(object):
         columns["_ljynse"] = "累计应纳税所得额"
         columns["_sl"] = "税率"
         columns["_sskc"] = "速算扣除数"
-        columns["_ljynse"] = "累计应纳税额"
+        columns["_ljynse1"] = "累计应纳税额"
         columns["_ljjm"] = "累计减免税额"
         columns["_ljykj"] = "累计应扣缴税额"
-        columns["_ljynse"] = "累计已预缴税额"
-
+        columns["_ljynse2"] = "累计已预缴税额"
         columns["_tex"] = "累计应补(退)税额"
 
         return columns

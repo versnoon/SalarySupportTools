@@ -10,7 +10,7 @@
 
 import pytest
 
-from salary_support_tools.model.SalaryPeriod import SalaryPeriod
+from salary_support_tools.model.salary_period import SalaryPeriod
 
 
 class TestSalaryPeriod(object):

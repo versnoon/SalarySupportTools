@@ -51,10 +51,10 @@ class SalaryOperator(object):
         self.err_info_write_to_depart_folder()
         # 审核表 格式输出
         self.export_auditor_excel()
-        # sh002 格式输出
-        self.export_sh002_excel()
-        # sh003 格式输出
-        self.export_sh003_excel()
+        # # sh002 格式输出
+        # self.export_sh002_excel()
+        # # sh003 格式输出
+        # self.export_sh003_excel()
 
         # 审核结果输出
         self.export_audited_info()

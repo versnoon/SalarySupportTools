@@ -35,8 +35,7 @@ class PersonCompareRunner(object):
 
         # 当期人员信息
         current_p_engine = PersonEngine(self._period, self._departs)
-        current_persons = current_p_engine.to_depart_map(
-            current_p_engine.load_data_new())
+        current_persons = current_p_engine.load_data_new()
 
         # 上期相关信息
 

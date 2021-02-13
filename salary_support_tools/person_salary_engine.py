@@ -322,6 +322,7 @@ class SapSalaryInfo(object):
 
         self._totalsdj = 0  # 所得税
         self._totalpayable = 0  # 应发
+        self._totalpayable_1 = 0  # 应发含独补
         self._totalpay = 0  # 实发
         self._gzpay = 0  # 工资上卡
         self._jjpay = 0  # 奖金上卡
@@ -384,7 +385,8 @@ class SapSalaryInfo(object):
                 self._code = jjinfo._code
                 self._name = jjinfo._name
             else:
-                raise ValueError("数据异常，存在不合法的发放人员数据")
+                pass
+                # raise ValueError("数据异常，存在不合法的发放人员数据")
         if gzinfo is not None:
             self._gwgz = gzinfo._gwgz
             # 直管领导 岗位薪 统计在岗位工资上
@@ -459,9 +461,9 @@ class SapSalaryInfo(object):
 
             self._cwdf = gzinfo._qtnssr  # 其他纳税收入
 
-            self._totalpayable = gzinfo._totalPayable    # 工资应发合计
-            self._totalpay = gzinfo._pay - gzinfo._jkdjf  # 工资实发
-            self._gzpay = gzinfo._pay - gzinfo._jkdjf  # 工资实发 - 教育经费
+            self._totalpayable = gzinfo._totalPayable  # 工资应发合计
+            self._totalpay = gzinfo._pay  # 工资实发
+            self._gzpay = gzinfo._pay  # 工资实发 - 教育经费
 
             self._jyjf = gzinfo._jkdjf
 
