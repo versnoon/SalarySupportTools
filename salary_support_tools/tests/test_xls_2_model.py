@@ -38,28 +38,21 @@ class TestXls2ModelUtil(object):
         assert r'd:\审核文件夹\工资信息.xls' == file_path
 
     def test_get_model_property_name(self):
-        cols = dict()
-        cols["__year"] = "年"
-        cols["__month"] = "月"
+        cols = SalaryPeriod.cols()
         i_model = BaseExcelImportModel(
             "sp", SalaryPeriod, cols, r'd:\审核文件夹', 'test', '当前审核日期')
         util = XlsToModelUtil([i_model])
         yearname = util.get_model_property_name("年", cols)
-        assert "__year" == yearname
+        assert "year" == yearname
         monthname = util.get_model_property_name("月", cols)
-        assert "__month" == monthname
+        assert "month" == monthname
         unknow = util.get_model_property_name("unkown", cols)
         assert "" == unknow
 
-    def cov(self, datas):
-        return datas[0]
-
     def test_load_tpls(self):
-        cols = dict()
-        cols["year"] = "年"
-        cols["month"] = "月"
+        cols = cols = SalaryPeriod.cols()
         i_model = BaseExcelImportModel(
-            "sp", SalaryPeriod, cols, r'd:\薪酬审核文件夹\test', '当前审核日期', None, func=self.cov)
+            "sp", SalaryPeriod, cols, r'd:\薪酬审核文件夹\test', '当前审核日期', None, func=SalaryPeriod.cov)
         util = XlsToModelUtil([i_model])
         res: dict = util.load_tpls()
         assert "sp" in res

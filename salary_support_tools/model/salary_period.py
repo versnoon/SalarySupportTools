@@ -64,5 +64,16 @@ class SalaryPeriod(object):
             return False
         return True
 
+    @classmethod
+    def cols(self):
+        cols = dict()
+        cols["year"] = "年"
+        cols["month"] = "月"
+        return cols
+
+    @classmethod
+    def cov(self, datas):
+        return datas[0]
+
     def __str__(self):
         return self.get_period_str(self.__year, self.__month)
