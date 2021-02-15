@@ -14,6 +14,7 @@ import pytest
 from salary_support_tools.excel.xls_2_model_util import XlsToModelUtil
 from salary_support_tools.model.base_excel_import_model import BaseExcelImportModel
 from salary_support_tools.model.salary_period import SalaryPeriod
+from salary_support_tools.model.salary_depart import SalaryDepart
 
 
 class TestXls2ModelUtil(object):
@@ -51,10 +52,15 @@ class TestXls2ModelUtil(object):
 
     def test_load_tpls(self):
         cols = cols = SalaryPeriod.cols()
-        i_model = BaseExcelImportModel(
+        sp_model = BaseExcelImportModel(
             "sp", SalaryPeriod, cols, r'd:\薪酬审核文件夹\test', '当前审核日期', None, func=SalaryPeriod.cov)
-        util = XlsToModelUtil([i_model])
+        sd_model = BaseExcelImportModel(
+            "sd", SalaryDepart, SalaryDepart.cols(), r'd:\薪酬审核文件夹\test', '审核机构信息', None, func=SalaryDepart.cov)
+        util = XlsToModelUtil([sp_model, sd_model])
         res: dict = util.load_tpls()
         assert "sp" in res
         assert res["sp"].year == 2021
         assert res["sp"].month == 2
+        assert "sd" in res
+        assert len(res["sd"]) > 0
+        assert "01" in res["sd"]

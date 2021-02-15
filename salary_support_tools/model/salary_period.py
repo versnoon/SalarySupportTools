@@ -9,7 +9,7 @@
 '''
 
 
-class SalaryPeriod(object):
+class SalaryPeriod:
     """
     期间信息 包含 年 月
     """
