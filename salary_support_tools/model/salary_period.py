@@ -14,7 +14,7 @@ class SalaryPeriod(object):
     期间信息 包含 年 月
     """
 
-    def __init__(self, year: int, month: int):
+    def __init__(self, year: int = 0, month: int = 0):
         self.__year: int = year  # 年
         self.__month: int = month  # 月
 
@@ -24,13 +24,25 @@ class SalaryPeriod(object):
             raise(ValueError("期间设置错误,年信息出错{}".format(self.__year)))
         return self.__year
 
-    @ property
+    @year.setter
+    def year(self, year):
+        if not self.year_validator(year):
+            raise(ValueError("期间设置错误,年信息出错{}".format(self.__year)))
+        self.__year = year
+
+    @property
     def month(self):
         if not self.month_validator(self.__month):
             raise(ValueError("期间设置错误,月信息出错{}".format(self.__month)))
         return self.__month
 
-    @ property
+    @month.setter
+    def month(self, month):
+        if not self.month_validator(self.__month):
+            raise(ValueError("期间设置错误,月信息出错{}".format(self.__month)))
+        self.__month = month
+
+    @property
     def period(self):
         return self.get_period_str(self.__year, self.__month)
 

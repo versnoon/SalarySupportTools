@@ -9,7 +9,7 @@
 '''
 
 
-class BaseEngine(object):
+class BaseEngine:
     """
     导入模板基类，定义引擎名称及根目录
     """
