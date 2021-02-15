@@ -13,9 +13,9 @@ import pytest
 
 from salary_support_tools.excel.xls_2_model_util import XlsToModelUtil
 from salary_support_tools.model.base_excel_import_model import BaseExcelImportModel
-from salary_support_tools.model.salary_period import SalaryPeriod
-from salary_support_tools.model.salary_depart import SalaryDepart
-from salary_support_tools.model.salary_person import SalaryPerson
+from salary_support_tools.model.salary_period import SalaryPeriod, SalaryPeriodConventor
+from salary_support_tools.model.salary_depart import SalaryDepart, SalaryDepartConventor
+from salary_support_tools.model.salary_person import SalaryPerson, SalaryPersonConventor
 
 
 class TestXls2ModelUtil(object):
@@ -55,7 +55,7 @@ class TestXls2ModelUtil(object):
     def test_load_tpls(self):
         cols = cols = SalaryPeriod.cols()
         sp_model = BaseExcelImportModel(
-            "sp", SalaryPeriod, cols, '当前审核日期', None, func=SalaryPeriod.cov)
+            "sp", SalaryPeriod, cols, '当前审核日期', None, func=SalaryPeriodConventor().cov)
         util = XlsToModelUtil([sp_model])
         res: dict = util.load_tpls()
         assert "sp" in res
@@ -64,9 +64,9 @@ class TestXls2ModelUtil(object):
         period = res["sp"]
 
         sd_model = BaseExcelImportModel(
-            "sd", SalaryDepart, SalaryDepart.cols(), '审核机构信息', None, func=SalaryDepart.cov, period=period)
+            "sd", SalaryDepart, SalaryDepart.cols(), '审核机构信息', None, func=SalaryDepartConventor().cov, period=period)
         s_p_model = BaseExcelImportModel(
-            "s_p", SalaryPerson, SalaryPerson.cols(), '', '人员信息导出结果', func=SalaryPerson.cov, period=period)
+            "s_p", SalaryPerson, SalaryPerson.cols(), '', '人员信息导出结果', func=SalaryPersonConventor().cov, period=period)
         util = XlsToModelUtil([sd_model, s_p_model])
         res: dict = util.load_tpls()
         assert '202102' == sd_model.period.period

@@ -71,9 +71,10 @@ class SalaryPeriod:
         cols["month"] = "月"
         return cols
 
-    @classmethod
-    def cov(self, datas, period):
-        return datas[0]
-
     def __str__(self):
         return self.get_period_str(self.__year, self.__month)
+
+
+class SalaryPeriodConventor:
+    def cov(self, datas, period):
+        return datas[0]

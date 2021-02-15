@@ -68,7 +68,12 @@ class SalaryDepart(BasePeriodEngine):
         cols["texdepart"] = "税务机构"
         return cols
 
-    @classmethod
+    def __str__(self):
+        return '审核机构信息: 序号{} - 工资范围 {} - 审核单位名称 {} - 相关单位 {}'.format(self.sortno, self.salaryScope, self.name, self.get_departs())
+
+
+class SalaryDepartConventor:
+
     def cov(self, datas, period):
         m = OrderedDict()
         if datas is not None and len(datas) > 0:
@@ -76,6 +81,3 @@ class SalaryDepart(BasePeriodEngine):
                 k = i.salaryScope
                 m[k] = i
         return m
-
-    def __str__(self):
-        return '审核机构信息: 序号{} - 工资范围 {} - 审核单位名称 {} - 相关单位 {}'.format(self.sortno, self.salaryScope, self.name, self.get_departs())
