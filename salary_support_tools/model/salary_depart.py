@@ -66,7 +66,7 @@ class SalaryDepart:
         return cols
 
     @classmethod
-    def cov(self, datas):
+    def cov(self, datas, period):
         m = OrderedDict()
         if datas is not None and len(datas) > 0:
             for i in datas:

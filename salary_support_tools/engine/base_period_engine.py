@@ -24,7 +24,3 @@ class BasePeriodEngine(BaseEngine):
     @property
     def period(self):
         return self.__period
-
-    @property
-    def base_folder_path(self):
-        return join(super().base_folder_path, self.period.period)

@@ -42,7 +42,8 @@ class XlsToModelUtil:
         """
         加载数据
         """
-        filepath_prefix = modelinfo.filepath_prefix
+        filepath_prefix = modelinfo.test_tpl_path()  # 测试环境
+        # filepath_prefix = modelinfo.tpl_path_prefix()  # 正式环境
         filename = modelinfo.filename
         filename_prefix = modelinfo.filename_prefix
         clazz = modelinfo.clazz
@@ -51,6 +52,7 @@ class XlsToModelUtil:
         title_row = modelinfo.title_row
         skipable = modelinfo.skip_load_with_no_file  # 导入文件不存在时是否跳过
         func = modelinfo.func
+        period = modelinfo.period
         filepaths = self.get_tpl_file_paths(
             filepath_prefix, filename, filename_prefix)
         res = []
@@ -64,7 +66,7 @@ class XlsToModelUtil:
             res.extend(self.read_tpl(clazz, filepath,
                                      sheet_index, title_row, cols))
         if func:
-            return func(res)
+            return func(res, period)
         else:
             return res
 

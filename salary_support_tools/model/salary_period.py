@@ -51,7 +51,7 @@ class SalaryPeriod:
         返回yyyyMM格式化期间字符串
         """
         if self.year_validator(year) and self.month_validator(month):
-            return "{:0>4d}{:0>2d}".format(year, month)
+            return "{:0>4d}{:0>2d}".format(int(year), int(month))
         return None
 
     def year_validator(self, year):
@@ -72,7 +72,7 @@ class SalaryPeriod:
         return cols
 
     @classmethod
-    def cov(self, datas):
+    def cov(self, datas, period):
         return datas[0]
 
     def __str__(self):

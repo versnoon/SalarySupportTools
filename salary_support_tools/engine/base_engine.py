@@ -16,7 +16,6 @@ class BaseEngine:
 
     def __init__(self, name=""):
         self.__name: str = name  # 模型名称
-        self.__base_folder_path: str = r'd:\薪酬审核文件夹'
 
     @property
     def name(self):
@@ -27,7 +26,3 @@ class BaseEngine:
         if name is None or len(name.strip()) == 0:
             raise ValueError("对象名称为空")
         return name.strip()
-
-    @property
-    def base_folder_path(self):
-        return self.__base_folder_path

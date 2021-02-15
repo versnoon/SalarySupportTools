@@ -61,7 +61,7 @@ class SalaryPerson(BasePeriodEngine):
         return cols
 
     @classmethod
-    def cov(self, datas):
+    def cov(self, datas, period):
         return datas
 
     def __str__(self):

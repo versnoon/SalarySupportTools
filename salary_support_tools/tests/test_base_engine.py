@@ -26,13 +26,11 @@ class TestBaseEngine(object):
         name = "基类"
         engine = BaseEngine(name)
         assert name == engine.name
-        assert r'd:\薪酬审核文件夹' == engine.base_folder_path
 
     def test_base_period_engine(self):
         period = SalaryPeriod(2021, 2)
         name = "期间引擎"
         engine = BasePeriodEngine(name, period)
         assert name == engine.name
-        assert r'd:\薪酬审核文件夹\202102' == engine.base_folder_path
         assert engine.period.year == 2021
         assert engine.period.month == 2
