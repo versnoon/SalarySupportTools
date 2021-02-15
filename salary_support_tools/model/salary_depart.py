@@ -74,7 +74,7 @@ class SalaryDepart(BasePeriodEngine):
 
 class SalaryDepartConventor:
 
-    def cov(self, datas, period):
+    def cov(self, datas, period, departs):
         m = OrderedDict()
         if datas is not None and len(datas) > 0:
             for i in datas:

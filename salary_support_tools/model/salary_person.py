@@ -66,7 +66,7 @@ class SalaryPerson(BasePeriodEngine):
 
 class SalaryPersonConventor:
 
-    def cov(self, datas, period):
+    def cov(self, datas, period, departs):
         res_code = OrderedDict()
         res_idno = OrderedDict()
         for data in datas:

@@ -18,7 +18,7 @@ class BaseExcelImportModel:
     导入业务模型基类
     """
 
-    def __init__(self, modelkey, clazz: BaseEngine, cols, filename, filename_prefix, sheetindex=0, titlerow=0, func=None, period=None):
+    def __init__(self, modelkey, clazz: BaseEngine, cols, filename, filename_prefix, sheetindex=0, titlerow=0, func=None, period=None, departs=None):
         self.__modelkey = modelkey  # 数据标示
         self.__clazz = clazz  # 模型
         self.__cols = cols  # excel列与模型属性之间得对应数组
@@ -29,6 +29,7 @@ class BaseExcelImportModel:
         self.__titlerow_index = titlerow  # 标题行索引
         self.__func = func  # 回调函数
         self.__period = period  # 期间
+        self.__departs = departs  # 审核单位
 
     @property
     def skip_load_with_no_file(self):
@@ -45,6 +46,14 @@ class BaseExcelImportModel:
     @period.setter
     def period(self, period):
         self.__period = period
+
+    @property
+    def departs(self):
+        return self.__departs
+
+    @departs.setter
+    def departs(self, departs):
+        self.__departs = departs
 
     @property
     def modelkey(self):

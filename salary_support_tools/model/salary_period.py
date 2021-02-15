@@ -76,5 +76,5 @@ class SalaryPeriod:
 
 
 class SalaryPeriodConventor:
-    def cov(self, datas, period):
+    def cov(self, datas, period, departs):
         return datas[0]

@@ -16,6 +16,7 @@ from salary_support_tools.model.base_excel_import_model import BaseExcelImportMo
 from salary_support_tools.model.salary_period import SalaryPeriod, SalaryPeriodConventor
 from salary_support_tools.model.salary_depart import SalaryDepart, SalaryDepartConventor
 from salary_support_tools.model.salary_person import SalaryPerson, SalaryPersonConventor
+from salary_support_tools.model.salary_job import SalaryJob, SalaryJobConventor
 
 
 class TestXls2ModelUtil(object):
@@ -65,17 +66,28 @@ class TestXls2ModelUtil(object):
 
         sd_model = BaseExcelImportModel(
             "sd", SalaryDepart, SalaryDepart.cols(), '审核机构信息', None, func=SalaryDepartConventor().cov, period=period)
-        s_p_model = BaseExcelImportModel(
-            "s_p", SalaryPerson, SalaryPerson.cols(), '', '人员信息导出结果', func=SalaryPersonConventor().cov, period=period)
-        util = XlsToModelUtil([sd_model, s_p_model])
+
+        util = XlsToModelUtil([sd_model])
         res: dict = util.load_tpls()
         assert '202102' == sd_model.period.period
         assert "sd" in res
         assert len(res["sd"]) > 0
         assert "01" in res["sd"]
+        departs = res["sd"]
+        s_p_model = BaseExcelImportModel(
+            "s_p", SalaryPerson, SalaryPerson.cols(), '', '人员信息', func=SalaryPersonConventor().cov, period=period, departs=departs)
+        s_j_model = BaseExcelImportModel(
+            "s_j", SalaryJob, SalaryJob.cols(), '', '岗位聘用信息', func=SalaryJobConventor().cov, period=period, departs=departs)
+        util = XlsToModelUtil([s_p_model, s_j_model])
+        res: dict = util.load_tpls()
         assert "s_p" in res
         assert len(res["s_p"]) > 0
         assert len(res["s_p"][0]["马鞍山钢铁股份有限公司（总部）"]) > 0
         assert res["s_p"][0]["马鞍山钢铁股份有限公司（总部）"]["M74244"]._name == "万利军"
         assert res["s_p"][1]["马鞍山钢铁股份有限公司（总部）"]["511022198105215653"]._name == "万利军"
         assert res["s_p"][1]["马鞍山钢铁股份有限公司（总部）"]["511022198105215653"].period.period == "202102"
+        assert "s_j" in res
+        assert len(res["s_j"]) > 0
+        assert res["s_j"]["马鞍山钢铁股份有限公司（总部）"]["02_股份机关"]["M04484"]._code == 'M04484'
+        assert res["s_j"]["马鞍山钢铁股份有限公司（总部）"]["02_股份机关"]["M04484"]._name == '汤寅波'
+        assert res["s_j"]["马鞍山钢铁股份有限公司（总部）"]["02_股份机关"]["M04484"]._zx_jobname == '经理'

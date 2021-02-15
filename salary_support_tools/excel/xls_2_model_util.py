@@ -53,6 +53,7 @@ class XlsToModelUtil:
         skipable = modelinfo.skip_load_with_no_file  # 导入文件不存在时是否跳过
         func = modelinfo.func
         period = modelinfo.period
+        departs = modelinfo.departs
         filepaths = self.get_tpl_file_paths(
             filepath_prefix, filename, filename_prefix)
         res = []
@@ -66,7 +67,7 @@ class XlsToModelUtil:
             res.extend(self.read_tpl(clazz, filepath,
                                      sheet_index, title_row, cols))
         if func:
-            return func(res, period)
+            return func(res, period, departs)
         else:
             return res
 

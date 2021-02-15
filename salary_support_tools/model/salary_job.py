@@ -64,10 +64,36 @@ class SalaryJob(BasePeriodEngine):
         cols["_job_level_range"] = "岗级范围"
         return cols
 
-    @classmethod
-    def cov(self, datas, period):
+
+class SalaryJobConventor:
+
+    def cov(self, datas, period, departs):
         res = OrderedDict()
         for data in datas:
-            vs_code = OrderedDict()
             data.period = period
+            company, depart_str = self._get_depart_byfullname(
+                data._depart_fullname, departs)
+            code = data._code
+            vs = OrderedDict()
+            vs_depart = OrderedDict()
+            if company in res:
+                vs = res[company]
+            if depart_str in vs:
+                vs_depart = vs[depart_str]
+            vs_depart[code] = data
+            vs[depart_str] = vs_depart
+            res[company] = vs
+
         return res
+
+    def _get_depart_byfullname(self, depart_fullname, departinfos):
+        departs = depart_fullname.split("\\")
+        if len(departs) < 2:
+            raise ValueError("{},机构信息异常".format(depart_fullname))
+        depart_name = departs[1]
+        for ds, depart in departinfos.items():
+            if depart.is_depart(depart_name):
+                depart_name = depart.get_depart_salaryScope_and_name()
+                break
+
+        return departs[0], depart_name
