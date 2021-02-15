@@ -75,14 +75,14 @@ class XlsToModelUtil:
                 self.get_tplfile_path(filepath_prefix, filename, self.EXT))
             paths[filename_path] = file_exist
         else:
-            file_list = list(filepath_prefix)
+            file_list = listdir(filepath_prefix)
             for file_name in file_list:
                 file_path = self.get_tplfile_path(filepath_prefix, file_name)
                 file_ext = file_name.rsplit('.', maxsplit=1)
                 if len(file_ext) != 2:
                     # 没有后缀名
                     continue
-                if file_ext[1].lower() != self.EXT:
+                if file_ext[1].lower() != self.EXT[1:]:
                     # 不是excel2003文件
                     continue
                 # 判断已特定名称开头的文件
