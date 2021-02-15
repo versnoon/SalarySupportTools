@@ -62,7 +62,26 @@ class SalaryPerson(BasePeriodEngine):
 
     @classmethod
     def cov(self, datas, period):
-        return datas
+        res_code = OrderedDict()
+        res_idno = OrderedDict()
+        for data in datas:
+            vs_code = OrderedDict()
+            vs_idno = OrderedDict()
+            data.period = period
+            companyname = data._complayLevelOne
+            if not companyname:
+                companyname = 'unknow'
+            if companyname in res_code:
+                vs_code = res_code[companyname]
+            if companyname in res_idno:
+                vs_idno = res_idno[companyname]
+            if data._code:
+                vs_code[data._code] = data
+            if data._idno:
+                vs_idno[data._idno] = data
+            res_code[companyname] = vs_code
+            res_idno[companyname] = vs_idno
+        return res_code, res_idno
 
     def __str__(self):
         return '员工基本信息: 工号 {} - 姓名 {} - 公司 {} - 部门 {} - 分厂 {} - 作业区 {} - 班组 {} - 岗位 {}'.format(self._code, self._name, self._complayLevelOne, self._departLevelTow, self._branchLevelThree, self._assignmentSectionLevelFour, self._groupLevelFive,  self._cJobTitle)

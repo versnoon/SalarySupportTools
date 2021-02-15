@@ -75,3 +75,7 @@ class TestXls2ModelUtil(object):
         assert "01" in res["sd"]
         assert "s_p" in res
         assert len(res["s_p"]) > 0
+        assert len(res["s_p"][0]["马鞍山钢铁股份有限公司（总部）"]) > 0
+        assert res["s_p"][0]["马鞍山钢铁股份有限公司（总部）"]["M74244"]._name == "万利军"
+        assert res["s_p"][1]["马鞍山钢铁股份有限公司（总部）"]["511022198105215653"]._name == "万利军"
+        assert res["s_p"][1]["马鞍山钢铁股份有限公司（总部）"]["511022198105215653"].period.period == "202102"
