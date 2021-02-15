@@ -20,17 +20,17 @@ class TestBaseEngine(object):
     def test_create_base_engine(self):
         engine = BaseEngine()
         with pytest.raises(ValueError):
-            engine.name
+            engine.engine_name
 
     def test_base_engine(self):
         name = "基类"
         engine = BaseEngine(name)
-        assert name == engine.name
+        assert name == engine.engine_name
 
     def test_base_period_engine(self):
         period = SalaryPeriod(2021, 2)
         name = "期间引擎"
         engine = BasePeriodEngine(name, period)
-        assert name == engine.name
+        assert name == engine.engine_name
         assert engine.period.year == 2021
         assert engine.period.month == 2

@@ -24,3 +24,7 @@ class BasePeriodEngine(BaseEngine):
     @property
     def period(self):
         return self.__period
+
+    @period.setter
+    def period(self, period):
+        self.__period = period

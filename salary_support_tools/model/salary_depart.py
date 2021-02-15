@@ -12,7 +12,10 @@
 from collections import OrderedDict
 
 
-class SalaryDepart:
+from salary_support_tools.engine.base_period_engine import BasePeriodEngine
+
+
+class SalaryDepart(BasePeriodEngine):
     """
     审核单位相关信息
     """

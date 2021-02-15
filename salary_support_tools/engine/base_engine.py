@@ -14,15 +14,15 @@ class BaseEngine:
     导入模板基类，定义引擎名称及根目录
     """
 
-    def __init__(self, name=""):
-        self.__name: str = name  # 模型名称
+    def __init__(self, engine_name=""):
+        self.__engine_name: str = engine_name  # 模型名称
 
     @property
-    def name(self):
+    def engine_name(self):
         """
         返回engine名称
         """
-        name = self.__name
+        name = self.__engine_name
         if name is None or len(name.strip()) == 0:
             raise ValueError("对象名称为空")
         return name.strip()
