@@ -17,6 +17,7 @@ from salary_support_tools.model.salary_period import SalaryPeriod, SalaryPeriodC
 from salary_support_tools.model.salary_depart import SalaryDepart, SalaryDepartConventor
 from salary_support_tools.model.salary_person import SalaryPerson, SalaryPersonConventor
 from salary_support_tools.model.salary_job import SalaryJob, SalaryJobConventor
+from salary_support_tools.model.salary_bank import SalaryBank, SalaryBankConventor
 
 
 class TestXls2ModelUtil(object):
@@ -78,7 +79,9 @@ class TestXls2ModelUtil(object):
             "s_p", SalaryPerson, SalaryPerson.cols(), '', '人员信息', func=SalaryPersonConventor().cov, period=period, departs=departs)
         s_j_model = BaseExcelImportModel(
             "s_j", SalaryJob, SalaryJob.cols(), '', '岗位聘用信息', func=SalaryJobConventor().cov, period=period, departs=departs)
-        util = XlsToModelUtil([s_p_model, s_j_model])
+        s_b_model = BaseExcelImportModel(
+            "s_b", SalaryBank, SalaryBank.cols(), '', '银行卡信息', func=SalaryBankConventor().cov, period=period, departs=departs)
+        util = XlsToModelUtil([s_p_model, s_j_model, s_b_model])
         res: dict = util.load_tpls()
         assert "s_p" in res
         assert len(res["s_p"]) > 0
@@ -91,3 +94,7 @@ class TestXls2ModelUtil(object):
         assert res["s_j"]["马鞍山钢铁股份有限公司（总部）"]["02_股份机关"]["M04484"]._code == 'M04484'
         assert res["s_j"]["马鞍山钢铁股份有限公司（总部）"]["02_股份机关"]["M04484"]._name == '汤寅波'
         assert res["s_j"]["马鞍山钢铁股份有限公司（总部）"]["02_股份机关"]["M04484"]._zx_jobname == '经理'
+        assert "s_j" in res
+        assert len(res["s_b"]) > 0
+        assert res["s_b"]["马鞍山钢铁股份有限公司（总部）"]["02_股份机关"]["M04484"]['gz']._code == 'M04484'
+        assert res["s_b"]["马鞍山钢铁股份有限公司（总部）"]["02_股份机关"]["M04484"]['jj']._code == 'M04484'
