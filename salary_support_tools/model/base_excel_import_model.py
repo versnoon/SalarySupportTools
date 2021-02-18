@@ -19,7 +19,7 @@ class BaseExcelImportModel:
     导入业务模型基类
     """
 
-    def __init__(self, modelkey, clazz: BaseEngine, cols, filename, filename_prefix, sheetindex=0, titlerow=0, convertor: BaseModelConventor = None, period=None, departs=None):
+    def __init__(self, modelkey, clazz: BaseEngine, cols, filename, filename_prefix, sheetindex=0, titlerow=0, convertor: BaseModelConventor = None, period=None, departs=None, filefoldername=""):
         self.__modelkey = modelkey  # 数据标示
         self.__clazz = clazz  # 模型
         self.__cols = cols  # excel列与模型属性之间得对应数组
@@ -31,6 +31,7 @@ class BaseExcelImportModel:
         self.__convertor = convertor  # 回调函数
         self.__period = period  # 期间
         self.__departs = departs  # 审核单位
+        self.__filefoldername = filefoldername  # 模板文件存放目录
 
     @property
     def skip_load_with_no_file(self):
@@ -90,6 +91,10 @@ class BaseExcelImportModel:
             return BaseModelConventor()
         return self.__convertor
 
+    @property
+    def filefoldername(self):
+        return self.__filefoldername
+
     def base_tpl_folder_path(self):
         return r'd:\薪酬审核文件夹'
 
@@ -97,11 +102,17 @@ class BaseExcelImportModel:
         return r'd:\薪酬审核文件夹\test'
 
     def tpl_path_prefix(self):
+        path = self.base_tpl_folder_path()
         if self.period:
-            return join(self.base_tpl_folder_path(), self.period.period)
-        return self.base_tpl_folder_path()
+            path = join(path, self.period.period)
+        if self.filefoldername:
+            path = join(path, self.filefoldername)
+        return path
 
     def test_tpl_path(self):
+        path = self.test_tpl_folder_path()
         if self.period:
-            return join(self.test_tpl_folder_path(), self.period.period)
-        return self.test_tpl_folder_path()
+            path = join(path, self.period.period)
+        if self.filefoldername:
+            path = join(path, self.filefoldername)
+        return path
