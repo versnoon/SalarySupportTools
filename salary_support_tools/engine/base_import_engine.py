@@ -30,7 +30,7 @@ class BaseImportEngine(BasePeriodEngine):
         """
         载入单个文件
         """
-        load = ExlToClazz(self.__clazz, dict(), self.base_folder_path)
+        # load = ExlToClazz(self.__clazz, dict(), self.base_folder_path)
 
     def batch_load_data(self):
         """

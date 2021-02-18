@@ -12,6 +12,7 @@
 from collections import OrderedDict
 
 from salary_support_tools.engine.base_period_engine import BasePeriodEngine
+from salary_support_tools.model.base_model_cov import BaseModelConventor
 
 
 class SalaryJob(BasePeriodEngine):
@@ -65,7 +66,7 @@ class SalaryJob(BasePeriodEngine):
         return cols
 
 
-class SalaryJobConventor:
+class SalaryJobConventor(BaseModelConventor):
 
     def cov(self, datas, period, departs):
         res = OrderedDict()
@@ -85,15 +86,3 @@ class SalaryJobConventor:
             res[company] = vs
 
         return res
-
-    def _get_depart_byfullname(self, depart_fullname, departinfos):
-        departs = depart_fullname.split("\\")
-        if len(departs) < 2:
-            raise ValueError("{},机构信息异常".format(depart_fullname))
-        depart_name = departs[1]
-        for ds, depart in departinfos.items():
-            if depart.is_depart(depart_name):
-                depart_name = depart.get_depart_salaryScope_and_name()
-                break
-
-        return departs[0], depart_name

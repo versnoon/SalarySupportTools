@@ -11,6 +11,7 @@
 from os.path import join
 
 from salary_support_tools.engine.base_engine import BaseEngine
+from salary_support_tools.model.base_model_cov import BaseModelConventor
 
 
 class BaseExcelImportModel:
@@ -18,7 +19,7 @@ class BaseExcelImportModel:
     导入业务模型基类
     """
 
-    def __init__(self, modelkey, clazz: BaseEngine, cols, filename, filename_prefix, sheetindex=0, titlerow=0, func=None, period=None, departs=None):
+    def __init__(self, modelkey, clazz: BaseEngine, cols, filename, filename_prefix, sheetindex=0, titlerow=0, convertor: BaseModelConventor = None, period=None, departs=None):
         self.__modelkey = modelkey  # 数据标示
         self.__clazz = clazz  # 模型
         self.__cols = cols  # excel列与模型属性之间得对应数组
@@ -27,7 +28,7 @@ class BaseExcelImportModel:
         self.__skip_load_with_no_file = True  # 当不存在导入文件是否跳过运行
         self.__sheetindex = sheetindex  # 工作部索引
         self.__titlerow_index = titlerow  # 标题行索引
-        self.__func = func  # 回调函数
+        self.__convertor = convertor  # 回调函数
         self.__period = period  # 期间
         self.__departs = departs  # 审核单位
 
@@ -84,8 +85,10 @@ class BaseExcelImportModel:
         return self.__titlerow_index
 
     @property
-    def func(self):
-        return self.__func
+    def conventor(self):
+        if not self.__convertor:
+            return BaseModelConventor()
+        return self.__convertor
 
     def base_tpl_folder_path(self):
         return r'd:\薪酬审核文件夹'

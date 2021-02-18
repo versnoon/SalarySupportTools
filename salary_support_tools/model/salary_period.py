@@ -8,6 +8,8 @@
 @Contact :   tongtan@gmail.com
 '''
 
+from salary_support_tools.model.base_model_cov import BaseModelConventor
+
 
 class SalaryPeriod:
     """
@@ -75,6 +77,6 @@ class SalaryPeriod:
         return self.get_period_str(self.__year, self.__month)
 
 
-class SalaryPeriodConventor:
+class SalaryPeriodConventor(BaseModelConventor):
     def cov(self, datas, period, departs):
         return datas[0]

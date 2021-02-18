@@ -12,6 +12,7 @@
 from collections import OrderedDict
 
 from salary_support_tools.engine.base_period_engine import BasePeriodEngine
+from salary_support_tools.model.base_model_cov import BaseModelConventor
 
 
 class SalaryPerson(BasePeriodEngine):
@@ -64,7 +65,7 @@ class SalaryPerson(BasePeriodEngine):
         return '员工基本信息: 工号 {} - 姓名 {} - 公司 {} - 部门 {} - 分厂 {} - 作业区 {} - 班组 {} - 岗位 {}'.format(self._code, self._name, self._complayLevelOne, self._departLevelTow, self._branchLevelThree, self._assignmentSectionLevelFour, self._groupLevelFive, self._cJobTitle)
 
 
-class SalaryPersonConventor:
+class SalaryPersonConventor(BaseModelConventor):
 
     def cov(self, datas, period, departs):
         res_code = OrderedDict()

@@ -13,6 +13,7 @@ from collections import OrderedDict
 
 
 from salary_support_tools.engine.base_period_engine import BasePeriodEngine
+from salary_support_tools.model.base_model_cov import BaseModelConventor
 
 
 class SalaryDepart(BasePeriodEngine):
@@ -72,7 +73,7 @@ class SalaryDepart(BasePeriodEngine):
         return '审核机构信息: 序号{} - 工资范围 {} - 审核单位名称 {} - 相关单位 {}'.format(self.sortno, self.salaryScope, self.name, self.get_departs())
 
 
-class SalaryDepartConventor:
+class SalaryDepartConventor(BaseModelConventor):
 
     def cov(self, datas, period, departs):
         m = OrderedDict()

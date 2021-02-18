@@ -57,7 +57,7 @@ class TestXls2ModelUtil(object):
     def test_load_tpls(self):
         cols = cols = SalaryPeriod.cols()
         sp_model = BaseExcelImportModel(
-            "sp", SalaryPeriod, cols, '当前审核日期', None, func=SalaryPeriodConventor().cov)
+            "sp", SalaryPeriod, cols, '当前审核日期', None, convertor=SalaryPeriodConventor())
         util = XlsToModelUtil([sp_model])
         res: dict = util.load_tpls()
         assert "sp" in res
@@ -66,7 +66,7 @@ class TestXls2ModelUtil(object):
         period = res["sp"]
 
         sd_model = BaseExcelImportModel(
-            "sd", SalaryDepart, SalaryDepart.cols(), '审核机构信息', None, func=SalaryDepartConventor().cov, period=period)
+            "sd", SalaryDepart, SalaryDepart.cols(), '审核机构信息', None, convertor=SalaryDepartConventor(), period=period)
 
         util = XlsToModelUtil([sd_model])
         res: dict = util.load_tpls()
@@ -76,11 +76,11 @@ class TestXls2ModelUtil(object):
         assert "01" in res["sd"]
         departs = res["sd"]
         s_p_model = BaseExcelImportModel(
-            "s_p", SalaryPerson, SalaryPerson.cols(), '', '人员信息', func=SalaryPersonConventor().cov, period=period, departs=departs)
+            "s_p", SalaryPerson, SalaryPerson.cols(), '', '人员信息', convertor=SalaryPersonConventor(), period=period, departs=departs)
         s_j_model = BaseExcelImportModel(
-            "s_j", SalaryJob, SalaryJob.cols(), '', '岗位聘用信息', func=SalaryJobConventor().cov, period=period, departs=departs)
+            "s_j", SalaryJob, SalaryJob.cols(), '', '岗位聘用信息', convertor=SalaryJobConventor(), period=period, departs=departs)
         s_b_model = BaseExcelImportModel(
-            "s_b", SalaryBank, SalaryBank.cols(), '', '银行卡信息', func=SalaryBankConventor().cov, period=period, departs=departs)
+            "s_b", SalaryBank, SalaryBank.cols(), '', '银行卡信息', convertor=SalaryBankConventor(), period=period, departs=departs)
         util = XlsToModelUtil([s_p_model, s_j_model, s_b_model])
         res: dict = util.load_tpls()
         assert "s_p" in res

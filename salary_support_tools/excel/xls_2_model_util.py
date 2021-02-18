@@ -51,7 +51,7 @@ class XlsToModelUtil:
         sheet_index = modelinfo.sheet_index
         title_row = modelinfo.title_row
         skipable = modelinfo.skip_load_with_no_file  # 导入文件不存在时是否跳过
-        func = modelinfo.func
+        conventor = modelinfo.conventor
         period = modelinfo.period
         departs = modelinfo.departs
         filepaths = self.get_tpl_file_paths(
@@ -66,10 +66,7 @@ class XlsToModelUtil:
                     continue
             res.extend(self.read_tpl(clazz, filepath,
                                      sheet_index, title_row, cols))
-        if func:
-            return func(res, period, departs)
-        else:
-            return res
+        return conventor.cov(res, period, departs)
 
     def get_tpl_file_paths(self, filepath_prefix: str, filename: str, filename_prefix: str) -> dict:
         paths = dict()
