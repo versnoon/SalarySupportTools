@@ -26,7 +26,7 @@ class SalaryGz(BasePeriodEngine):
         self.tex_depart = ""  # 税务机构
         self._code = ""  # 员工通行证
         self._name = ""  # 员工姓名
-        self._departfullinfo = ""  # 机构
+        self._depart_fullname = ""  # 机构
         self._departLevelTow = ""  # 二级机构
         self._branchLevelThree = ""  # 三级机构
         self._salaryModel = ""  # 薪酬模式
@@ -142,7 +142,7 @@ class SalaryGz(BasePeriodEngine):
         self._nj_qybx = 0  # 年金
 
     def __str__(self):
-        return '员工工资信息: 机构 {} - 二级机构 {} - 三级机构 {} - 工号 {} - 姓名 {} - 岗位 {} - 应发 {}'.format(self._departfullinfo, self._departLevelTow, self._branchLevelThree, self._code, self._name, self._jobName, self._totalPayable)
+        return '员工工资信息: 机构 {} - 二级机构 {} - 三级机构 {} - 工号 {} - 姓名 {} - 岗位 {} - 应发 {}'.format(self._depart_fullname, self._departLevelTow, self._branchLevelThree, self._code, self._name, self._jobName, self._totalPayable)
 
     @classmethod
     def cols(self):
