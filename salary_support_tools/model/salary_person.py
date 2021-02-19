@@ -20,7 +20,10 @@ class SalaryPerson(BasePeriodEngine):
     员工相关信息
     """
 
+    NAME = "salary_person"
+
     def __init__(self):
+        super().__init__(None)
         self._complayLevelOne = ""  # 一级机构(公司)
         self._departLevelTow = ""  # 二级机构（部门）
         self._branchLevelThree = ""  # 三级机构（分厂）

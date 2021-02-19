@@ -19,8 +19,16 @@ class SalaryBonus(BasePeriodEngine):
     奖金模板载入
     """
 
+    NAME = "salary_bonus"
+    NAME_JT = "salary_bonus_jt"
+    NAME_GF = "salary_bonus_gf"
+    NAME_JP = "salary_bonus_jp"
+    NAME_XW = "salary_bonus_xw"
+    NAME_LT = "salary_bonus_lt"
+    NAME_BWB = "salary_bonus_BWB"
+
     def __init__(self):
-        super().__init__("salary_bo", None)
+        super().__init__(None)
         self._code = ""  # 员工通行证
         self._name = ""  # 员工姓名
         self._depart_fullname = ""  # 所在机构

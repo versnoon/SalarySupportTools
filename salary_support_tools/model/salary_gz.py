@@ -20,8 +20,10 @@ class SalaryGz(BasePeriodEngine):
     员工工资相关信息
     """
 
+    NAME = "salary_gz"
+
     def __init__(self):
-        super().__init__("salary_gz", None)
+        super().__init__(None)
         self.depart = ""  # 单位文件夹名称
         self.tex_depart = ""  # 税务机构
         self._code = ""  # 员工通行证

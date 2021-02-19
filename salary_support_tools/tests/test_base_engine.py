@@ -17,20 +17,15 @@ from salary_support_tools.model.salary_period import SalaryPeriod
 
 class TestBaseEngine(object):
 
-    def test_create_base_engine(self):
-        engine = BaseEngine()
-        with pytest.raises(ValueError):
-            engine.engine_name
-
     def test_base_engine(self):
-        name = "基类"
-        engine = BaseEngine(name)
-        assert name == engine.engine_name
+        name = "base"
+        engine = BaseEngine()
+        assert name == engine.NAME
 
     def test_base_period_engine(self):
         period = SalaryPeriod(2021, 2)
-        name = "期间引擎"
-        engine = BasePeriodEngine(name, period)
-        assert name == engine.engine_name
+        name = "base_period"
+        engine = BasePeriodEngine(period)
+        assert name == engine.NAME
         assert engine.period.year == 2021
         assert engine.period.month == 2

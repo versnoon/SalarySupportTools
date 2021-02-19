@@ -20,7 +20,10 @@ class SalaryBank(BasePeriodEngine):
     员工银行相关信息
     """
 
+    NAME = "salary_bank"
+
     def __init__(self):
+        super().__init__(None)
         self._code = ""
         self._name = ""
         self._departfullinfo = ""

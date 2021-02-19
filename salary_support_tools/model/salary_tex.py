@@ -16,9 +16,10 @@ class SalaryTex(BasePeriodEngine):
     """
     税务系统相关信息
     """
+    NAME = "salary_tex"
 
     def __init__(self):
-        super().__init__("salary_tex", None)
+        super().__init__(None)
         self._code = ""  # 工号
         self._name = ""  # 姓名
         self._idtype = "居民身份证"  # 证件类型

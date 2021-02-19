@@ -21,8 +21,10 @@ class SalaryDepart(BasePeriodEngine):
     审核单位相关信息
     """
 
+    NAME = "salary_depart"
+
     def __init__(self):
-        super().__init__("salary_d", None)
+        super().__init__(None)
         self.salaryScope = ""  # 工资范围
         self.name = ""  # 单位名称
         self.sortno = 0  # 显示顺序

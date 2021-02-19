@@ -20,8 +20,10 @@ class SalaryJj(BasePeriodEngine):
     员工奖金相关信息
     """
 
+    NAME = "salary_jj"
+
     def __init__(self):
-        super().__init__("salary_jj", None)
+        super().__init__(None)
         self.depart = ""  # 审批单位文件夹名称
         self.tex_depart = ""  # 税务机构
         self._code = ""

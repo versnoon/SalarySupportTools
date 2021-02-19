@@ -17,8 +17,9 @@ from salary_support_tools.model.salary_period import SalaryPeriod
 
 class BasePeriodEngine(BaseEngine):
 
-    def __init__(self, name: str, period: SalaryPeriod):
-        super().__init__(name)
+    NAME = "base_period"
+
+    def __init__(self, period: SalaryPeriod):
         self.__period = period
 
     @property

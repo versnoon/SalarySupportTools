@@ -20,7 +20,10 @@ class SalaryJob(BasePeriodEngine):
     员工岗位相关信息
     """
 
+    NAME = "salary_job"
+
     def __init__(self):
+        super().__init__(None)
         self._code = ""  # 通行证
         self._name = ""  # 姓名
         self._depart_fullname = ""  # 机构名称

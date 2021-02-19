@@ -19,8 +19,10 @@ class SalaryAttendance(BasePeriodEngine):
     考勤模板载入
     """
 
+    NAME = "salary_attend"
+
     def __init__(self):
-        super().__init__("salary_a", None)
+        super().__init__(None)
         self._code = ""  # 员工通行证
         self._name = ""  # 员工姓名
         self._depart_fullname = ""  # 员工部门
