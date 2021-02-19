@@ -58,7 +58,7 @@ class XlsToModelUtil:
             filepath_prefix, filename, filename_prefix)
         res = []
         for filepath, exist in filepaths.items():
-            if not exists:
+            if not exist:
                 if not skipable:
                     raise (FileNotFoundError(
                         "文件不存在{}，不能执行导入操作".format(filepath)))

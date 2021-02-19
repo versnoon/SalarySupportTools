@@ -20,6 +20,8 @@ from salary_support_tools.model.salary_job import SalaryJob, SalaryJobConventor
 from salary_support_tools.model.salary_bank import SalaryBank, SalaryBankConventor
 from salary_support_tools.model.salary_gz import SalaryGz, SalaryGzConventor
 from salary_support_tools.model.salary_jj import SalaryJj, SalaryJjConventor
+from salary_support_tools.model.salary_tex import SalaryTex
+from salary_support_tools.excel.tex_xls_2_model_util import TexXlsToModelUtil
 
 
 class TestXls2ModelUtil(object):
@@ -112,4 +114,30 @@ class TestXls2ModelUtil(object):
         assert "s_jj" in res
         assert len(res["s_jj"]) > 0
         assert res["s_jj"]["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M73677"]._code == 'M73677'
-        assert res["s_jj"]["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M80374"]._totalPayable == 4965*3
+        assert res["s_jj"]["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M80374"]._totalPayable == 4965 * 3
+
+    def test_load_tex_tpls(self):
+
+        cols = cols = SalaryPeriod.cols()
+        sp_model = BaseExcelImportModel(
+            "sp", SalaryPeriod, cols, '当前审核日期', None, convertor=SalaryPeriodConventor())
+        util = XlsToModelUtil([sp_model])
+        res: dict = util.load_tpls()
+        assert "sp" in res
+        assert res["sp"].year == 2021
+        assert res["sp"].month == 2
+        period = res["sp"]
+
+        sd_model = BaseExcelImportModel(
+            "sd", SalaryDepart, SalaryDepart.cols(), '审核机构信息', None, convertor=SalaryDepartConventor(), period=period)
+
+        util = XlsToModelUtil([sd_model])
+        res: dict = util.load_tpls()
+        assert '202102' == sd_model.period.period
+        assert "sd" in res
+        assert len(res["sd"]) > 0
+        assert "01" in res["sd"]
+        departs = res["sd"]
+        tex_util = TexXlsToModelUtil(period, departs)
+        tex_res: dict = tex_util.load_tex_tpls()
+        assert len(tex_res) > 0
