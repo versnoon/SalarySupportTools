@@ -22,6 +22,7 @@ class SalaryDepart(BasePeriodEngine):
     """
 
     def __init__(self):
+        super().__init__("salary_d", None)
         self.salaryScope = ""  # 工资范围
         self.name = ""  # 单位名称
         self.sortno = 0  # 显示顺序

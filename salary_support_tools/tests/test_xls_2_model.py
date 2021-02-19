@@ -21,6 +21,8 @@ from salary_support_tools.model.salary_bank import SalaryBank, SalaryBankConvent
 from salary_support_tools.model.salary_gz import SalaryGz, SalaryGzConventor
 from salary_support_tools.model.salary_jj import SalaryJj, SalaryJjConventor
 from salary_support_tools.model.salary_tex import SalaryTex
+from salary_support_tools.model.salary_attendance import SalaryAttendance, SalaryAttendanceConventor
+from salary_support_tools.model.salary_bonus import SalaryBonus, SalaryBonusConventor
 from salary_support_tools.excel.tex_xls_2_model_util import TexXlsToModelUtil
 
 
@@ -89,8 +91,22 @@ class TestXls2ModelUtil(object):
             "s_gz", SalaryGz, SalaryGz.cols(), '', '工资信息', convertor=SalaryGzConventor(), period=period, departs=departs, filefoldername='工资奖金数据')
         s_jj_model = BaseExcelImportModel(
             "s_jj", SalaryJj, SalaryJj.cols(), '', '奖金信息', convertor=SalaryJjConventor(), period=period, departs=departs, filefoldername='工资奖金数据')
+        s_a_model = BaseExcelImportModel(
+            "s_a", SalaryAttendance, SalaryAttendance.cols(), '', '考勤模板', convertor=SalaryAttendanceConventor(), period=period, departs=departs, filefoldername='考勤奖金模板')
+        s_bo_jt_model = BaseExcelImportModel(
+            "s_bo_jt", SalaryBonus, SalaryBonus.get_jt_cols(), '奖金模板-集团机关', '', convertor=SalaryBonusConventor(), period=period, departs=departs, filefoldername='考勤奖金模板')
+        s_bo_gf_model = BaseExcelImportModel(
+            "s_bo_gf", SalaryBonus, SalaryBonus.get_gf_cols(), '奖金模板-股份', '', convertor=SalaryBonusConventor(), period=period, departs=departs, filefoldername='考勤奖金模板')
+        s_bo_jp_model = BaseExcelImportModel(
+            "s_bo_jp", SalaryBonus, SalaryBonus.get_jp_cols(), '奖金模板-教培', '', convertor=SalaryBonusConventor(), period=period, departs=departs, filefoldername='考勤奖金模板')
+        s_bo_xw_model = BaseExcelImportModel(
+            "s_bo_xw", SalaryBonus, SalaryBonus.get_xw_cols(), '奖金模板-新闻', '', convertor=SalaryBonusConventor(), period=period, departs=departs, filefoldername='考勤奖金模板')
+        s_bo_lt_model = BaseExcelImportModel(
+            "s_bo_lt", SalaryBonus, SalaryBonus.get_lt_cols(), '奖金模板-离退休', '', convertor=SalaryBonusConventor(), period=period, departs=departs, filefoldername='考勤奖金模板')
+        s_bo_bw_model = BaseExcelImportModel(
+            "s_bo_bwb", SalaryBonus, SalaryBonus.get_bwb_cols(), '奖金模板-保卫部', '', convertor=SalaryBonusConventor(), period=period, departs=departs, filefoldername='考勤奖金模板')
         util = XlsToModelUtil(
-            [s_p_model, s_j_model, s_b_model, s_gz_model, s_jj_model])
+            [s_p_model, s_j_model, s_b_model, s_gz_model, s_jj_model, s_a_model, s_bo_jt_model, s_bo_gf_model, s_bo_jp_model, s_bo_xw_model, s_bo_lt_model, s_bo_bw_model])
         res: dict = util.load_tpls()
         assert "s_p" in res
         assert len(res["s_p"]) > 0
@@ -115,6 +131,37 @@ class TestXls2ModelUtil(object):
         assert len(res["s_jj"]) > 0
         assert res["s_jj"]["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M73677"]._code == 'M73677'
         assert res["s_jj"]["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M80374"]._totalPayable == 4965 * 3
+
+        assert "s_a" in res
+        assert len(res["s_a"]) > 0
+
+        assert "s_bo_jt" in res
+        assert len(res["s_bo_jt"]) > 0
+        assert res["s_bo_jt"]["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M73677"]._name == "童坦"
+
+        assert "s_bo_gf" in res
+        assert len(res["s_bo_gf"]) > 0
+        assert "02_股份机关" in res["s_bo_gf"]["马鞍山钢铁股份有限公司（总部）"]
+
+        assert "s_bo_jp" in res
+        assert len(res["s_bo_jp"]) > 0
+        assert "M73677" not in res["s_bo_jp"]["马钢（集团）控股有限公司(总部)"]["C5_教培中心"]
+        assert res["s_bo_jp"]["马钢（集团）控股有限公司(总部)"]["C5_教培中心"]["M19391"]._code == "M19391"
+
+        assert "s_bo_xw" in res
+        assert len(res["s_bo_xw"]) > 0
+        assert "M73677" not in res["s_bo_xw"]["马钢（集团）控股有限公司(总部)"]["C2_新闻中心"]
+        assert res["s_bo_xw"]["马钢（集团）控股有限公司(总部)"]["C2_新闻中心"]["M02830"]._code == "M02830"
+
+        assert "s_bo_lt" in res
+        assert len(res["s_bo_lt"]) > 0
+        assert "M73677" not in res["s_bo_lt"]["马钢（集团）控股有限公司(总部)"]["C3_离退休职工服务中心"]
+        assert res["s_bo_lt"]["马钢（集团）控股有限公司(总部)"]["C3_离退休职工服务中心"]["M32812"]._code == "M32812"
+
+        assert "s_bo_bwb" in res
+        assert len(res["s_bo_bwb"]) > 0
+        assert "M32812" not in res["s_bo_bwb"]["马钢（集团）控股有限公司(总部)"]["C1_保卫部（武装部）"]
+        assert res["s_bo_bwb"]["马钢（集团）控股有限公司(总部)"]["C1_保卫部（武装部）"]["M72717"]._code == "M72717"
 
     def test_load_tex_tpls(self):
 
