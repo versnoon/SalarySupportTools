@@ -3,7 +3,7 @@
 '''
 @File    :   base_model_cov.py
 @Time    :   2021/02/18 08:44:35
-@Author  :   Tong tan 
+@Author  :   Tong tan
 @Version :   1.0
 @Contact :   tongtan@gmail.com
 '''
@@ -22,9 +22,12 @@ class BaseModelConventor:
         if len(departs) < 2:
             raise ValueError("{},机构信息异常".format(depart_fullname))
         depart_name = departs[1]
+
+        return departs[0], self._get_depart_byname(depart_name, departinfos)
+
+    def _get_depart_byname(self, depart_name, departinfos):
         for ds, depart in departinfos.items():
             if depart.is_depart(depart_name):
                 depart_name = depart.get_depart_salaryScope_and_name()
                 break
-
-        return departs[0], depart_name
+        return depart_name

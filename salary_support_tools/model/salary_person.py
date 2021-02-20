@@ -74,20 +74,34 @@ class SalaryPersonConventor(BaseModelConventor):
         res_code = OrderedDict()
         res_idno = OrderedDict()
         for data in datas:
+            vs_depart_code = OrderedDict()
+            vs_depart_idno = OrderedDict()
+
             vs_code = OrderedDict()
             vs_idno = OrderedDict()
             data.period = period
             companyname = data._complayLevelOne
+            departname = data._departLevelTow
             if not companyname:
                 companyname = 'unknow'
+            if departname:
+                departname = self._get_depart_byname(departname, departs)
+            else:
+                departname = 'unknow'
             if companyname in res_code:
-                vs_code = res_code[companyname]
+                vs_depart_code = res_code[companyname]
             if companyname in res_idno:
-                vs_idno = res_idno[companyname]
+                vs_depart_idno = res_idno[companyname]
+            if departname in vs_depart_code:
+                vs_code = vs_depart_code[departname]
+            if departname in vs_depart_idno:
+                vs_idno = vs_depart_idno[departname]
             if data._code:
                 vs_code[data._code] = data
             if data._idno:
                 vs_idno[data._idno] = data
-            res_code[companyname] = vs_code
-            res_idno[companyname] = vs_idno
+            vs_depart_code[departname] = vs_code
+            vs_depart_idno[departname] = vs_idno
+            res_code[companyname] = vs_depart_code
+            res_idno[companyname] = vs_depart_idno
         return res_code, res_idno

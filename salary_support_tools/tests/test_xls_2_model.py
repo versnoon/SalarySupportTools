@@ -111,9 +111,9 @@ class TestXls2ModelUtil(object):
         assert SalaryPerson.name_key in res
         assert len(res[SalaryPerson.name_key]) > 0
         assert len(res[SalaryPerson.name_key][0]["马鞍山钢铁股份有限公司（总部）"]) > 0
-        assert res[SalaryPerson.name_key][0]["马鞍山钢铁股份有限公司（总部）"]["M74244"]._name == "万利军"
-        assert res[SalaryPerson.name_key][1]["马鞍山钢铁股份有限公司（总部）"]["511022198105215653"]._name == "万利军"
-        assert res[SalaryPerson.name_key][1]["马鞍山钢铁股份有限公司（总部）"]["511022198105215653"].period.period == "202102"
+        assert res[SalaryPerson.name_key][0]["马鞍山钢铁股份有限公司（总部）"]["34_港务原料总厂1"]["M74244"]._name == "万利军"
+        assert res[SalaryPerson.name_key][1]["马鞍山钢铁股份有限公司（总部）"]["34_港务原料总厂1"]["511022198105215653"]._name == "万利军"
+        assert res[SalaryPerson.name_key][1]["马鞍山钢铁股份有限公司（总部）"]["34_港务原料总厂1"]["511022198105215653"].period.period == "202102"
         assert SalaryJob.name_key in res
         assert len(res[SalaryJob.name_key]) > 0
         assert res[SalaryJob.name_key]["马鞍山钢铁股份有限公司（总部）"]["02_股份机关"]["M04484"]._code == 'M04484'
@@ -185,6 +185,13 @@ class TestXls2ModelUtil(object):
         assert len(res[SalaryDepart.name_key]) > 0
         assert "01" in res[SalaryDepart.name_key]
         departs = res[SalaryDepart.name_key]
-        tex_util = TexXlsToModelUtil(period, departs)
+
+        s_p_model = BaseExcelImportModel(
+            SalaryPerson.name_key, SalaryPerson, SalaryPerson.cols(), '', '人员信息', convertor=SalaryPersonConventor(), period=period, departs=departs)
+        util = XlsToModelUtil([s_p_model])
+        res: dict = util.load_tpls()
+        persons = res[SalaryPerson.name_key]
+        tex_util = TexXlsToModelUtil(period, departs, persons)
         tex_res: dict = tex_util.load_tex_tpls()
         assert len(tex_res) > 0
+        assert "M32812" not in tex_res["马钢（集团）控股有限公司(总部)"]["C1_保卫部（武装部）"]
