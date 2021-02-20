@@ -188,10 +188,15 @@ class TestXls2ModelUtil(object):
 
         s_p_model = BaseExcelImportModel(
             SalaryPerson.name_key, SalaryPerson, SalaryPerson.cols(), '', '人员信息', convertor=SalaryPersonConventor(), period=period, departs=departs)
-        util = XlsToModelUtil([s_p_model])
+        s_gz_model = BaseExcelImportModel(
+            SalaryGz.name_key, SalaryGz, SalaryGz.cols(), '', '工资信息', convertor=SalaryGzConventor(), period=period, departs=departs, filefoldername='工资奖金数据')
+        s_jj_model = BaseExcelImportModel(
+            SalaryJj.name_key, SalaryJj, SalaryJj.cols(), '', '奖金信息', convertor=SalaryJjConventor(), period=period, departs=departs, filefoldername='工资奖金数据')
+        util = XlsToModelUtil([s_p_model, s_gz_model, s_jj_model])
         res: dict = util.load_tpls()
         persons = res[SalaryPerson.name_key]
-        tex_util = TexXlsToModelUtil(period, departs, persons)
+        tex_util = TexXlsToModelUtil(
+            period, departs, persons, res[SalaryGz.name_key], res[SalaryJj.name_key])
         tex_res: dict = tex_util.load_tex_tpls()
         assert len(tex_res) > 0
         assert "M32812" not in tex_res["马钢（集团）控股有限公司(总部)"]["C1_保卫部（武装部）"]

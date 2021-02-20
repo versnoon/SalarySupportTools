@@ -54,7 +54,7 @@ class TestPersonSalary:
         res: dict = util.load_tpls()
 
         tex_util = TexXlsToModelUtil(
-            period, departs, res[SalaryPerson.name_key])
+            period, departs, res[SalaryPerson.name_key], res[SalaryGz.name_key], res[SalaryJj.name_key])
         tex_res: dict = tex_util.load_tex_tpls()
 
         return period, departs, res[SalaryPerson.name_key], res[SalaryJob.name_key], res[SalaryBank.name_key], res[SalaryGz.name_key], res[SalaryJj.name_key], tex_res
@@ -67,3 +67,6 @@ class TestPersonSalary:
         assert "M27108" in res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]
         assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"]._gz is None
         assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"]._jj._totalPayable == 83928
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"]._texes is not None
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"]._texes["s_tex"]._totalpayable == 47928
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"]._texes["s_one_tex"]._totalpayable == 36000
