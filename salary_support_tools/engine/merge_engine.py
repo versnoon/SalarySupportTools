@@ -11,7 +11,7 @@
 from collections import OrderedDict
 
 from salary_support_tools.model.person_salary import PersonSalaryInfo
-from salary_support_tools.model.salary_gz import SalaryGz
+from salary_support_tools.model.sap_salary_info import SapSalaryInfo
 
 
 class MergeEngine:
@@ -47,23 +47,8 @@ class MergeEngine:
                         vs_tex_depart = res_tex_depart[tex_depart]
                     if depart in res_depart:
                         vs_depart = res_depart[depart]
-                    info = PersonSalaryInfo()
-                    info.period = self._period
-                    info._tex_depart = tex_depart
-                    info._depart = depart
-                    info._depart_fullname = gz._depart_fullname
-                    info._gz = gz
-                    info._code = code
-                    info._job = self.get_person_salary_info(
-                        self._jobs, tex_depart, depart, code)
-                    info._jj = self.get_person_salary_info(
-                        self._jjs, tex_depart, depart, code)
-                    info._banks = self.get_person_salary_info(
-                        self._banks, tex_depart, depart, code)
-                    info._person = self.get_person_salary_info(
-                        self._persons[0], tex_depart, depart, code)
-                    info._texes = self.get_person_salary_info(
-                        self._texes, tex_depart, depart, code)
+                    info = self.create_person_salary_info(
+                        tex_depart, depart, code, gz, True)
                     vs_depart[code] = info
                     vs_tex_depart[depart] = vs_depart
                     res_depart[depart] = vs_depart
@@ -84,22 +69,9 @@ class MergeEngine:
                             vs_tex_depart = res_tex_depart[tex_depart]
                         if depart in res_depart:
                             vs_depart = res_depart[depart]
-                        info = PersonSalaryInfo()
-                        info.period = self._period
-                        info._tex_depart = tex_depart
-                        info._depart = depart
-                        info._depart_fullname = jj._depart_fullname
-                        info._jj = jj
-                        info._code = code
-                        info._job = self.get_person_salary_info(
-                            self._jobs, tex_depart, depart, code)
-                        info._banks = self.get_person_salary_info(
-                            self._banks, tex_depart, depart, code)
-                        info._person = self.get_person_salary_info(
-                            self._persons[0], tex_depart, depart, code)
-                        info._texes = self.get_person_salary_info(
-                            self._texes, tex_depart, depart, code)
-                        vs_depart[code] = info
+                        info, sap_info = self.create_person_salary_info(
+                            tex_depart, depart, code, jj, False)
+                        vs_depart[code] = info, sap_info
                         vs_tex_depart[depart] = vs_depart
                         res_depart[depart] = vs_depart
                         res_tex_depart[tex_depart] = vs_tex_depart
@@ -112,3 +84,28 @@ class MergeEngine:
                 if code in datas[tex_depart][depart]:
                     return datas[tex_depart][depart][code]
         return None
+
+    def create_person_salary_info(self, tex_depart, depart, code, salary, gz_flag):
+        info = PersonSalaryInfo()
+        info.period = self._period
+        info._tex_depart = tex_depart
+        info._depart = depart
+        info._depart_fullname = salary._depart_fullname
+        if gz_flag:
+            info._gz = salary
+        else:
+            info._jj = salary
+        info._code = code
+        info._job = self.get_person_salary_info(
+            self._jobs, tex_depart, depart, code)
+        info._jj = self.get_person_salary_info(
+            self._jjs, tex_depart, depart, code)
+        info._banks = self.get_person_salary_info(
+            self._banks, tex_depart, depart, code)
+        info._person = self.get_person_salary_info(
+            self._persons[0], tex_depart, depart, code)
+        info._texes = self.get_person_salary_info(
+            self._texes, tex_depart, depart, code)
+        sap_info = SapSalaryInfo()
+        sap_info.to_sap(info)
+        return info, sap_info

@@ -161,7 +161,7 @@ class SalaryGz(BasePeriodEngine):
         cols["_fzZxkc"] = "累计住房租金支出"
         cols["_fdZxkc"] = "累计住房贷款利息支出"
         cols["_jxjyZxkc"] = "累计继续教育支出"
-        cols["_jxjyZxkc"] = "累计子女教育支出"
+        cols["_znjyZxkc"] = "累计子女教育支出"
 
         cols["_sylrZxkc"] = "累计赡养老人支出"
         cols["_zxnf"] = "执行年份"

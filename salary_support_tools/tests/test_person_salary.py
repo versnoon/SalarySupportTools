@@ -65,8 +65,13 @@ class TestPersonSalary:
             period, departs, persons, jobs, gzs, jjs, banks, texes)
         res = merge_engine.merge_salary_info()
         assert "M27108" in res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]
-        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"]._gz is None
-        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"]._jj._totalPayable == 83928
-        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"]._texes is not None
-        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"]._texes["s_tex"]._totalpayable == 47928
-        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"]._texes["s_one_tex"]._totalpayable == 36000
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][0]._gz is None
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][0]._jj._totalPayable == 83928
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][0]._texes is not None
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][0]._banks is None
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M73677"][0]._banks is not None
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][0]._texes["s_tex"]._totalpayable == 47928
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][0]._texes["s_one_tex"]._totalpayable == 36000
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][1]._totalpayable == 36000 + 47928
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][1]._totalpay == 34920 + \
+            47928 - 1506.33
