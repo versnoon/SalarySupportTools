@@ -88,15 +88,19 @@ class BaseExcelExportModel:
         # 写入标题
         for i, v in enumerate(cols):
             s.write(0, i, v._name)
-        for i, v in enumerate(datas):
+        row_index = 0
+        for v in datas:
             data = self._convertor.cov(v)
-            for j, col in enumerate(cols):
-                propertyName = col._code
-                try:
-                    s.write(
-                        i+1, j, getattr(data, propertyName, 0))
-                except TypeError:
-                    pass
+            if data:
+                for j, col in enumerate(cols):
+                    propertyName = col._code
+                    try:
+                        if data:
+                            s.write(
+                                row_index + 1, j, getattr(data, propertyName, 0))
+                    except TypeError:
+                        pass
+                row_index += 1
         b.save(r'{}\{}{}'.format(filepath, filename, self.EXT))
 
 
@@ -104,3 +108,15 @@ class SapInfoConventor(PersonSalaryConventor):
 
     def cov(self, data):
         return data[1]
+
+
+class TexInfoConventor(PersonSalaryConventor):
+
+    def cov(self, data):
+        return data[2]
+
+
+class TexSpecialInfoConventor(PersonSalaryConventor):
+
+    def cov(self, data):
+        return data[3]

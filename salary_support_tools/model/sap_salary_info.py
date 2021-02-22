@@ -158,6 +158,10 @@ class SapSalaryInfo(object):
         self._ljqt = 0  # 累计其他
         self._ljjm = 0  # 累计减免
         self._ljtex = 0  # 累计个税
+        self._tex_totalable = 0  # 综合当期收入
+        self._tex = 0  # 当期综合个税
+        self._tex_totalable_special = 0  # 当期一次性奖励收入
+        self._tex_special = 0  # 当期一次性奖励税
 
     def to_sap(self, person_salary_info: PersonSalaryInfo):
         personinfo = person_salary_info._person
@@ -169,11 +173,18 @@ class SapSalaryInfo(object):
         self.period = person_salary_info.period.period
         self.depart = person_salary_info._depart
         if personinfo is not None:
-            self.one = personinfo._complayLevelOne
-            self.two = personinfo._departLevelTow
-            self.three = personinfo._branchLevelThree
-            self.four = personinfo._assignmentSectionLevelFour
-            self.five = personinfo._groupLevelFive
+            if personinfo._complayLevelOne != "马钢（集团）控股有限公司(总部)":
+                self.one = "马钢（集团）控股有限公司(总部)"
+                self.two = personinfo._complayLevelOne
+                self.three = personinfo._departLevelTow
+                self.four = personinfo._branchLevelThree
+                self.five = personinfo._assignmentSectionLevelFour
+            else:
+                self.one = personinfo._complayLevelOne
+                self.two = personinfo._departLevelTow
+                self.three = personinfo._branchLevelThree
+                self.four = personinfo._assignmentSectionLevelFour
+                self.five = personinfo._groupLevelFive
 
             self._code = personinfo._code
             self._name = personinfo._name
@@ -293,7 +304,8 @@ class SapSalaryInfo(object):
             self._totalsdj = self._totalsdj + 0 - jjinfo._gts + \
                 0 - jjinfo._gstz  # 合并入奖金所得税(包括奖金个税调整)
 
-            self._totalpayable = self._totalpayable + jjinfo._totalPayable  # 合并奖金应发
+            self._totalpayable = self._totalpayable + \
+                jjinfo._totalPayable - jjinfo._nddxj  # 合并奖金应发并减去年底兑现奖
             self._totalpay = self._totalpay + jjinfo._pay  # 合并奖金实发
             self._jjpay = jjinfo._pay  # 奖金实发
 
@@ -304,6 +316,14 @@ class SapSalaryInfo(object):
             if 'jj' in bankinfo and bankinfo['jj'] is not None:
                 self._bankno2 = bankinfo['jj']._bankNo
                 self._bankinfo2 = bankinfo['jj']._financialInstitution
+        # 所得税系统信息
+        if texes is not None:
+            if "s_tex" in texes:
+                self._tex_totalable = texes["s_tex"]._totalpayable
+                self._tex = texes["s_tex"]._tex
+            if "s_one_tex" in texes:
+                self._tex_totalable_special = texes["s_one_tex"]._totalpayable
+                self._tex_special = texes["s_one_tex"]._tex
 
     def __str__(self):
         return 'SAP薪酬信息: 发薪日期 {} - 审核单位 {} - 职工编码 {} - 姓名 {} - 人员类型 {} - 在职状态 {} - 应发合计 {} - 奖金合计 {} - 公积金 {} - 养老保险 {} - 失业保险 {} - 医疗保险 {} - 年金 {} - 所得税 {} - 实发合计 {} - 工资卡号 {} - 工资卡金融机构 {} - 奖金卡号 {} - 奖金卡金融机构 {}'.format(

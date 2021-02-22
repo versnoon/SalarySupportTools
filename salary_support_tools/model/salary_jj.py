@@ -79,7 +79,7 @@ class SalaryJj(BasePeriodEngine):
         cols["_gcjj"] = "工程津贴"
         cols["_jssc"] = "技术输出"
         cols["_qt"] = "争取国家政策奖"
-        cols["_nddx"] = "年底兑现奖"
+        cols["_nddxj"] = "年底兑现奖"
         cols["_jsjj"] = "计税奖金"
         return cols
 

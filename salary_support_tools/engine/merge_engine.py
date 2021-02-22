@@ -12,6 +12,7 @@ from collections import OrderedDict
 
 from salary_support_tools.model.person_salary import PersonSalaryInfo
 from salary_support_tools.model.sap_salary_info import SapSalaryInfo
+from salary_support_tools.model.tex_info import TexInfo
 
 
 class MergeEngine:
@@ -69,9 +70,9 @@ class MergeEngine:
                             vs_tex_depart = res_tex_depart[tex_depart]
                         if depart in res_depart:
                             vs_depart = res_depart[depart]
-                        info, sap_info = self.create_person_salary_info(
+                        info, sap_info, tex_info, tex_info_special = self.create_person_salary_info(
                             tex_depart, depart, code, jj, False)
-                        vs_depart[code] = info, sap_info
+                        vs_depart[code] = info, sap_info, tex_info, tex_info_special
                         vs_tex_depart[depart] = vs_depart
                         res_depart[depart] = vs_depart
                         res_tex_depart[tex_depart] = vs_tex_depart
@@ -83,6 +84,11 @@ class MergeEngine:
             if depart in datas[tex_depart]:
                 if code in datas[tex_depart][depart]:
                     return datas[tex_depart][depart][code]
+        # 在减员类找
+        if "unknow" in datas:
+            if "unknow" in datas["unknow"]:
+                if code in datas["unknow"]["unknow"]:
+                    return datas["unknow"]["unknow"][code]
         return None
 
     def create_person_salary_info(self, tex_depart, depart, code, salary, gz_flag):
@@ -108,4 +114,10 @@ class MergeEngine:
             self._texes, tex_depart, depart, code)
         sap_info = SapSalaryInfo()
         sap_info.to_sap(info)
-        return info, sap_info
+        tex_info = TexInfo()
+        tex_info.to_tex(sap_info)
+        tex_info_special = None
+        if sap_info._nddxj > 0:
+            tex_info_special = TexInfo()
+            tex_info_special.to_tex_special(sap_info)
+        return info, sap_info, tex_info, tex_info_special
