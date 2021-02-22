@@ -27,33 +27,4 @@ class ModelToXls:
 
     def export(self):
         for model_info in self.__model_infos:
-            self.do_export(model_info)
-
-    def do_export(self, model_info: BaseExcelExportModel):
-        model_datas = model_info._datas
-        convertor = model_info._convertor
-        datas = convertor.cov(model_datas)
-        filepath = model_info.get_export_path()
-        cols = model_info._cols
-        filename = model_info._filename
-        self.create_excel_file(datas, filepath, filename, cols)
-
-    def create_excel_file(self, datas, filepath, filename, cols):
-        """
-        创建excel
-        """
-        b = xlwt.Workbook(encoding='uft-8')
-        s = b.add_sheet('Sheet1')
-
-        # 写入标题
-        for i, v in enumerate(cols):
-            s.write(0, i, v._name)
-        for i, v in enumerate(datas):
-            for j, col in enumerate(cols):
-                propertyName = col._code
-                try:
-                    s.write(
-                        i+1, j, getattr(datas[i], propertyName, 0))
-                except TypeError:
-                    pass
-        b.save(r'{}\{}{}'.format(filepath, filename, self.EXT))
+            model_info.export()
