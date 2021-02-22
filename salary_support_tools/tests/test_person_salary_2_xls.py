@@ -28,6 +28,9 @@ from salary_support_tools.engine.merge_engine import MergeEngine
 from salary_support_tools.excel.xls_2_model_util import XlsToModelUtil
 from salary_support_tools.model.base_excel_import_model import BaseExcelImportModel
 from salary_support_tools.model.export.jj_export_model import JjExport
+from salary_support_tools.model.export.auditor_export_model import AuditorExport
+from salary_support_tools.model.export.sh002_export_model import Sh002Export
+from salary_support_tools.model.export.sh003_export_model import Sh003Export
 
 
 class TestPersonSalaryToXls:
@@ -62,9 +65,18 @@ class TestPersonSalaryToXls:
 
         tex_util = TexXlsToModelUtil(
             period, departs, res[SalaryPerson.name_key], res[SalaryGz.name_key], res[SalaryJj.name_key])
-        tex_res: dict = tex_util.load_tex_tpls()
+        texes: dict = tex_util.load_tex_tpls()
 
-        return period, departs, res[SalaryPerson.name_key], res[SalaryJob.name_key], res[SalaryGz.name_key], res[SalaryJj.name_key], res[SalaryBank.name_key], tex_res
+        persons = res[SalaryPerson.name_key]
+        jobs = res[SalaryJob.name_key]
+        gzs = res[SalaryGz.name_key]
+        jjs = res[SalaryJj.name_key]
+        banks = res[SalaryBank.name_key]
+
+        m_engine = MergeEngine(period, departs, persons,
+                               jobs, gzs, jjs, banks, texes)
+        merge_infos = m_engine.merge_salary_info()
+        return period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos
 
     def test_create_person_salary_to_xls_model(self):
 
@@ -78,12 +90,13 @@ class TestPersonSalaryToXls:
             cols, datas, "导出文件夹", "测试1", None, SalaryPeriod(2021, 2))])
         util.export()
 
-    def test_export_gz(self):
+    def test_export(self):
         # 准备数据
-        period, _, _, _, gzs, jjs, _, _ = self.prepare_datas()
+        period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = self.prepare_datas()
 
         # 执行导出
-        util = ModelToXls([GzExport(period, gzs), JjExport(period, jjs)])
+        util = ModelToXls([GzExport(period, gzs), JjExport(
+            period, jjs), AuditorExport(period, merge_infos), Sh002Export(period, merge_infos), Sh003Export(period, merge_infos)])
         util.export()
 
 

@@ -166,7 +166,7 @@ class SapSalaryInfo(object):
         bankinfo = person_salary_info._banks
         job = person_salary_info._job
         texes = person_salary_info._texes
-        self.period = person_salary_info.period
+        self.period = person_salary_info.period.period
         self.depart = person_salary_info._depart
         if personinfo is not None:
             self.one = personinfo._complayLevelOne

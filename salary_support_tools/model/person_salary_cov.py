@@ -11,8 +11,8 @@
 
 class PersonSalaryConventor:
 
-    def cov(self, datas):
+    def cov(self, data):
         """
         默认直接返回查询数据
         """
-        return datas
+        return data

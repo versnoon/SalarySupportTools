@@ -37,6 +37,14 @@ class BaseExcelExportModel:
     def export(self):
         print("导出逻辑")
 
+    def export_by_depart(self, filename):
+        for tex_depart, datas_by_tex_depart in self._datas.items():
+            for depart, datas_by_depart in datas_by_tex_depart.items():
+                filepath = self.get_test_export_path(depart)
+                self.create_excel_file(
+                    self.get_datas(
+                        tex_depart, depart), filepath, filename, self._cols)
+
     def base_export_folder_path_prefix(self):
         return r'd:\薪酬审核文件夹'
 
@@ -81,11 +89,18 @@ class BaseExcelExportModel:
         for i, v in enumerate(cols):
             s.write(0, i, v._name)
         for i, v in enumerate(datas):
+            data = self._convertor.cov(v)
             for j, col in enumerate(cols):
                 propertyName = col._code
                 try:
                     s.write(
-                        i+1, j, getattr(v, propertyName, 0))
+                        i+1, j, getattr(data, propertyName, 0))
                 except TypeError:
                     pass
         b.save(r'{}\{}{}'.format(filepath, filename, self.EXT))
+
+
+class SapInfoConventor(PersonSalaryConventor):
+
+    def cov(self, data):
+        return data[1]

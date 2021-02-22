@@ -155,7 +155,7 @@ class SalaryOperator(object):
     def auditor_columns(self):
         columns = OrderedDict()
         columns["period"] = "发薪期间"
-        columns["salaryScope"] = "工资范围"
+        columns["depart"] = "工资范围"
         columns["_code"] = "员工编号"
         columns["_name"] = "员工姓名"
         columns["_gwgz"] = "岗位工资"

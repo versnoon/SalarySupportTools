@@ -10,13 +10,12 @@
 
 from salary_support_tools.model.export.base_excel_export_model import BaseExcelExportModel
 from salary_support_tools.model.export.export_column import ExportColumn
-from salary_support_tools.model.salary_gz import SalaryGz
 
 
 class GzExport(BaseExcelExportModel):
 
     def __init__(self, period, datas):
-        super().__init__(period, SalaryGz.cols(), datas)
+        super().__init__(period, self.cols(), datas)
 
     def cols(self):
         cols = []
