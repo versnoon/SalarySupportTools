@@ -115,9 +115,5 @@ class AuditorExport(BaseExcelExportModel):
         cols.append(ExportColumn(code="_err02", name="病假天数"))
         return cols
 
-    def export(self):
-        for tex_depart, datas_by_tex_depart in self._datas.items():
-            for depart, datas_by_depart in datas_by_tex_depart.items():
-                filepath = self.get_test_export_path(depart)
-                self.create_excel_file(
-                    self.get_datas(tex_depart, depart), filepath, "审核表数据", self.cols())
+    def get_filename(self):
+        return "审核表数据"

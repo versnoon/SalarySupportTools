@@ -13,6 +13,7 @@ from collections import OrderedDict
 from salary_support_tools.model.person_salary import PersonSalaryInfo
 from salary_support_tools.model.sap_salary_info import SapSalaryInfo
 from salary_support_tools.model.tex_info import TexInfo
+from salary_support_tools.model.err_message import ErrMessage
 
 
 class MergeEngine:
@@ -70,9 +71,9 @@ class MergeEngine:
                             vs_tex_depart = res_tex_depart[tex_depart]
                         if depart in res_depart:
                             vs_depart = res_depart[depart]
-                        info, sap_info, tex_info, tex_info_special = self.create_person_salary_info(
+                        info, sap_info, tex_info, tex_info_special, err_msg = self.create_person_salary_info(
                             tex_depart, depart, code, jj, False)
-                        vs_depart[code] = info, sap_info, tex_info, tex_info_special
+                        vs_depart[code] = info, sap_info, tex_info, tex_info_special, err_msg
                         vs_tex_depart[depart] = vs_depart
                         res_depart[depart] = vs_depart
                         res_tex_depart[tex_depart] = vs_tex_depart
@@ -120,4 +121,8 @@ class MergeEngine:
         if sap_info._nddxj > 0:
             tex_info_special = TexInfo()
             tex_info_special.to_tex_special(sap_info)
-        return info, sap_info, tex_info, tex_info_special
+        err_info = ErrMessage()
+        err_info.validate(info, sap_info)
+        if len(err_info._err_messages) == 0:
+            err_info = None
+        return info, sap_info, tex_info, tex_info_special, err_info

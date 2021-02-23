@@ -325,6 +325,22 @@ class SapSalaryInfo(object):
                 self._tex_totalable_special = texes["s_one_tex"]._totalpayable
                 self._tex_special = texes["s_one_tex"]._tex
 
+    def get_totalable(self):
+        totalpayable = self._totalpayable
+        if self._yl < 0:
+            totalpayable += 0 - self._yl
+        if self._yil < 0:
+            totalpayable += 0 - self._yil
+        if self._sy < 0:
+            totalpayable += 0 - self._sy
+        if self._gjj > 2410:
+            totalpayable += (self._gjj - 2410) * 2
+        if self._nj > 804:
+            totalpayable += (self._nj - 804) * 2
+        if self._nj < 0:
+            totalpayable += 0 - self._nj
+        return totalpayable
+
     def __str__(self):
         return 'SAP薪酬信息: 发薪日期 {} - 审核单位 {} - 职工编码 {} - 姓名 {} - 人员类型 {} - 在职状态 {} - 应发合计 {} - 奖金合计 {} - 公积金 {} - 养老保险 {} - 失业保险 {} - 医疗保险 {} - 年金 {} - 所得税 {} - 实发合计 {} - 工资卡号 {} - 工资卡金融机构 {} - 奖金卡号 {} - 奖金卡金融机构 {}'.format(
             self.period, self.depart, self._code, self._name, self._ygz, self._ygzz, self._totalpayable, self._totaljj, self._gjj, self._yl, self._sy, self._yil, self._nj, self._totalsdj, self._totalpay, self._bankno1, self._bankinfo1, self._bankno2, self._bankinfo2)

@@ -142,5 +142,5 @@ class Sh003Export(BaseExcelExportModel):
         cols.append(ExportColumn(code="period", name="发薪期间"))
         return cols
 
-    def export(self):
-        self.export_by_depart("sh003")
+    def get_filename(self):
+        return "sh003"

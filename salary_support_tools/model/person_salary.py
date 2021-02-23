@@ -21,6 +21,7 @@ class PersonSalaryInfo(BasePeriodEngine):
         self._depart_fullname = ""  # 机构全称
         self._tex_depart = ""  # 税务机构
         self._code = ""  # 职工编码
+        self._name = ""  # 姓名
         self._idno = ""  # 身份证号
         self._gz = None  # 工资信息
         self._jj = None  # 奖金信息

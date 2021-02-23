@@ -41,30 +41,24 @@ class TexInfo:
         self._code = sapinfo._code  # 工号
         self._name = sapinfo._name  # *姓名
         self._idno = sapinfo._idno  # 证件号码
-        self._totalpayable = sapinfo._totalpayable     # 本期收入
+        self._totalpayable = sapinfo.get_totalable()     # 本期收入
         self._yl = sapinfo._yl  # 基本养老保险费
         if sapinfo._yl < 0:
             self._yl = 0
-            self._totalpayable += 0 - sapinfo._yl
         self._yil = sapinfo._yil  # 基本医疗保险费
         if sapinfo._yil < 0:
             self._yil = 0
-            self._totalpayable += 0 - sapinfo._yil
         self._sy = sapinfo._sy  # 基本失业保险费
         if sapinfo._sy < 0:
             self._sy = 0
-            self._totalpayable += 0 - sapinfo._sy
         self._gjj = sapinfo._gjj  # 住房公积金
         if sapinfo._gjj > 2410:
             self._gjj = 2410  # 住房公积金
-            self._totalpayable += sapinfo._gjj - 2410
         self._nj = sapinfo._nj  # 企业（职业）年金
         if sapinfo._nj > 804:
             self._nj = 804
-            self._totalpayable += sapinfo._nj - 804
         if sapinfo._nj < 0:
             self._nj = 0
-            self._totalpayable += 0 - self._nj
         self._bz = '{}-{}'.format(sapinfo.one, sapinfo.depart)  # 备注
 
     def to_tex_special(self, sapinfo: SapSalaryInfo):

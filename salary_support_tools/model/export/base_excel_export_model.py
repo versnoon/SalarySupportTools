@@ -35,18 +35,24 @@ class BaseExcelExportModel:
         self._datas = datas  # 原始数据
 
     def export(self):
-        print("导出逻辑")
+        self.export_by_depart()
 
-    def export_by_depart(self, filename):
+    def export_by_depart(self):
         for tex_depart, datas_by_tex_depart in self._datas.items():
             for depart, datas_by_depart in datas_by_tex_depart.items():
                 filepath = self.get_test_export_path(depart)
                 self.create_excel_file(
                     self.get_datas(
-                        tex_depart, depart), filepath, filename, self._cols)
+                        tex_depart, depart), filepath, '{}_{}_{}'.format(self._period.period, depart, self.get_filename()), self._cols)
 
     def base_export_folder_path_prefix(self):
         return r'd:\薪酬审核文件夹'
+
+    def get_filename(self):
+        return "导出文件"
+
+    def get_sheetname(self):
+        return "Sheet1"
 
     def base_test_export_folder_path_prefix(self):
         return r'{}\{}'.format(self.base_export_folder_path_prefix(), 'test')
@@ -83,7 +89,7 @@ class BaseExcelExportModel:
         创建excel
         """
         b = xlwt.Workbook(encoding='uft-8')
-        s = b.add_sheet('Sheet1')
+        s = b.add_sheet(self.get_sheetname())
 
         # 写入标题
         for i, v in enumerate(cols):
@@ -120,3 +126,9 @@ class TexSpecialInfoConventor(PersonSalaryConventor):
 
     def cov(self, data):
         return data[3]
+
+
+class ErrorMessageConventor(PersonSalaryConventor):
+
+    def cov(self, data):
+        return data[4]

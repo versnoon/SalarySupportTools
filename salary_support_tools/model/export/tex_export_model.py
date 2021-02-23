@@ -43,9 +43,11 @@ class TexExport(BaseExcelExportModel):
         cols.append(ExportColumn(code="_bz", name="备注"))
         return cols
 
-    def export(self):
-        self.export_by_depart("{}_{}".format(
-            self._period.period, "税款计算_工资薪金所得"))
+    def get_filename(self):
+        return "工资薪金所得"
+
+    def get_sheetname(self):
+        return "工资薪金所得"
 
 
 class TexSpecialExport(BaseExcelExportModel):
@@ -68,6 +70,8 @@ class TexSpecialExport(BaseExcelExportModel):
         cols.append(ExportColumn(code="_bz", name="备注"))
         return cols
 
-    def export(self):
-        self.export_by_depart("{}_{}".format(
-            self._period.period, "税款计算_全年一次性奖金收入"))
+    def get_filename(self):
+        return "全年一次性奖金收入"
+
+    def get_sheetname(self):
+        return "全年一次性奖金收入"
