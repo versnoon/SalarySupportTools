@@ -42,8 +42,7 @@ class XlsToModelUtil:
         """
         加载数据
         """
-        filepath_prefix = modelinfo.test_tpl_path()  # 测试环境
-        # filepath_prefix = modelinfo.tpl_path_prefix()  # 正式环境
+        filepath_prefix = modelinfo.tpl_path_prefix()  # 正式环境
         filename = modelinfo.filename
         filename_prefix = modelinfo.filename_prefix
         clazz = modelinfo.clazz

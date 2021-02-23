@@ -40,7 +40,7 @@ class BaseExcelExportModel:
     def export_by_depart(self):
         for tex_depart, datas_by_tex_depart in self._datas.items():
             for depart, datas_by_depart in datas_by_tex_depart.items():
-                filepath = self.get_test_export_path(depart)
+                filepath = self.get_export_path(depart)
                 self.create_excel_file(
                     self.get_datas(
                         tex_depart, depart), filepath, '{}_{}_{}'.format(self._period.period, depart, self.get_filename()), self._cols)
@@ -53,19 +53,6 @@ class BaseExcelExportModel:
 
     def get_sheetname(self):
         return "Sheet1"
-
-    def base_test_export_folder_path_prefix(self):
-        return r'{}\{}'.format(self.base_export_folder_path_prefix(), 'test')
-
-    def get_test_export_path(self, foldername):
-        path = self.base_test_export_folder_path_prefix()
-        period = self._period.period
-        path = join(path, period)
-        if foldername:
-            path = join(path, foldername)
-        if not exists(path):
-            makedirs(path)
-        return path
 
     def get_export_path(self, foldername):
         path = self.base_export_folder_path_prefix()
@@ -82,6 +69,23 @@ class BaseExcelExportModel:
         if tex_depart in self._datas:
             if depart in self._datas[tex_depart]:
                 datas = self._datas[tex_depart][depart].values()
+        return datas
+
+    def get_datas_by_tex_depart_export_path(self, foldername):
+        path = self.base_export_folder_path_prefix()
+        period = self._period.period
+        path = join(path, period, "汇总数据")
+        if foldername:
+            path = join(path, foldername)
+        if not exists(path):
+            makedirs(path)
+        return path
+
+    def get_datas_by_tex_depart(self, tex_depart):
+        datas = []
+        if tex_depart in self._datas:
+            for depart, datas_by_departs in self._datas[tex_depart].items():
+                datas.extend(self._datas[tex_depart][depart].values())
         return datas
 
     def create_excel_file(self, datas, filepath, filename, cols):

@@ -334,9 +334,9 @@ class SapSalaryInfo(object):
         if self._sy < 0:
             totalpayable += 0 - self._sy
         if self._gjj > 2410:
-            totalpayable += (self._gjj - 2410) * 2
+            totalpayable += self._gjj - 2410
         if self._nj > 804:
-            totalpayable += (self._nj - 804) * 2
+            totalpayable += self._nj - 804
         if self._nj < 0:
             totalpayable += 0 - self._nj
         return totalpayable

@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 '''
-@File    :   test_person_salary_2_xls.py
-@Time    :   2021/02/20 15:35:55
+@File    :   runner.py
+@Time    :   2021/02/23 13:52:45
 @Author  :   Tong tan
 @Version :   1.0
 @Contact :   tongtan@gmail.com
 '''
-
-
-import pytest
 
 
 from salary_support_tools.excel.model_2_xls import ModelToXls
@@ -36,9 +33,9 @@ from salary_support_tools.model.export.err_message_export_model import ErrMessag
 from salary_support_tools.model.export.sh003_export_by_tex_depart_model import Sh003ByTexDepartExport
 
 
-class TestPersonSalaryToXls:
+class Runner:
 
-    def prepare_datas(self):
+    def load_tpl(self):
         sp_model = BaseExcelImportModel(
             "sp", SalaryPeriod, SalaryPeriod.cols(), '当前审核日期', None, convertor=SalaryPeriodConventor())
         util = XlsToModelUtil([sp_model])
@@ -81,52 +78,12 @@ class TestPersonSalaryToXls:
         merge_infos = m_engine.merge_salary_info()
         return period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos
 
-    def test_create_person_salary_to_xls_model(self):
+    def run(self):
 
-        cols = list()
-        cols.append(ExportColumn("_period", "期间"))
-        datas = list()
-        datas.append(TestModel("202101"))
-        datas.append(TestModel("202102"))
-        util = ModelToXls([BaseExcelExportModel(
-            cols, datas, "导出文件夹", "测试", None, SalaryPeriod(2021, 2)), BaseExcelExportModel(
-            cols, datas, "导出文件夹", "测试1", None, SalaryPeriod(2021, 2))])
-        util.export()
-
-    def test_export(self):
         # 准备数据
-        period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = self.prepare_datas()
+        period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = self.load_tpl()
 
         # 执行导出
         util = ModelToXls([GzExport(period, gzs), JjExport(
-            period, jjs), AuditorExport(period, merge_infos), Sh002Export(period, merge_infos), Sh003Export(period, merge_infos), TexExport(period, merge_infos), TexSpecialExport(period, merge_infos), ErrMessageExport(period, merge_infos)])
+            period, jjs), AuditorExport(period, merge_infos), Sh002Export(period, merge_infos), Sh003Export(period, merge_infos), TexExport(period, merge_infos), TexSpecialExport(period, merge_infos), ErrMessageExport(period, merge_infos), Sh003ByTexDepartExport(period, merge_infos)])
         util.export()
-
-    def test_err_message_export(self):
-        # 准备数据
-        period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = self.prepare_datas()
-
-        # 执行导出
-        util = ModelToXls([ErrMessageExport(period, merge_infos)])
-        util.export()
-
-    def test_sh003_export_by_tex_depart(self):
-        # 准备数据
-        period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = self.prepare_datas()
-
-        # 执行导出
-        util = ModelToXls([Sh003ByTexDepartExport(period, merge_infos)])
-        util.export()
-
-
-class ExportColumn:
-
-    def __init__(self, code, name):
-        self._code = code
-        self._name = name
-
-
-class TestModel:
-
-    def __init__(self, period):
-        self._period = period

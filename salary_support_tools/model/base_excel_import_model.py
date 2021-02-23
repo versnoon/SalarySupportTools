@@ -98,19 +98,8 @@ class BaseExcelImportModel:
     def base_tpl_folder_path(self):
         return r'd:\薪酬审核文件夹'
 
-    def test_tpl_folder_path(self):
-        return r'd:\薪酬审核文件夹\test'
-
     def tpl_path_prefix(self):
         path = self.base_tpl_folder_path()
-        if self.period:
-            path = join(path, self.period.period)
-        if self.filefoldername:
-            path = join(path, self.filefoldername)
-        return path
-
-    def test_tpl_path(self):
-        path = self.test_tpl_folder_path()
         if self.period:
             path = join(path, self.period.period)
         if self.filefoldername:
