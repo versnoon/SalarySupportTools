@@ -92,7 +92,7 @@ class SalaryTex(BasePeriodEngine):
         cols["_ljsr"] = "累计收入额"
         cols["_ljms"] = "累计免税收入"
 
-        cols["_ljjc"] = "本累计减除费用"
+        cols["_ljjc"] = "累计减除费用"
         cols["_ljzx"] = "累计专项扣除"
         cols["_ljznjy"] = "累计子女教育支出扣除"
         cols["_ljjxjy"] = "累计继续教育支出扣除"

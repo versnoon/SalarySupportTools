@@ -310,7 +310,7 @@ class SapSalaryInfo(object):
             self._jjpay = jjinfo._pay  # 奖金实发
 
         if bankinfo is not None:
-            if bankinfo['gz'] is not None:
+            if 'gz' in bankinfo and bankinfo['gz'] is not None:
                 self._bankno1 = bankinfo['gz']._bankNo
                 self._bankinfo1 = bankinfo['gz']._financialInstitution
             if 'jj' in bankinfo and bankinfo['jj'] is not None:
@@ -326,7 +326,9 @@ class SapSalaryInfo(object):
                 self._tex_special = texes["s_one_tex"]._tex
 
     def get_totalable(self):
-        totalpayable = self._totalpayable
+        totalpayable = self._totalpayable + self._jyjf
+        if self._cwdf != -55000 and self._cwdf != 55000:
+            totalpayable += self._cwdf
         if self._yl < 0:
             totalpayable += 0 - self._yl
         if self._yil < 0:
@@ -340,6 +342,33 @@ class SapSalaryInfo(object):
         if self._nj < 0:
             totalpayable += 0 - self._nj
         return totalpayable
+
+    def get_total_kc(self):
+        total = 0
+        if self._yl < 0:
+            total += 0
+        else:
+            total += self._yl
+        if self._yil < 0:
+            total += 0
+        else:
+            total += self._yil
+        if self._sy < 0:
+            total += 0
+        else:
+            total += self._sy
+        if self._gjj > 2410:
+            total += 2410
+        else:
+            total += self._gjj
+        if self._nj > 804:
+            total += 804
+        elif self._nj < 0:
+            total += 0
+        else:
+            total += self._nj
+
+        return total
 
     def __str__(self):
         return 'SAP薪酬信息: 发薪日期 {} - 审核单位 {} - 职工编码 {} - 姓名 {} - 人员类型 {} - 在职状态 {} - 应发合计 {} - 奖金合计 {} - 公积金 {} - 养老保险 {} - 失业保险 {} - 医疗保险 {} - 年金 {} - 所得税 {} - 实发合计 {} - 工资卡号 {} - 工资卡金融机构 {} - 奖金卡号 {} - 奖金卡金融机构 {}'.format(

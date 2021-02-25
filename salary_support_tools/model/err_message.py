@@ -23,6 +23,7 @@ class ErrMessage(BasePeriodEngine):
         self.tex_depart = ""  # 税务机构
         self._code = ""  # 员工通行证
         self._name = ""  # 员工姓名
+        self._ygzz = ""  # 在职状态
         self._depart_fullname = ""  # 机构
         self._err_messages = []  # 错误信息
 
@@ -36,6 +37,7 @@ class ErrMessage(BasePeriodEngine):
         self._depart_fullname = person_salary_info._depart_fullname
         self._code = person_salary_info._code
         self._name = sap_info._name
+        self._ygzz = sap_info._ygzz
         gz = person_salary_info._gz
         jj = person_salary_info._jj
         banks = person_salary_info._banks

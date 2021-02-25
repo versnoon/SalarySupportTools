@@ -45,8 +45,16 @@ class BaseExcelExportModel:
                     self.get_datas(
                         tex_depart, depart), filepath, '{}_{}_{}'.format(self._period.period, depart, self.get_filename()), self._cols)
 
+    def export_datas_by_depart(self, datas):
+        for tex_depart, datas_by_tex_depart in datas.items():
+            for depart, datas_by_depart in datas_by_tex_depart.items():
+                filepath = self.get_export_path(depart)
+                self.create_excel_file(
+                    self.get_datas_1(datas,
+                                     tex_depart, depart), filepath, '{}_{}_{}'.format(self._period.period, depart, self.get_filename()), self._cols)
+
     def base_export_folder_path_prefix(self):
-        return r'd:\薪酬审核文件夹'
+        return r'd:\薪酬审核文件夹\test'
 
     def get_filename(self):
         return "导出文件"
@@ -65,11 +73,14 @@ class BaseExcelExportModel:
         return path
 
     def get_datas(self, tex_depart, depart):
-        datas = []
-        if tex_depart in self._datas:
-            if depart in self._datas[tex_depart]:
-                datas = self._datas[tex_depart][depart].values()
-        return datas
+        return self.get_datas_1(self._datas, tex_depart, depart)
+
+    def get_datas_1(self, datas, tex_depart, depart):
+        res = []
+        if tex_depart in datas:
+            if depart in datas[tex_depart]:
+                res = datas[tex_depart][depart].values()
+        return res
 
     def get_datas_by_tex_depart_export_path(self, foldername):
         path = self.base_export_folder_path_prefix()
@@ -80,6 +91,13 @@ class BaseExcelExportModel:
         if not exists(path):
             makedirs(path)
         return path
+
+    def get_datas_all(self):
+        datas = []
+        for tex_depart, datas_by_tex_depart in self._datas.items():
+            for depart, datas_by_departs in datas_by_tex_depart.items():
+                datas.extend(self._datas[tex_depart][depart].values())
+        return datas
 
     def get_datas_by_tex_depart(self, tex_depart):
         datas = []

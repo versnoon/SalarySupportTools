@@ -26,6 +26,7 @@ class ErrMessageExport(BaseExcelExportModel):
         cols.append(ExportColumn(code="tex_depart", name="税务机构"))
         cols.append(ExportColumn(code="_code", name="员工通行证"))
         cols.append(ExportColumn(code="_name", name="员工姓名"))
+        cols.append(ExportColumn(code="_ygzz", name="在职状态"))
         cols.append(ExportColumn(code="_depart_fullname", name="机构"))
         cols.append(ExportColumn(code="_err_messages", name="错误信息"))
         return cols

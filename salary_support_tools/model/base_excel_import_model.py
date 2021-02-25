@@ -96,7 +96,7 @@ class BaseExcelImportModel:
         return self.__filefoldername
 
     def base_tpl_folder_path(self):
-        return r'd:\薪酬审核文件夹'
+        return r'd:\薪酬审核文件夹\test'
 
     def tpl_path_prefix(self):
         path = self.base_tpl_folder_path()

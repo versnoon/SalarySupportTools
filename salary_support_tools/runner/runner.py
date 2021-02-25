@@ -35,13 +35,26 @@ from salary_support_tools.model.export.sh003_export_by_tex_depart_model import S
 
 class Runner:
 
-    def load_tpl(self):
+    def load_current_tpl(self):
         sp_model = BaseExcelImportModel(
             "sp", SalaryPeriod, SalaryPeriod.cols(), '当前审核日期', None, convertor=SalaryPeriodConventor())
         util = XlsToModelUtil([sp_model])
         res: dict = util.load_tpls()
         period = res["sp"]
 
+        return self.load_tpl_by_period(period)
+
+    def run(self):
+
+        # 准备数据
+        period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = self.load_current_tpl()
+
+        # 执行导出
+        util = ModelToXls([GzExport(period, gzs), JjExport(
+            period, jjs), AuditorExport(period, merge_infos), Sh002Export(period, merge_infos), Sh003Export(period, merge_infos), TexExport(period, merge_infos), TexSpecialExport(period, merge_infos), ErrMessageExport(period, merge_infos), Sh003ByTexDepartExport(period, merge_infos)])
+        util.export()
+
+    def load_tpl_by_period(self, period: SalaryPeriod):
         sd_model = BaseExcelImportModel(
             "sd", SalaryDepart, SalaryDepart.cols(), '审核机构信息', None, convertor=SalaryDepartConventor(), period=period)
 
@@ -77,13 +90,3 @@ class Runner:
                                jobs, gzs, jjs, banks, texes)
         merge_infos = m_engine.merge_salary_info()
         return period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos
-
-    def run(self):
-
-        # 准备数据
-        period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = self.load_tpl()
-
-        # 执行导出
-        util = ModelToXls([GzExport(period, gzs), JjExport(
-            period, jjs), AuditorExport(period, merge_infos), Sh002Export(period, merge_infos), Sh003Export(period, merge_infos), TexExport(period, merge_infos), TexSpecialExport(period, merge_infos), ErrMessageExport(period, merge_infos), Sh003ByTexDepartExport(period, merge_infos)])
-        util.export()
