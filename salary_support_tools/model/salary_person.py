@@ -47,6 +47,7 @@ class SalaryPerson(BasePeriodEngine):
         self._cJobTitle = ""  # 执行岗位名称
         self._postType = ""  # 岗位类型
         self._jobStatus = ""  # 人员类型
+        self._tel = ""  # 手机号码
 
     @classmethod
     def cols(self):
@@ -62,6 +63,7 @@ class SalaryPerson(BasePeriodEngine):
         cols["_timeOfWork"] = "参加工作日期"
         cols["_vJobTile"] = "岗位名称"
         cols["_jobStatus"] = "在职状态"
+        cols["_tel"] = "手机号码"
         return cols
 
     def __str__(self):

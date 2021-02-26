@@ -82,6 +82,13 @@ class BaseExcelExportModel:
                 res = datas[tex_depart][depart].values()
         return res
 
+    def get_datas_2(self, datas, tex_depart, depart):
+        res = []
+        if tex_depart in datas:
+            if depart in datas[tex_depart]:
+                res = datas[tex_depart][depart]
+        return res
+
     def get_datas_by_tex_depart_export_path(self, foldername):
         path = self.base_export_folder_path_prefix()
         period = self._period.period
@@ -99,12 +106,22 @@ class BaseExcelExportModel:
                 datas.extend(self._datas[tex_depart][depart].values())
         return datas
 
-    def get_datas_by_tex_depart(self, tex_depart):
-        datas = []
-        if tex_depart in self._datas:
-            for depart, datas_by_departs in self._datas[tex_depart].items():
-                datas.extend(self._datas[tex_depart][depart].values())
-        return datas
+    def get_datas_by_tex_depart(self, tex_depart, datas=None):
+        if not datas:
+            datas = self._datas
+        ds = []
+        if tex_depart in datas:
+            for depart, datas_by_departs in datas[tex_depart].items():
+                ds.extend(datas[tex_depart][depart].values())
+        return ds
+
+    def get_datas_by_tex_depart_2(self, tex_depart, datas=None):
+        if not datas:
+            datas = self._datas
+        ds = []
+        if tex_depart in datas:
+            ds.extend(datas[tex_depart])
+        return ds
 
     def create_excel_file(self, datas, filepath, filename, cols):
         """

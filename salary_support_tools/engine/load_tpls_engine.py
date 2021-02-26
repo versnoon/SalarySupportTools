@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 '''
-@File    :   test_person_salary_2_xls.py
-@Time    :   2021/02/20 15:35:55
-@Author  :   Tong tan
+@File    :   load_tpls_engine.py
+@Time    :   2021/02/25 12:49:31
+@Author  :   Tong tan 
 @Version :   1.0
 @Contact :   tongtan@gmail.com
 '''
-
-
-import pytest
-
 
 from salary_support_tools.excel.model_2_xls import ModelToXls
 from salary_support_tools.model.export.base_excel_export_model import BaseExcelExportModel
@@ -27,28 +23,49 @@ from salary_support_tools.excel.tex_xls_2_model_util import TexXlsToModelUtil
 from salary_support_tools.engine.merge_engine import MergeEngine
 from salary_support_tools.excel.xls_2_model_util import XlsToModelUtil
 from salary_support_tools.model.base_excel_import_model import BaseExcelImportModel
-from salary_support_tools.model.export.jj_export_model import JjExport
-from salary_support_tools.model.export.auditor_export_model import AuditorExport
-from salary_support_tools.model.export.sh002_export_model import Sh002Export
-from salary_support_tools.model.export.sh003_export_model import Sh003Export
-from salary_support_tools.model.export.tex_export_model import TexExport, TexSpecialExport
-from salary_support_tools.model.export.err_message_export_model import ErrMessageExport
-from salary_support_tools.model.export.sh003_export_by_tex_depart_model import Sh003ByTexDepartExport
-from salary_support_tools.model.export.sh002_export_one_file_model import Sh002OneFileExport
-from salary_support_tools.engine.person_compare_engine import PersonCompareEngine
-from salary_support_tools.engine.load_tpls_engine import LoadTplEngine
-from salary_support_tools.model.export.person_compare_export_model import PersonCompareExport
 
 
-class TestPersonSalaryToXls:
+class LoadTplEngine:
+    """
+    加载模板数据
+    """
 
-    def prepare_datas(self):
+    def load_current_period_departs(self):
         sp_model = BaseExcelImportModel(
             "sp", SalaryPeriod, SalaryPeriod.cols(), '当前审核日期', None, convertor=SalaryPeriodConventor())
         util = XlsToModelUtil([sp_model])
         res: dict = util.load_tpls()
         period = res["sp"]
 
+        sd_model = BaseExcelImportModel(
+            "sd", SalaryDepart, SalaryDepart.cols(), '审核机构信息', None, convertor=SalaryDepartConventor(), period=period)
+
+        util = XlsToModelUtil([sd_model])
+        res: dict = util.load_tpls()
+        departs = res["sd"]
+
+        return period, departs
+
+    def pre_period(self, period: SalaryPeriod):
+        month = period.month
+        year = period.year
+        if month == 1 or month > 12:
+            month = 12
+            year -= 1
+        else:
+            month -= 1
+        return SalaryPeriod(year, month)
+
+    def load_persons(self, period: SalaryPeriod, departs):
+        s_p_model = BaseExcelImportModel(
+            SalaryPerson.name_key, SalaryPerson, SalaryPerson.cols(), '', '人员信息', convertor=SalaryPersonConventor(), period=period, departs=departs)
+        util = XlsToModelUtil(
+            [s_p_model])
+        res: dict = util.load_tpls()
+
+        return res[SalaryPerson.name_key]
+
+    def load_tpl_by_period(self, period: SalaryPeriod):
         sd_model = BaseExcelImportModel(
             "sd", SalaryDepart, SalaryDepart.cols(), '审核机构信息', None, convertor=SalaryDepartConventor(), period=period)
 
@@ -84,64 +101,3 @@ class TestPersonSalaryToXls:
                                jobs, gzs, jjs, banks, texes)
         merge_infos = m_engine.merge_salary_info()
         return period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos
-
-    def test_create_person_salary_to_xls_model(self):
-
-        cols = list()
-        cols.append(ExportColumn("_period", "期间"))
-        datas = list()
-        datas.append(TestModel("202101"))
-        datas.append(TestModel("202102"))
-        util = ModelToXls([BaseExcelExportModel(
-            cols, datas, "导出文件夹", "测试", None, SalaryPeriod(2021, 2)), BaseExcelExportModel(
-            cols, datas, "导出文件夹", "测试1", None, SalaryPeriod(2021, 2))])
-        util.export()
-
-    def test_export(self):
-        # 准备数据
-        period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = self.prepare_datas()
-
-        # 执行导出
-        util = ModelToXls([GzExport(period, gzs), JjExport(
-            period, jjs), AuditorExport(period, merge_infos), Sh002Export(period, merge_infos), Sh003Export(period, merge_infos), TexExport(period, merge_infos), TexSpecialExport(period, merge_infos), ErrMessageExport(period, merge_infos), Sh003ByTexDepartExport(period, merge_infos), Sh002OneFileExport(period, merge_infos)])
-        util.export()
-
-    def test_err_message_export(self):
-        # 准备数据
-        period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = self.prepare_datas()
-
-        # 执行导出
-        util = ModelToXls([ErrMessageExport(period, merge_infos)])
-        util.export()
-
-    def test_sh003_export_by_tex_depart(self):
-        # 准备数据
-        period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = self.prepare_datas()
-
-        # 执行导出
-        util = ModelToXls([Sh003ByTexDepartExport(period, merge_infos)])
-        util.export()
-
-    def test_person_compare_export(self):
-        # 准备数据
-        load_engine = LoadTplEngine()
-        period, _ = load_engine.load_current_period_departs()
-        person_compare_engine = PersonCompareEngine()
-        datas = person_compare_engine.compare()
-
-        # 执行导出
-        util = ModelToXls([PersonCompareExport(period, datas)])
-        util.export()
-
-
-class ExportColumn:
-
-    def __init__(self, code, name):
-        self._code = code
-        self._name = name
-
-
-class TestModel:
-
-    def __init__(self, period):
-        self._period = period

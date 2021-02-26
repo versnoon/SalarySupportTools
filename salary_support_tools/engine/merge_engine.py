@@ -98,6 +98,8 @@ class MergeEngine:
         info._tex_depart = tex_depart
         info._depart = depart
         info._depart_fullname = salary._depart_fullname
+        info._name = salary._name  # 姓名
+        info._idno = ""  # 身份证号码
         if gz_flag:
             info._gz = salary
         else:

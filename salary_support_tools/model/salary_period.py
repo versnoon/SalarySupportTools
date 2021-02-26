@@ -16,6 +16,8 @@ class SalaryPeriod:
     期间信息 包含 年 月
     """
 
+    NAME = "salary_period"
+
     def __init__(self, year: int = 0, month: int = 0):
         self.__year: int = year  # 年
         self.__month: int = month  # 月
