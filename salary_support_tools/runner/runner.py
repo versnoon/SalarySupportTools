@@ -26,9 +26,10 @@ class Runner:
 
     def run(self):
         load_engine = LoadTplEngine()
+        period, departs = load_engine.load_current_period_departs()
         # 准备数据
         period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = load_engine.load_tpl_by_period(
-            load_engine.load_current_period())
+            period)
 
         # 执行导出
         util = ModelToXls([GzExport(period, gzs), JjExport(
