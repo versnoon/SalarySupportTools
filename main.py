@@ -13,6 +13,7 @@
 # from salary_support_tools import salary_depart_engine
 # from salary_support_tools.runner import AuditorRunner
 from salary_support_tools.runner.runner import Runner
+from salary_support_tools.runner.tex_runner import TexRunner
 
 if __name__ == "__main__":
 
@@ -27,4 +28,7 @@ if __name__ == "__main__":
 
     # AuditorRunner(period, departs).run()
 
+    # 导出审核及报表相关数据并进行常规验证
     Runner().run()
+    # 导出所得税累计验证
+    TexRunner().run()

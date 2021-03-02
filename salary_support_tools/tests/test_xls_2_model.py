@@ -128,7 +128,7 @@ class TestXls2ModelUtil(object):
         assert SalaryJj.name_key in res
         assert len(res[SalaryJj.name_key]) > 0
         assert res[SalaryJj.name_key]["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M73677"]._code == 'M73677'
-        assert res[SalaryJj.name_key]["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M80374"]._totalPayable == 4965 * 3
+        assert res[SalaryJj.name_key]["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M80374"]._totalPayable == 4965
 
         assert SalaryAttendance.name_key in res
         assert len(res[SalaryAttendance.name_key]) > 0

@@ -26,7 +26,7 @@ class SalaryPeriod:
     def year(self):
         if not self.year_validator(self.__year):
             raise(ValueError("期间设置错误,年信息出错{}".format(self.__year)))
-        return self.__year
+        return int(self.__year)
 
     @year.setter
     def year(self, year):
@@ -38,7 +38,7 @@ class SalaryPeriod:
     def month(self):
         if not self.month_validator(self.__month):
             raise(ValueError("期间设置错误,月信息出错{}".format(self.__month)))
-        return self.__month
+        return int(self.__month)
 
     @month.setter
     def month(self, month):

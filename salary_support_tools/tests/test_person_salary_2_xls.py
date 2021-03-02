@@ -85,18 +85,6 @@ class TestPersonSalaryToXls:
         merge_infos = m_engine.merge_salary_info()
         return period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos
 
-    def test_create_person_salary_to_xls_model(self):
-
-        cols = list()
-        cols.append(ExportColumn("_period", "期间"))
-        datas = list()
-        datas.append(TestModel("202101"))
-        datas.append(TestModel("202102"))
-        util = ModelToXls([BaseExcelExportModel(
-            cols, datas, "导出文件夹", "测试", None, SalaryPeriod(2021, 2)), BaseExcelExportModel(
-            cols, datas, "导出文件夹", "测试1", None, SalaryPeriod(2021, 2))])
-        util.export()
-
     def test_export(self):
         # 准备数据
         period, departs, persons, jobs, gzs, jjs, banks, texes, merge_infos = self.prepare_datas()

@@ -40,23 +40,30 @@ class BaseExcelExportModel:
     def export_by_depart(self):
         for tex_depart, datas_by_tex_depart in self._datas.items():
             for depart, datas_by_depart in datas_by_tex_depart.items():
-                filepath = self.get_export_path(depart)
-                self.create_excel_file(
-                    self.get_datas(
-                        tex_depart, depart), filepath, '{}_{}_{}'.format(self._period.period, depart, self.get_filename()), self._cols)
+                datas = self.get_datas(
+                    tex_depart, depart)
+                if len(datas) > 0:
+                    filepath = self.get_export_path(depart)
+                    self.create_excel_file(
+                        datas, filepath, '{}_{}_{}'.format(self._period.period, depart, self.get_filename()), self._cols)
 
     def export_datas_by_depart(self, datas):
         for tex_depart, datas_by_tex_depart in datas.items():
             for depart, datas_by_depart in datas_by_tex_depart.items():
-                filepath = self.get_export_path(depart)
-                self.create_excel_file(
-                    self.get_datas_1(datas,
-                                     tex_depart, depart), filepath, '{}_{}_{}'.format(self._period.period, depart, self.get_filename()), self._cols)
+                ds = self.get_datas_1(datas,
+                                      tex_depart, depart)
+                if len(ds) > 0:
+                    filepath = self.get_export_path(depart)
+
+                    self.create_excel_file(ds, filepath, '{}_{}_{}'.format(
+                        self._period.period, depart, self.get_filename()), self._cols)
 
     def base_export_folder_path_prefix(self):
         return r'd:\薪酬审核文件夹\test'
 
     def get_filename(self):
+        if self._filename:
+            return self._filename
         return "导出文件"
 
     def get_sheetname(self):

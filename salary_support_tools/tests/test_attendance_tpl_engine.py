@@ -25,9 +25,9 @@ class TestAttendacntTplEngine(object):
         engine = AttendanceTplEngine("", None)
         assert engine._name == "attendance_tpl_op"
 
-    def test_load_data(self):
-        engine = AttendanceTplEngine("202101", None)
-        assert len(engine.load_data()) > 0
+    # def test_load_data(self):
+    #     engine = AttendanceTplEngine("202102", None)
+    #     assert len(engine.load_data()) > 0
 
     def test_split_depart_fullname(self):
         info = AttendanceInfo()

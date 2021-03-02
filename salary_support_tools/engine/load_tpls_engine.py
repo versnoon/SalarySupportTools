@@ -3,7 +3,7 @@
 '''
 @File    :   load_tpls_engine.py
 @Time    :   2021/02/25 12:49:31
-@Author  :   Tong tan 
+@Author  :   Tong tan
 @Version :   1.0
 @Contact :   tongtan@gmail.com
 '''
@@ -64,6 +64,31 @@ class LoadTplEngine:
         res: dict = util.load_tpls()
 
         return res[SalaryPerson.name_key]
+
+    def get_datas_by_period(self, year, month, datas):
+        ds = None
+        try:
+            ds = self.load_tpl_by_period(SalaryPeriod(year, month))
+        except Exception:
+            ds = None
+        if ds:
+            datas.append(ds)
+
+    def load_tpl_by_year(self, year: int):
+        datas = []
+        self.get_datas_by_period(year, 1, datas)
+        self.get_datas_by_period(year, 2, datas)
+        self.get_datas_by_period(year, 3, datas)
+        self.get_datas_by_period(year, 4, datas)
+        self.get_datas_by_period(year, 5, datas)
+        self.get_datas_by_period(year, 6, datas)
+        self.get_datas_by_period(year, 7, datas)
+        self.get_datas_by_period(year,  8, datas)
+        self.get_datas_by_period(year, 9, datas)
+        self.get_datas_by_period(year, 10, datas)
+        self.get_datas_by_period(year, 11, datas)
+        self.get_datas_by_period(year, 12, datas)
+        return datas
 
     def load_tpl_by_period(self, period: SalaryPeriod):
         sd_model = BaseExcelImportModel(

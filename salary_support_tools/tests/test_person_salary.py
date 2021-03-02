@@ -72,6 +72,6 @@ class TestPersonSalary:
         assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M73677"][0]._banks is not None
         assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][0]._texes["s_tex"]._totalpayable == 47928
         assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][0]._texes["s_one_tex"]._totalpayable == 36000
-        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][1]._totalpayable == 36000 + 47928
-        assert res["马钢（集团）控股有限公司(总部)"]["营销中心（销售公司）1"]["M44318"][1]._totalpayable == 144000 + \
-            47928
+        assert res["马钢（集团）控股有限公司(总部)"]["01_集团机关"]["M27108"][1]._totalpayable == 47928
+        # assert res["马钢（集团）控股有限公司(总部)"]["营销中心（销售公司）1"]["M44318"][1]._totalpayable == 144000 + \
+        #     47928
