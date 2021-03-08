@@ -20,6 +20,7 @@ from salary_support_tools.model.export.tex_export_model import TexExport, TexSpe
 from salary_support_tools.model.export.err_message_export_model import ErrMessageExport
 from salary_support_tools.model.export.sh003_export_by_tex_depart_model import Sh003ByTexDepartExport
 from salary_support_tools.engine.load_tpls_engine import LoadTplEngine
+from salary_support_tools.model.export.sh002_export_one_file_model import Sh002OneFileExport
 
 
 class Runner:
@@ -33,5 +34,5 @@ class Runner:
 
         # 执行导出
         util = ModelToXls([GzExport(period, gzs), JjExport(
-            period, jjs), AuditorExport(period, merge_infos), Sh002Export(period, merge_infos), Sh003Export(period, merge_infos), TexExport(period, merge_infos), TexSpecialExport(period, merge_infos), ErrMessageExport(period, merge_infos), Sh003ByTexDepartExport(period, merge_infos)])
+            period, jjs), AuditorExport(period, merge_infos), Sh002Export(period, merge_infos), Sh003Export(period, merge_infos), TexExport(period, merge_infos), TexSpecialExport(period, merge_infos), ErrMessageExport(period, merge_infos), Sh003ByTexDepartExport(period, merge_infos), Sh002OneFileExport(period, merge_infos)])
         util.export()

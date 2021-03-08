@@ -59,7 +59,7 @@ class BaseExcelExportModel:
                         self._period.period, depart, self.get_filename()), self._cols)
 
     def base_export_folder_path_prefix(self):
-        return r'd:\薪酬审核文件夹\test'
+        return r'd:\薪酬审核文件夹'
 
     def get_filename(self):
         if self._filename:

@@ -112,7 +112,10 @@ class PersonCompareEngine:
         res = []
 
         for code, person in current_persons.items():
-            if code not in pre_persons:
+            if not pre_persons:
+                res.append(PersonChangeInfo(
+                    preiod, depart, code, person._idno, person._name, person._departLevelTow, "新增人员", person._tel))
+            if pre_persons and code not in pre_persons:
                 res.append(PersonChangeInfo(
                     preiod, depart, code, person._idno, person._name, person._departLevelTow, "新增人员", person._tel))
         return res

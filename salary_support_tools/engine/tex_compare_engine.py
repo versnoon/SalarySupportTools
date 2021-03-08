@@ -25,7 +25,7 @@ class TexCompareEngine:
         load_engine = LoadTplEngine()
         current_period, _ = load_engine.load_current_period_departs()
         infos = load_engine.load_tpl_by_year(
-            2021)
+            current_period.year)
         # current = load_engine.load_tpl_by_period(current_period)
         # 2月份数据
         # two_period, two_departs, two_persons, two_jobs, two_gzs, two_jjs, two_banks, two_texes, two_merge_infos = load_engine.load_tpl_by_period(
