@@ -57,7 +57,7 @@ class PersonCompareEngine:
                     vs_incs = vs_incs_depart[depart]
                 if depart in vs_reds_depart:
                     vs_reds = vs_reds_depart[depart]
-                pre_ps = None
+                pre_ps = dict()
                 if tex_depart in pre_person_salary_infos:
                     if depart in pre_person_salary_infos[tex_depart]:
                         pre_ps = pre_person_salary_infos[tex_depart][depart]
