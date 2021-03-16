@@ -84,12 +84,12 @@ class ErrMessage(BasePeriodEngine):
                 # ehr 年底兑现
                 _one_total_payable = sap_info._nddxj
                 # 当期综合税
-                _tex_total_tex = round(s_tex._tex)
+                _tex_total_tex = round(s_tex._tex, 2)
                 # 当期优惠税率
                 _one_tex_total_tex = 0
 
                 # ehr
-                _total_tex = round(sap_info._totalsdj)
+                _total_tex = round(sap_info._totalsdj, 2)
                 if s_one_tex:
                     _one_tex_total_payable = round(s_one_tex._totalpayable, 2)
                     _one_tex_total_tex = round(s_one_tex._tex, 2)

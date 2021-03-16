@@ -36,9 +36,10 @@ class TexCompareEngine:
         # SalaryPeriod(2021, 1))
 
         # errs = self.compare(two[7], one[8], two[8])
-        errs = self.compare_all(infos[current_period.month - 1][7], 2, infos)
+        errs = self.compare_all(
+            infos[current_period.month - 1][7], current_period.month, infos)
 
-        BaseExcelExportModel(SalaryPeriod(2021, 2), ErrMessageExport(SalaryPeriod(2021, 2), None).cols(),
+        BaseExcelExportModel(current_period, ErrMessageExport(current_period, None).cols(),
                              None, filename="所得税效验").export_datas_by_depart(errs)
 
     def compare_all(self, current_texes, current_month, merge_infos):
@@ -148,16 +149,16 @@ class TexCompareEngine:
         if round(ehr_ynse, 2) != round(tex_ynse, 2):  # 累计收入不等
             if round(ljsr, 2) != round(ehr_totalpayable, 2):
                 err._err_messages.append(
-                    "累计收入不匹配，宝武ehr金额{:2f},税务系统金额{:2f},差额{:2f}".format(ehr_totalpayable, ljsr, ehr_totalpayable - ljsr))
+                    "累计收入不匹配，宝武ehr金额{:.2f},税务系统金额{:.2f},差额{:.2f}".format(ehr_totalpayable, ljsr, ehr_totalpayable - ljsr))
             if round(ljkc, 2) != round(ehr_totalkc, 2):
                 err._err_messages.append(
-                    "累计扣缴不匹配，宝武ehr金额{:2f},税务系统金额{:2f},差额{:2f}".format(ehr_totalkc, ljkc, ehr_totalkc - ljkc))
+                    "累计扣缴不匹配，宝武ehr金额{:.2f},税务系统金额{:.2f},差额{:.2f}".format(ehr_totalkc, ljkc, ehr_totalkc - ljkc))
             if round(ehr_ljznjy, 2) != round(ljznjy, 2) or round(ehr_ljjxjy, 2) != round(ljjxjy, 2) or round(ehr_ljzfdk, 2) != round(ljzfdk, 2) or round(ehr_ljzfzz, 2) != round(ljzfzz, 2) or round(ehr_ljsylr, 2) != round(ljsylr, 2):
                 err._err_messages.append(
-                    "专项附件扣除项目不匹配，累计子女教育:宝武ehr金额{:2f}-税务系统金额{:2f},累计继续教育:宝武ehr金额{:2f}-税务系统金额{:2f},累计住房贷款:宝武ehr金额{:2f}-税务系统金额{:2f},累计住房租金:宝武ehr金额{:2f}-税务系统金额{:2f},累计赡养老人宝武ehr金额{:2f}-税务系统金额{:2f}".format(ehr_ljznjy, ljznjy, ehr_ljjxjy, ljjxjy, ehr_ljzfdk, ljzfdk, ehr_ljzfzz, ljzfzz, ehr_ljsylr, ljsylr))
+                    "专项附件扣除项目不匹配，累计子女教育:宝武ehr金额{:.2f}-税务系统金额{:.2f},累计继续教育:宝武ehr金额{:.2f}-税务系统金额{:.2f},累计住房贷款:宝武ehr金额{:.2f}-税务系统金额{:.2f},累计住房租金:宝武ehr金额{:.2f}-税务系统金额{:.2f},累计赡养老人宝武ehr金额{:.2f}-税务系统金额{:.2f}".format(ehr_ljznjy, ljznjy, ehr_ljjxjy, ljjxjy, ehr_ljzfdk, ljzfdk, ehr_ljzfzz, ljzfzz, ehr_ljsylr, ljsylr))
         if round(ehr_tex, 2) != round(tex_tex, 2):
             err._err_messages.append(
-                "个税不匹配，宝武ehr系统金额{:2f},税务系统金额{:2f},差额{:2f}".format(ehr_tex, tex_tex, ehr_tex - tex_tex))
+                "个税不匹配，宝武ehr系统金额{:.2f},税务系统金额{:.2f},差额{:.2f}".format(ehr_tex, tex_tex, ehr_tex - tex_tex))
         if len(err._err_messages) > 0:
             return err
         return None
