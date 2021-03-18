@@ -12,7 +12,7 @@ from salary_support_tools.model.export.base_excel_export_model import BaseExcelE
 from salary_support_tools.model.export.export_column import ExportColumn
 
 
-class Sh002Export(BaseExcelExportModel):
+class Sh001Export(BaseExcelExportModel):
 
     def __init__(self, period, datas):
         super().__init__(period, self.cols(), datas, convertor=SapInfoConventor())
@@ -139,10 +139,11 @@ class Sh002Export(BaseExcelExportModel):
         cols.append(ExportColumn(code="_ljqt", name="累计其他计税"))
         cols.append(ExportColumn(code="_ljjm", name="累计标准免税额"))
         cols.append(ExportColumn(code="_ljtex", name="累计个税"))
+        cols.append(ExportColumn(code="period", name="发薪期间"))
         cols.append(ExportColumn(code="_sfkk", name="司法扣款"))
         cols.append(ExportColumn(code="_zxj", name="重点工作专项奖"))
         cols.append(ExportColumn(code="_ryj", name="荣誉类奖"))
         return cols
 
     def get_filename(self):
-        return "sh002"
+        return "sh001"

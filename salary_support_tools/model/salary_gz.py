@@ -142,6 +142,7 @@ class SalaryGz(BasePeriodEngine):
         self._gs_qybx = 0  # 工伤
         self._gjj_qybx = 0  # 公积金
         self._nj_qybx = 0  # 年金
+        self._sfkk = 0  # 司法扣款
 
     def __str__(self):
         return '员工工资信息: 机构 {} - 二级机构 {} - 三级机构 {} - 工号 {} - 姓名 {} - 岗位 {} - 应发 {}'.format(self._depart_fullname, self._departLevelTow, self._branchLevelThree, self._code, self._name, self._jobName, self._totalPayable)
@@ -260,6 +261,7 @@ class SalaryGz(BasePeriodEngine):
         cols["_gs_qybx"] = "工伤保险企业额度"
         cols["_gjj_qybx"] = "公积金企业额度"
         cols["_nj_qybx"] = "企业年金企业额度"
+        cols["_sfkk"] = "司法扣款"
         return cols
 
 

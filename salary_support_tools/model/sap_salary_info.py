@@ -162,6 +162,9 @@ class SapSalaryInfo(object):
         self._tex = 0  # 当期综合个税
         self._tex_totalable_special = 0  # 当期一次性奖励收入
         self._tex_special = 0  # 当期一次性奖励税
+        self._sfkk = 0  # 司法扣款
+        self._zxj = 0  # 重点工作奖
+        self._ryj = 0  # 荣誉类奖
 
     def to_sap(self, person_salary_info: PersonSalaryInfo):
         personinfo = person_salary_info._person
@@ -207,6 +210,7 @@ class SapSalaryInfo(object):
                 pass
                 # raise ValueError("数据异常，存在不合法的发放人员数据")
         if gzinfo is not None:
+            self._sfkk = gzinfo._sfkk  # 司法扣款
             self._gwgz = gzinfo._gwgz
             # 直管领导 岗位薪 统计在岗位工资上
             if gzinfo._gwx > 0 and gzinfo._gwgz == 0:
@@ -287,6 +291,9 @@ class SapSalaryInfo(object):
             self._jyjf = gzinfo._jkdjf
 
         if jjinfo is not None:
+            self._zxj = jjinfo._zxj
+            self._ryj = jjinfo._ryj
+
             self._jbjj = jjinfo._jbjj
             self._onejj = jjinfo._bonusOne
             self._twojj = jjinfo._bonusTwo

@@ -50,6 +50,8 @@ class SalaryJj(BasePeriodEngine):
         self._jsjj = 0
         self._qt = 0
         self._gsxyj = 0
+        self._zxj = 0   # 重点工作专项奖
+        self._ryj = 0   # 荣誉类奖
 
     def __str__(self):
         return '员工奖金信息: 机构 {} - 工号 {} - 姓名 {} - 应发 {} - 实发 {}'.format(self._depart_fullname, self._code, self._name, self._totalPayable, self._pay)
@@ -81,6 +83,8 @@ class SalaryJj(BasePeriodEngine):
         cols["_qt"] = "争取国家政策奖"
         cols["_nddxj"] = "年底兑现奖"
         cols["_jsjj"] = "计税奖金"
+        cols["_zxj"] = "重点工作专项奖"
+        cols["_ryj"] = "荣誉类奖"
         return cols
 
 

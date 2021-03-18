@@ -113,6 +113,7 @@ class GzExport(BaseExcelExportModel):
         cols.append(ExportColumn(code="_bfone", name="补发一"))
         cols.append(ExportColumn(code="_bftwo", name="补发二"))
         cols.append(ExportColumn(code="_total_dk", name="代扣合计"))
+        cols.append(ExportColumn(code="_sfkk", name="司法扣款"))
         cols.append(ExportColumn(code="_pay", name="实发"))
         cols.append(ExportColumn(code="_yl_qybx", name="养老保险企业额度"))
         cols.append(ExportColumn(code="_sy_qybx", name="失业保险企业额度"))
