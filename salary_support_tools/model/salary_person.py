@@ -60,7 +60,7 @@ class SalaryPerson(BasePeriodEngine):
         cols["_gender"] = "性别"
         cols["_idno"] = "证件号码"
         cols["_personType"] = "人员类型"
-        cols["_timeOfWork"] = "参加工作日期"
+        cols["_timeOfWork"] = "参加工作时间"
         cols["_vJobTile"] = "岗位名称"
         cols["_jobStatus"] = "在职状态"
         cols["_tel"] = "手机号码"

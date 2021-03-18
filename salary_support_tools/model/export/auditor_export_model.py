@@ -62,7 +62,7 @@ class AuditorExport(BaseExcelExportModel):
         cols.append(ExportColumn(code="_nj", name="年金"))
         cols.append(ExportColumn(code="_totalsdj", name="工资税收"))
         cols.append(ExportColumn(code="_sljj", name="水利基金"))
-        cols.append(ExportColumn(code="_cwkk", name="财务扣款"))
+        cols.append(ExportColumn(code="audit_cwkk", name="财务扣款"))
         cols.append(ExportColumn(code="_df", name="电费"))
         cols.append(ExportColumn(code="_fz", name="房租"))
         cols.append(ExportColumn(code="_dsf", name="收视费"))

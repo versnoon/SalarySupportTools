@@ -150,7 +150,7 @@ class SapSalaryInfo(object):
         self._zffz = 0  # 住房租金
         self._sylr = 0  # 赡养老人
         self._mggl = 0  # 马钢工龄
-        self._gl = 0  # 参加工作时间工龄
+        self._gl = ""  # 参加工作时间工龄
         self._cwdf = 0  # 财务代发计税项
         self._cwdff = 0  # 财务代发非计税项
         self._ljyf = 0  # 累计应发
@@ -331,6 +331,10 @@ class SapSalaryInfo(object):
             if "s_one_tex" in texes:
                 self._tex_totalable_special = texes["s_one_tex"]._totalpayable
                 self._tex_special = texes["s_one_tex"]._tex
+
+    @property
+    def audit_cwkk(self):
+        return self._cwkk + self._sfkk
 
     def get_totalable(self):
         totalpayable = self._totalpayable + self._jyjf
