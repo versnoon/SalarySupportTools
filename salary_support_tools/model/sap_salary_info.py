@@ -9,6 +9,7 @@
 '''
 
 from salary_support_tools.model.person_salary import PersonSalaryInfo
+from salary_support_tools.model.base_model_cov import BaseModelConventor
 
 
 class SapSalaryInfo(object):
@@ -166,6 +167,39 @@ class SapSalaryInfo(object):
         self._zxj = 0  # 重点工作奖
         self._ryj = 0  # 荣誉类奖
 
+    def depart_info(self, personinfo, gz, jj):
+        one, two, three = "", "", ""
+        one = "马钢（集团）控股有限公司(总部)"
+        depart_fullname = ""
+        if personinfo:
+            if personinfo._complayLevelOne != "马钢（集团）控股有限公司(总部)":
+                two = personinfo._complayLevelOne
+                three = personinfo._departLevelTow
+            else:
+                two = personinfo._departLevelTow
+                three = personinfo._branchLevelThree
+        if not two:
+            if gz:
+                two = gz._departLevelTow
+            if not two:
+                if jj:
+                    depart_fullname = jj._depart_fullname
+                    if depart_fullname:
+                        departs = depart_fullname.split("\\")
+                        if len(departs) > 1:
+                            two = departs[1]
+        if not three:
+            if gz:
+                three = gz._branchLevelThree
+            if not three:
+                if jj:
+                    depart_fullname = jj._depart_fullname
+                    if depart_fullname:
+                        departs = depart_fullname.split("\\")
+                        if len(departs) > 2:
+                            three = departs[2]
+        return one, two, three
+
     def to_sap(self, person_salary_info: PersonSalaryInfo):
         personinfo = person_salary_info._person
         gzinfo = person_salary_info._gz
@@ -175,17 +209,19 @@ class SapSalaryInfo(object):
         texes = person_salary_info._texes
         self.period = person_salary_info.period.period
         self.depart = person_salary_info._depart
+        self.one, self.two, self.three = self.depart_info(
+            personinfo, gzinfo, jjinfo)
         if personinfo is not None:
             if personinfo._complayLevelOne != "马钢（集团）控股有限公司(总部)":
-                self.one = "马钢（集团）控股有限公司(总部)"
-                self.two = personinfo._complayLevelOne
-                self.three = personinfo._departLevelTow
+                # self.one = "马钢（集团）控股有限公司(总部)"
+                # self.two = personinfo._complayLevelOne
+                # self.three = personinfo._departLevelTow
                 self.four = personinfo._branchLevelThree
                 self.five = personinfo._assignmentSectionLevelFour
             else:
-                self.one = personinfo._complayLevelOne
-                self.two = personinfo._departLevelTow
-                self.three = personinfo._branchLevelThree
+                # self.one = personinfo._complayLevelOne
+                # self.two = personinfo._departLevelTow
+                # self.three = personinfo._branchLevelThree
                 self.four = personinfo._assignmentSectionLevelFour
                 self.five = personinfo._groupLevelFive
 
