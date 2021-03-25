@@ -187,7 +187,10 @@ class SapSalaryInfo(object):
                     if depart_fullname:
                         departs = depart_fullname.split("\\")
                         if len(departs) > 1:
-                            two = departs[1]
+                            if departs[0] != "马钢（集团）控股有限公司(总部)":
+                                two = departs[0]
+                            else:
+                                two = departs[1]
         if not three:
             if gz:
                 three = gz._branchLevelThree
@@ -197,7 +200,11 @@ class SapSalaryInfo(object):
                     if depart_fullname:
                         departs = depart_fullname.split("\\")
                         if len(departs) > 2:
-                            three = departs[2]
+                            if departs[0] != "马钢（集团）控股有限公司(总部)":
+                                three = departs[1]
+                            else:
+                                three = departs[2]
+
         return one, two, three
 
     def to_sap(self, person_salary_info: PersonSalaryInfo):
