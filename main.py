@@ -31,4 +31,4 @@ if __name__ == "__main__":
     # 导出审核及报表相关数据并进行常规验证
     Runner().run()
     # 导出所得税累计验证
-    TexRunner().run()
+    # 暂时关闭核对20210422 TexRunner().run()

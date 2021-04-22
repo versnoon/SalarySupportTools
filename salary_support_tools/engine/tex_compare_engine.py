@@ -207,6 +207,9 @@ class TexCompareEngine:
                 if pre_sap_info:
                     totalpayable += pre_sap_info.get_totalable()
                     tex += pre_sap_info._totalsdj
+                    # 去掉一次性奖金所得税得干扰
+                    if pre_sap_info._tex_special:
+                        tex -= pre_sap_info._tex_special
                     totalkc += pre_sap_info.get_total_kc()
 
         ehr_ynse = self.get_ynse(totalpayable, totalkc,
