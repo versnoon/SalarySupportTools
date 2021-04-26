@@ -166,6 +166,7 @@ class SapSalaryInfo(object):
         self._sfkk = 0  # 司法扣款
         self._zxj = 0  # 重点工作奖
         self._ryj = 0  # 荣誉类奖
+        self._jyj = 0  # 员工精益改善奖
 
     def depart_info(self, personinfo, gz, jj):
         one, two, three = "", "", ""
@@ -336,6 +337,7 @@ class SapSalaryInfo(object):
         if jjinfo is not None:
             self._zxj = jjinfo._zxj
             self._ryj = jjinfo._ryj
+            self._jyj = jjinfo._jyj
 
             self._jbjj = jjinfo._jbjj
             self._onejj = jjinfo._bonusOne

@@ -52,6 +52,7 @@ class SalaryJj(BasePeriodEngine):
         self._gsxyj = 0
         self._zxj = 0   # 重点工作专项奖
         self._ryj = 0   # 荣誉类奖
+        self._jyj = 0  # 员工精益改善奖
 
     def __str__(self):
         return '员工奖金信息: 机构 {} - 工号 {} - 姓名 {} - 应发 {} - 实发 {}'.format(self._depart_fullname, self._code, self._name, self._totalPayable, self._pay)
@@ -85,6 +86,7 @@ class SalaryJj(BasePeriodEngine):
         cols["_jsjj"] = "计税奖金"
         cols["_zxj"] = "重点工作专项奖"
         cols["_ryj"] = "荣誉类奖"
+        cols["_jyj"] = "员工精益改善奖"
         return cols
 
 
@@ -139,4 +141,7 @@ class SalaryJjConventor(BaseModelConventor):
         res._jsjj = jj1._jsjj + jj2._jsjj
         res._qt = jj1._qt + jj2._qt
         res._gsxyj = jj1._gsxyj + jj2._gsxyj
+        res._zxj = jj1._zxj + jj2._zxj
+        res._ryj = jj1._ryj + jj2._ryj
+        res._jyj = jj1._jyj + jj2._jyj
         return res

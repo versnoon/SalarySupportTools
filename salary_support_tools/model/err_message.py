@@ -26,6 +26,7 @@ class ErrMessage(BasePeriodEngine):
         self._ygzz = ""  # 在职状态
         self._depart_fullname = ""  # 机构
         self._err_messages = []  # 错误信息
+        self._descript = ""  # 备注
 
     def validate(self, person_salary_info: PersonSalaryInfo, sap_info: SapSalaryInfo):
         """
@@ -97,9 +98,12 @@ class ErrMessage(BasePeriodEngine):
                 if _tex_total_payable + _one_tex_total_payable != _total_payable + _one_total_payable:
                     self._err_messages.append(self.err_mss(
                         "本期收入异常", "税务系统当期综合计税收入金额{:.2f} + 一次性奖金收入金额{:.2f} 不等于 宝武EHR当期综合计税收入金额{:.2f} + 一次性奖金收入金额{:.2f}".format(_tex_total_payable, _one_tex_total_payable, _total_payable, _one_total_payable)))
-                if _tex_total_tex + _one_tex_total_tex != _total_tex:  # 当期所得税不匹配
+                if round(_tex_total_tex + _one_tex_total_tex - _total_tex, 0) != 0:  # 当期所得税不匹配
                     self._err_messages.append(self.err_mss(
                         "所得税异常", "税务系统当期综合计税个税金额{:.2f} + 一次性奖金个税金额{:.2f} 不等于 宝武EHR个调税金额{:.2f}".format(_tex_total_tex, _one_tex_total_tex, _total_tex)))
+                    # 个税调整差额
+                    self._descript = round(
+                        _total_tex - (_tex_total_tex + _one_tex_total_tex), 2)
 
     def err_mss(self, err_type, message) -> str:
         return '错误类型 {} - 错误信息 {}'.format(err_type, message)

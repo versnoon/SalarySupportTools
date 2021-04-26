@@ -29,6 +29,7 @@ class ErrMessageExport(BaseExcelExportModel):
         cols.append(ExportColumn(code="_ygzz", name="在职状态"))
         cols.append(ExportColumn(code="_depart_fullname", name="机构"))
         cols.append(ExportColumn(code="_err_messages", name="错误信息"))
+        cols.append(ExportColumn(code="_descript", name="备注"))
         return cols
 
     def get_filename(self):

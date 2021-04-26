@@ -41,10 +41,11 @@ class JjExport(BaseExcelExportModel):
         cols.append(ExportColumn(code="_gcjj", name="工程津贴"))
         cols.append(ExportColumn(code="_jssc", name="技术输出"))
         cols.append(ExportColumn(code="_qt", name="争取国家政策奖"))
-        cols.append(ExportColumn(code="_nddx", name="年底兑现奖"))
+        cols.append(ExportColumn(code="_nddxj", name="年底兑现奖"))
         cols.append(ExportColumn(code="_jsjj", name="计税奖金"))
         cols.append(ExportColumn(code="_zxj", name="重点工作专项奖"))
         cols.append(ExportColumn(code="_ryj", name="荣誉类奖"))
+        cols.append(ExportColumn(code="_jyj", name="员工精益改善奖"))
         return cols
 
     def get_filename(self):
