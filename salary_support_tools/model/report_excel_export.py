@@ -33,9 +33,9 @@ class ReportExcelExport:
         标题单元格定义
         """
         title_def = CellDef(self.title, 0, 0, 0, self.MAX_COL_NO)
-        self.write_cell(sheet, self.head_styles(), title_def)
+        self.write_cell(sheet, self.head_styles(), [title_def])
 
-    def write_cell(self, sheet, styles, *cells):
+    def write_cell(self, sheet, styles, cells):
         for cell in cells:
             row_start_no = cell.row_start_no
             col_start_no = cell.col_start_no
@@ -59,9 +59,6 @@ class ReportExcelExport:
         """
         return "Sheet1"
 
-    def dw_cols(self):
-        return ["机构名称", "人数"]
-
     def gz_cols(self):
         """
         工资列名
@@ -72,19 +69,13 @@ class ReportExcelExport:
         """
         代发列名
         """
-        return ["财务补退", "独生子女费", "教育经费", "驻外补贴", "其它扣款"]
+        return ["财务补退(经常性)", "其它财务补退", "独生子女费", "教育经费", "驻外补贴"]
 
     def dj_cols(self):
         """
         代缴列名
         """
         return ["公积金", "养老", "医疗", "失业", "年金", "所得税"]
-
-    def sf_cols(self):
-        """
-        实发列名
-        """
-        return ["实发合计"]
 
     def default_styles(self):
         return xlwt.XFStyle()
@@ -133,7 +124,7 @@ class ReportExcelExport:
         # 日期
         rq = CellDef("发放日期:2021年03月16日", 2, self.MAX_COL_NO - 1)
 
-        self.write_cell(sheet, None, bb, rq)
+        self.write_cell(sheet, None, [bb, rq])
         # 空行
         self.blank_row(3, sheet)
 
@@ -141,58 +132,45 @@ class ReportExcelExport:
         sheet.row(row_no).set_style(self.min_height_styles())
 
     def create_columns(self, sheet):
-
+        cols = []
         # 机构
         dw_def = CellDef("机构名称", 4, 0, 1)
-
+        cols.append(dw_def)
         # 人数
         rs_def = CellDef("人数", 4, 1, 1)
-
+        cols.append(rs_def)
         # 薪酬项目分组
-        xc_group_def = CellDef("薪酬", 4, 2, 0, 1)
+        xc_group_def = CellDef("薪酬项目", 4, 2, 0, len(self.gz_cols())-1)
+        cols.append(xc_group_def)
+        for i, v in enumerate(self.gz_cols()):
+            cols.append(CellDef(v, 5, 2+i))
 
-        # 岗位工资
-        gw_def = CellDef("岗位工资", 5, 2)
-        # 保留工资
-        bl_def = CellDef("保留工资", 5, 3)
+        # 代发代扣项目分组
+        df_group_def = CellDef("代发代扣项目", 4, 16, 0, len(self.df_cols())-1)
+        cols.append(df_group_def)
+        for i, v in enumerate(self.df_cols()):
+            cols.append(CellDef(v, 5, 16+i))
 
-        # 年功工资
-        ng_def = CellDef("年功工资", 5, 4)
+        # 三险两金所得税项目分组
+        dk_group_def = CellDef("三险两金所得税", 4, 21, 0, len(self.dj_cols())-1)
+        cols.append(dk_group_def)
+        for i, v in enumerate(self.dj_cols()):
+            cols.append(CellDef(v, 5, 21+i))
 
-        self.write_cell(sheet, self.title_styles(), dw_def,
-                        rs_def, xc_group_def, gw_def, bl_def, ng_def)
-        # columns_row_index = 5
-        # # # 写入单位标题
-        # for i, v in enumerate(self.dw_cols()):
-        #     sheet.write_merge(columns_row_index-1,
-        #                       columns_row_index, i, i, v, self.title_styles())
-        # # # 写入工资标题
-        # for i, v in enumerate(self.gz_cols()):
-        #     sheet.write(columns_row_index, i+len(self.dw_cols()),
-        #                 v, self.title_styles())
-        # # 写入代发标题
-        # for i, v in enumerate(self.df_cols()):
-        #     sheet.write(columns_row_index, i+len(self.dw_cols())+len(self.gz_cols()),
-        #                 v, self.title_styles())
-        # # 写入代扣标题
-        # for i, v in enumerate(self.dj_cols()):
-        #     sheet.write(columns_row_index, i + len(self.dw_cols()) +
-        #                 len(self.gz_cols()) + len(self.df_cols()), v, self.title_styles())
-        # # 写入实发标题
-        # for i, v in enumerate(self.sf_cols()):
-        #     sheet.write_merge(columns_row_index-1, columns_row_index, i + len(self.dw_cols()) + len(self.gz_cols()) +
-        #                       len(self.df_cols()) + len(self.dj_cols()), i + len(self.dw_cols()) + len(self.gz_cols()) +
-        #                       len(self.df_cols()) + len(self.dj_cols()), v, self.title_styles())
+        # 实发
+        sf_def = CellDef("实发合计", 4, 27, 1)
+        cols.append(sf_def)
+        self.write_cell(sheet, self.title_styles(), cols)
         # self.set_width(sheet,
         #                self.gz_cols()+self.df_cols()+self.dj_cols()+self.sf_cols())
 
-    def set_width(self, sheet, columns):
-        for i in range(len(columns)):
-            col = sheet.col(i)
-            width = 180 * 20
+    def set_width(self, sheet):
+        for i in range(self.MAX_COL_NO):
+            # width = 180 * 20
             if i == 0:
-                width = 640 * 20
-            col.width = width
+                col = sheet.col(i)
+                width = 320 * 20
+                col.width = width
 
     def create_datas(self, sheet):
         """
@@ -220,6 +198,8 @@ class ReportExcelExport:
 
         # 列名
         self.create_columns(s)
+
+        self.set_width(s)
 
         # 数据
         self.create_datas(s)
