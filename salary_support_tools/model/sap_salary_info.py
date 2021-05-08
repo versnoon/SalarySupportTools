@@ -426,6 +426,34 @@ class SapSalaryInfo(object):
 
         return total
 
+    def jg_report_salary_info(self):
+        return [self.gwgz, self._blgz, self._nggz, self._fzgz, self._gzbt, self.report_jt(), self._zwbt, self._ybjt, self.report_jj(), self._yznx, self.report_jb(), self.report_kq(), self.report_qt(), self.report_yf()]
+
+    def report_jb(self):
+        # 加班费
+        pass
+
+    def report_jt(self):
+        # 机关报表其它津贴
+        pass
+
+    def report_jj(self):
+        # 机关报表奖金
+        # 基本奖金 + 单项奖1 + 单项奖2 + 单项奖3 + 公司效益奖 + 年底兑现奖 + 计税奖金 + 工程津贴 + 技术输出 + 争取国家政策等 + 重点工作奖 + 荣誉类奖 + 员工精益改善奖
+        return self._jbjj + self._onejj + self._twojj + self._threejj + self._gsxyj + self._nddxj + self._jsjj + self._gcjt + self._jssc + self._qt + self._zxj + elf._ryj + self._jyj
+
+    def report_kq(self):
+        # 考勤扣发
+        return self._totalqq
+
+    def report_qt(self):
+        # 其它
+        pass
+
+    def report_yf(self):
+        # 应发合计
+        return self._totalpayable
+
     def __str__(self):
         return 'SAP薪酬信息: 发薪日期 {} - 审核单位 {} - 职工编码 {} - 姓名 {} - 人员类型 {} - 在职状态 {} - 应发合计 {} - 奖金合计 {} - 公积金 {} - 养老保险 {} - 失业保险 {} - 医疗保险 {} - 年金 {} - 所得税 {} - 实发合计 {} - 工资卡号 {} - 工资卡金融机构 {} - 奖金卡号 {} - 奖金卡金融机构 {}'.format(
             self.period, self.depart, self._code, self._name, self._ygz, self._ygzz, self._totalpayable, self._totaljj, self._gjj, self._yl, self._sy, self._yil, self._nj, self._totalsdj, self._totalpay, self._bankno1, self._bankinfo1, self._bankno2, self._bankinfo2)
