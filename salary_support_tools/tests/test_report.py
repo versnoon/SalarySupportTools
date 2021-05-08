@@ -40,10 +40,6 @@ class TestReport:
                        ReportColumn(["薪酬项目", "保留工资"], 1, "blgz")])
         assert len(r.report_columns()) == 2
 
-    def test_create_report(self):
-        r = Report()
-        r.export()
-
     def test_parse_report(self):
         r = Report()
         r.add_column(ReportColumn(["薪酬项目", "岗位工资"], 0, "gwgz"))
