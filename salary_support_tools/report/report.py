@@ -7,6 +7,10 @@
 @Version :   1.0
 @Contact :   tongtan@gmail.com
 '''
+import time
+
+from os.path import exists
+from os import makedirs
 
 import xlwt
 
@@ -42,7 +46,7 @@ class ReportCell:
         """
         根据内容格式获取标准化输出
         """
-        if self.contant:
+        if self.contant != None:
             if self.contant_type == "S" and isinstance(self.contant, str):
                 return self.get_str_val()
             elif self.contant_type == "I" and isinstance(self.contant, int):
@@ -77,7 +81,7 @@ class Report:
 
     EXT = "xls"
 
-    def __init__(self, name="报表名称", title="标题", creator="人力资源服务中心薪酬发放室", datas=[], title_showable=True):
+    def __init__(self, period=None, name="报表名称", title="标题", creator="人力资源服务中心薪酬发放室", datas=[], title_showable=True):
         # 报表名称
         self.name = name
         # 编报单位
@@ -89,8 +93,17 @@ class Report:
         # 报表数据
         self.datas = datas
 
-        # 是否显示标题编报等西悉尼
+        # 是否显示标题编报等信息
         self.title_showable = title_showable
+
+        # 报表日期 默认为当前日期
+        self.date_info = self.date_info()
+
+        # 保存路径前缀
+        self.base_folder_prefix = r'd:\薪酬审核文件夹'
+
+        # 审核日期
+        self.period = period
 
     def add_column(self, col: ReportColumn):
         if not isinstance(col, ReportColumn):
@@ -113,6 +126,9 @@ class Report:
         获取报表列定义
         """
         return tuple(self.columns)
+
+    def date_info(self):
+        return time.strftime("%Y年%m月%d日", time.localtime())
 
     def sheetname(self):
         return "Sheet1"
@@ -147,7 +163,7 @@ class Report:
                 cols[name] = size
         return max_col_no, max_row_no, cols
 
-    def export(self):
+    def export(self, folders=[]):
 
         b = xlwt.Workbook(encoding='uft-8')
         s = b.add_sheet(self.sheetname())
@@ -176,11 +192,19 @@ class Report:
 
         # 写入报表
         self.write_cell(s, report_cells)
-        b.save(r'{}.{}'.format(self.report_filename(), self.EXT))
+
+        path = r'{}\{}\{}'.format(
+            self.base_folder_prefix, self.period, "相关报表")
+        if len(folders) > 0:
+            for folder in folders:
+                path = f'{path}\{folder}'
+        if not exists(path):
+            makedirs(path)
+        b.save(r'{}\{}.{}'.format(path, self.report_filename(), self.EXT))
 
     def create_title_report_cells(self, max_col_no, start_row_no, start_col_no):
         return [ReportCell(
-            self.title, start_row_no, start_col_no, 0, max_col_no-1, self.head_styles()), ReportCell(f'编报:{self.creator}', start_row_no+2, 0)]
+            self.title, start_row_no, start_col_no, 0, max_col_no-1, self.head_styles()), ReportCell(f'编报:{self.creator}', start_row_no+2, 0), ReportCell(f'编制如期:{self.date_info}', start_row_no+2, max_col_no-3)]
 
         # self.write_cell(sheet, [report_name])
 
@@ -203,32 +227,36 @@ class Report:
         col_size = len(col_names)
         col_star_row = start_row_no
         res = []
+        styles = self.title_styles()
         for i, col_name in enumerate(col_names):
             col_height = len(col_names)
             row_offset = max_row_no - i - 1
             if i != col_height - 1:
                 row_offset = 0
             res.append(ReportCell(
-                col_name, col_star_row+i, sort_no, row_offset, col_name_size[col_name] - 1, self.title_styles()))
+                col_name, col_star_row+i, sort_no, row_offset, col_name_size[col_name] - 1, styles))
         return res
 
     def create_datas_report_cells(self, start_row_no):
+        styles = self.contant_styles()
         res = []
         for i, data in enumerate(self.datas):
-            res.extend(self.create_data_row_report_cells(data, start_row_no+i))
+            res.extend(self.create_data_row_report_cells(
+                data, start_row_no+i, styles))
         return res
 
-    def create_data_row_report_cells(self, data, start_row_no):
+    def create_data_row_report_cells(self, data, start_row_no, styles):
         columns = self.report_columns()
         res = []
+        # styles = self.contant_styles()
         for col in columns:
             # 获取对应的属性
             code = col.code
             # 反射获取属性值
             contant = self.get_report_cell_val(data, code)
-            if contant:
+            if contant != None:
                 res.append(ReportCell(contant, start_row_no,
-                                      col.sort_no, 0, 0, self.contant_styles()))
+                                      col.sort_no, 0, 0, styles))
         return res
 
     def get_report_cell_val(self, data, code):
@@ -236,12 +264,13 @@ class Report:
             return getattr(data, code)
 
     def write_cell(self, sheet, cells):
+        default_styles = self.default_styles()
         for cell in cells:
             row_start_no = cell.row_start_no
             col_start_no = cell.col_start_no
             styles = cell.styles
             if not styles:
-                styles = self.default_styles()
+                styles = default_styles
             # 单元格其实坐标为-1 时报错
             if row_start_no == -1 or col_start_no == -1:
                 raise ValueError(

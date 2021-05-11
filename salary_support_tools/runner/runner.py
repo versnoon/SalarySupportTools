@@ -10,7 +10,6 @@
 
 
 from salary_support_tools.excel.model_2_xls import ModelToXls
-from salary_support_tools.model.export.base_excel_export_model import BaseExcelExportModel
 from salary_support_tools.model.export.gz_export_model import GzExport
 from salary_support_tools.model.export.jj_export_model import JjExport
 from salary_support_tools.model.export.auditor_export_model import AuditorExport

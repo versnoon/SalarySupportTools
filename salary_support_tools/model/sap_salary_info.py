@@ -167,6 +167,9 @@ class SapSalaryInfo(object):
         self._zxj = 0  # 重点工作奖
         self._ryj = 0  # 荣誉类奖
         self._jyj = 0  # 员工精益改善奖
+        self._cwbt_jcx = 0  # 财务补退经常性
+        self._cwbt_qt = 0  # 其它财务补退
+        self._dlj = 0  # 宝武集团单列奖励
 
     def depart_info(self, personinfo, gz, jj):
         one, two, three = "", "", ""
@@ -307,6 +310,9 @@ class SapSalaryInfo(object):
 
             self._cwbt = gzinfo._qtbf + gzinfo._bfone  # 财务补退
 
+            self._cwbt_jcx = gzinfo._bfone  # 财务补退经常性
+            self._cwbt_qt = gzinfo._qtbf  # 其他财务补退
+
             self._wybt = gzinfo._sdqnwy_jt  # 物业补贴
             self._bjf = gzinfo._cq_jt
             self._db = gzinfo._dsznf
@@ -338,6 +344,7 @@ class SapSalaryInfo(object):
             self._zxj = jjinfo._zxj
             self._ryj = jjinfo._ryj
             self._jyj = jjinfo._jyj
+            self._dlj = jjinfo._dlj
 
             self._jbjj = jjinfo._jbjj
             self._onejj = jjinfo._bonusOne

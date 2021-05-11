@@ -143,6 +143,7 @@ class Sh002Export(BaseExcelExportModel):
         cols.append(ExportColumn(code="_zxj", name="重点工作专项奖"))
         cols.append(ExportColumn(code="_ryj", name="荣誉类奖"))
         cols.append(ExportColumn(code="_jyj", name="员工精益改善奖"))
+        cols.append(ExportColumn(code="_dlj", name="宝武集团单列奖励"))
         return cols
 
     def get_filename(self):
